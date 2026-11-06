@@ -1,0 +1,68 @@
+# dependencies
+node_modules/
+.pnpm-store/
+
+# build output
+dist/
+build/
+.turbo/
+*.tsbuildinfo
+
+# test output
+coverage/
+playwright-report/
+test-results/
+.vitest/
+
+# environment (never commit real values)
+.env
+.env.*
+!.env.example
+
+# database
+*.sql.gz
+database/**/*.local.json
+# The default engine's local file (ADR 0025). `pnpm run db:migrate` and
+# `db:seed` create it from scratch; a committed database would be local
+# state in the repository.
+/data/
+
+# TanStack Router plugin scratch space. It writes generated bundles here; they
+# are build output, not source.
+.tanstack/
+
+# Tauri / Rust
+apps/desktop/src-tauri/target/
+apps/desktop/src-tauri/gen/
+
+# Kept desktop builds (scripts/desktop-pin.mjs). Tens of megabytes of binary per
+# entry, local to one machine, worthless to anyone else — `pnpm run desktop:pins`
+# lists what is there and `desktop:forget` clears it.
+.desktop-known-good/
+
+# editors / OS
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.swp
+
+# npm is not used here; pnpm-lock.yaml is the lockfile. This file is a stub from
+# before the workspace existed.
+package-lock.json
+
+# NOTE: packages/app/src/routeTree.gen.ts is NOT ignored, even though the TanStack
+# Router Vite plugin generates it from packages/app/src/routes. It is committed on
+# purpose, for two reasons:
+#
+#   1. `pnpm typecheck` runs `tsc` with no Vite plugin in the process, so on a
+#      fresh clone it fails with TS2307 unless the file already exists. Committing
+#      it keeps a clean checkout green without a build first.
+#   2. A route tree that only exists after a build hides real type errors in
+#      route files, because the stale tree describes the routes as they were.
+#
+# The plugin regenerates it on every dev server start, test run and build, and the
+# output is deterministic, so a stale copy is never committed by accident: adding
+# or renaming a route changes the file and shows up in `git diff`.
+#
+# It stays in .prettierignore so formatting never rewrites generated output.

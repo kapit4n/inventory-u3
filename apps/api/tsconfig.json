@@ -1,0 +1,4 @@
+{
+  "extends": "@inventory-u3/tsconfig/node.json",
+  "include": ["src", "test"]
+}

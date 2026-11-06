@@ -1,0 +1,24 @@
+{
+  "name": "@inventory-u3/tsconfig",
+  "version": "0.1.0",
+  "private": true,
+  "license": "UNLICENSED",
+  "type": "module",
+  "description": "Base TypeScript configurations shared by every Inventory U3 package",
+  "files": [
+    "base.json",
+    "library.json",
+    "react-library.json",
+    "node.json",
+    "vite-app.json"
+  ],
+  "exports": {
+    "./base.json": "./base.json",
+    "./library.json": "./library.json",
+    "./react-library.json": "./react-library.json",
+    "./node.json": "./node.json",
+    "./e2e.json": "./e2e.json",
+    "./vite-app.json": "./vite-app.json",
+    "./http-client.json": "./http-client.json"
+  }
+}

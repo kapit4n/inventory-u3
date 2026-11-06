@@ -1,0 +1,4 @@
+{
+  "extends": "@inventory-u3/tsconfig/http-client.json",
+  "include": ["src", "vitest.config.ts"]
+}

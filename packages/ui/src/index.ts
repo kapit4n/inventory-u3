@@ -1,0 +1,69 @@
+/**
+ * Inventory U3 design system.
+ *
+ * `packages/ui` owns the visual language: design tokens (as CSS custom
+ * properties consumed through Tailwind's `@theme`), the `cn()` class helper and
+ * shadcn/ui-derived primitives.
+ *
+ * It knows nothing about inventory items, stock movements or organizations — a
+ * component here must be reusable for any screen. Anything that knows what an
+ * "item" is belongs in `packages/app/src/features`.
+ */
+
+export { cn } from './cn.js';
+export type { StatusTone } from './status-tone.js';
+export { STATUS_TONE_BADGE_CLASS, STATUS_TONE_CLASS, toneForStatus } from './status-tone.js';
+
+export { Button, buttonVariants } from './button.js';
+export type { ButtonProps } from './button.js';
+export { Input } from './input.js';
+export type { InputProps } from './input.js';
+export { Label } from './label.js';
+export {
+  Dialog,
+  DialogPortal,
+  DialogOverlay,
+  DialogClose,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogFooter,
+  DialogTitle,
+  DialogDescription,
+} from './dialog.js';
+export {
+  Table,
+  TableHeader,
+  TableBody,
+  TableFooter,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableCaption,
+} from './table.js';
+export {
+  Select,
+  SelectGroup,
+  SelectValue,
+  SelectTrigger,
+  SelectContent,
+  SelectLabel,
+  SelectItem,
+  SelectSeparator,
+  SelectScrollUpButton,
+  SelectScrollDownButton,
+} from './select.js';
+export {
+  type ToastProps,
+  type ToastActionElement,
+  ToastProvider,
+  ToastViewport,
+  Toast,
+  ToastTitle,
+  ToastDescription,
+  ToastClose,
+  ToastAction,
+} from './toast.js';
+export { Toaster } from './toaster.js';
+export { useToast } from './use-toast.js';
+export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent } from './card.js';

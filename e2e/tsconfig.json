@@ -1,0 +1,4 @@
+{
+  "extends": "@inventory-u3/tsconfig/e2e.json",
+  "include": ["web", "playwright.config.ts"]
+}

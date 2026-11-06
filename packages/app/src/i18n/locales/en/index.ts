@@ -1,0 +1,13 @@
+import { auth } from './auth.js';
+import { common } from './common.js';
+import { dashboard } from './dashboard.js';
+import { inventory } from './inventory.js';
+import { settings } from './settings.js';
+
+export const en = {
+  ...common,
+  ...auth,
+  ...dashboard,
+  ...inventory,
+  ...settings,
+} as const;

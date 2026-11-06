@@ -1,0 +1,29 @@
+{
+  "name": "@inventory-u3/validation",
+  "version": "0.1.0",
+  "private": true,
+  "license": "UNLICENSED",
+  "type": "module",
+  "description": "Zod schemas for every Inventory U3 system boundary (HTTP, forms, configuration)",
+  "exports": {
+    ".": "./src/index.ts",
+    "./auth": "./src/auth/index.ts",
+    "./common": "./src/common/index.ts",
+    "./env": "./src/env/index.ts",
+    "./organization": "./src/organization/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src",
+    "test": "vitest run --passWithNoTests"
+  },
+  "dependencies": {
+    "@inventory-u3/types": "workspace:*",
+    "zod": "4.6.5"
+  },
+  "devDependencies": {
+    "@inventory-u3/tsconfig": "workspace:*",
+    "typescript": "5.9.3",
+    "vitest": "5.0.3"
+  }
+}

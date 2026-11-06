@@ -1,0 +1,9 @@
+{
+  "extends": "@inventory-u3/tsconfig/library.json",
+  "include": ["src"],
+  "compilerOptions": {
+    "paths": {
+      "@inventory-u3/types": ["./node_modules/@inventory-u3/types/src/index.ts"]
+    }
+  }
+}
