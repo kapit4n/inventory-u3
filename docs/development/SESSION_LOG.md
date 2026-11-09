@@ -360,6 +360,7 @@ measurement units, categories, products and presentations on both engines.
 - Applied the SQLite migration and reseeded the development database.
 - Updated the progress, roadmap, task, issue, architecture, domain and overview
   documents.
+- Committed M1-T2 as `10f882d`.
 
 ### Files changed
 
@@ -437,11 +438,9 @@ Modified:
 - The default integration command still needs the empty `TEST_DATABASE_URL`
   override.
 - Raw/processed, average weight and prices are still unimplemented by design.
-- M1-T2 remains uncommitted at the time of this entry.
 
 ### Pending work
 
-- Commit M1-T2 when requested.
 - Implement M1-T3: raw/processed product kind and average-weight configuration.
 - Confirm BQ-06, BQ-10 and BQ-19 before their dependent milestones.
 

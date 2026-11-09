@@ -14,7 +14,7 @@
 | In-progress milestones | M1                                                                                |
 | Blocked milestones     | M6 finalization is blocked on BR-013 (WhatsApp reporting format)                  |
 | Pending milestones     | M2, M3, M4, M5, M6, M7, M8, M9                                                    |
-| Last verified commit   | `d6b62d5` (branch foundation) plus uncommitted M1-T2 changes                      |
+| Last verified commit   | `10f882d` (M1-T2 catalog foundation)                                              |
 | Last update date       | 2026-11-09                                                                        |
 | Next recommended task  | M1-T3 — Raw/processed distinction and average-weight configuration                |
 
@@ -22,8 +22,9 @@
 
 M1-T2 added the catalog domain entities, ports, both schemas, both migrations,
 eight repository implementations, repository wiring and tests. These changes are
-in the working tree and were not committed at the time of this update. M1-T1 is
-committed as `d6b62d5`.
+committed as `10f882d`. M1-T1 is committed as `d6b62d5`. The working tree used
+for the verification record below is therefore the M1-T2 commit plus its
+documentation update.
 
 ## Verification for this update
 
