@@ -1,18 +1,60 @@
-# Open questions
+# Open Questions
 
-These need product input before the inventory milestones can be designed.
+These require product input. Do not resolve them silently in code. The confirmed
+business requirements are in
+[BUSINESS_REQUIREMENTS.md](./project/BUSINESS_REQUIREMENTS.md); the implementation
+sequence is in
+[IMPLEMENTATION_ROADMAP.md](./development/IMPLEMENTATION_ROADMAP.md).
 
-| #   | Question                                                                | Current assumption                                       | Needed by   |
-| --- | ----------------------------------------------------------------------- | -------------------------------------------------------- | ----------- |
-| 1   | Is inventory organized by warehouse, location, or only by organization? | Organization-wide stock until a location model is chosen | Milestone 2 |
-| 2   | Are items tracked individually (serial/lot) or only by quantity?        | Quantity only for the first slice                        | Milestone 2 |
-| 3   | Can one item have multiple units and conversion factors?                | One base unit per item initially                         | Milestone 2 |
-| 4   | Are stock levels derived from movements or maintained as a cache?       | Decide with the movement milestone                       | Milestone 3 |
-| 5   | Are negative stock levels allowed?                                      | Refuse by default; make any override explicit            | Milestone 3 |
-| 6   | Is multi-organization membership required for one user?                 | One user belongs to one organization                     | Future      |
-| 7   | Should desktop work offline?                                            | No; offline and sync are out of scope                    | Future      |
-| 8   | What is the reporting granularity for stock valuation?                  | Not decided                                              | Milestone 4 |
-| 9   | Who may manage users after the foundation?                              | `ADMINISTRATOR` only for initial slices                  | Milestone 4 |
-| 10  | Which locales beyond English and Spanish are required?                  | English and Spanish only                                 | Future      |
+When a question is answered:
 
-When a question is answered, record the decision in an ADR and update this table.
+1. Record the answer in the relevant requirements/workflow document.
+2. If the answer changes the architecture, write an ADR or a decision in
+   [TECHNICAL_DECISIONS.md](./project/TECHNICAL_DECISIONS.md).
+3. Update this table and the corresponding item in
+   [KNOWN_ISSUES.md](./development/KNOWN_ISSUES.md).
+
+## Confirmed resolutions from the business requirements
+
+These replace the earlier generic foundation assumptions:
+
+| Earlier question                                | Resolution                                                                                                   |
+| ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| Warehouse, location or organization-wide stock? | Inventory is organized by **branch**; each branch is independent (BR-022).                                   |
+| Can one item have multiple units/conversions?   | The model must support kg, units, trays and configured units (BR-014). Conversion rules remain open (BQ-10). |
+| Are individual sales tracked?                   | No, not in the initial version (BR-009). Sales are aggregate checkpoints.                                    |
+| Is WhatsApp integrated?                         | No (BR-027). Manual entry by the central operator.                                                           |
+| Who accesses the app initially?                 | One central operator for all branches; branch employees have no access (BR-007, BR-008).                     |
+
+## Open questions
+
+| ID    | Question                                                                                                     | Current assumption                                                           | Needed by |
+| ----- | ------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------- | --------- |
+| BQ-01 | What exact fields, order and units do branch employees report through WhatsApp?                              | Not assumed. Keep the checkpoint schema generic until confirmed (BR-013).    | M6        |
+| BQ-02 | Are the ~12:00 and ~20:00 checkpoints fixed, configurable, or only typical reporting times?                  | Support two periods; do not hardcode exact times until confirmed.            | M6        |
+| BQ-03 | Are confirmed purchases/production/checkpoints correctable? Who may correct them and what audit is required? | Assume auditable corrections, never silent edits.                            | M3/M5/M6  |
+| BQ-04 | What is the estimated cost basis for daily closing: latest price, weighted average, FIFO, manual?            | Not decided. Do not hardcode one.                                            | M7        |
+| BQ-05 | Is raw-material consumption always recorded in production, or only when reliable information is available?   | Optional initially.                                                          | M5        |
+| BQ-06 | Are prices and average weights organization-wide or branch-specific?                                         | Organization-wide until confirmed; price history should support later scope. | M2        |
+| BQ-07 | Is inventory balance derived from movements or maintained as a cache?                                        | Decide before M4; movements remain the source of truth.                      | M4        |
+| BQ-08 | Are negative stock levels ever allowed?                                                                      | Refuse by default; any override must be explicit and audited.                | M4        |
+| BQ-09 | When do branch employees/managers need application access, and what may they see?                            | Future only; data model keeps branch scope ready.                            | M9        |
+| BQ-10 | Are unit conversions needed between purchase, inventory, production and sales units?                         | Not assumed; store the unit used rather than converting silently.            | M2        |
+| BQ-11 | Is there a recipe/bill of materials, or are production inputs free-form per batch?                           | Free-form inputs when present; no recipe entity yet.                         | M5        |
+| BQ-12 | Are transfers between branches in scope?                                                                     | No, not in M1–M9.                                                            | Future    |
+| BQ-13 | Is there one supplier delivery shared across branches, or a separate purchase per branch?                    | One purchase belongs to one branch (BR-023); shared delivery is unconfirmed. | M3        |
+| BQ-14 | Are purchase prices tax-inclusive, and are taxes/freight part of cost?                                       | Not modeled; do not add tax fields without confirmation.                     | M3/M7     |
+| BQ-15 | Is partial receiving allowed?                                                                                | Not assumed.                                                                 | M3        |
+| BQ-16 | Does the business day start/end at local midnight for every branch?                                          | Use the organization timezone; branch timezones are not modeled.             | M7        |
+| BQ-17 | Is an explicit "no sales" checkpoint required?                                                               | Not assumed.                                                                 | M6        |
+| BQ-18 | How should mixed measured and estimated tray weights be represented?                                         | Store both bases; do not overwrite one with the other.                       | M5/M6     |
+
+## Earlier foundation questions still relevant
+
+| Earlier question                            | Status                                                   |
+| ------------------------------------------- | -------------------------------------------------------- |
+| Item tracked individually (serial/lot)?     | PENDING; quantity-only is the initial assumption.        |
+| Multi-organization membership for one user? | PENDING; currently one user belongs to one organization. |
+| Should desktop work offline?                | Out of scope; no offline or synchronization.             |
+| Reporting granularity for stock valuation?  | PENDING; belongs to reporting and closing.               |
+| Which locales beyond English and Spanish?   | English and Spanish only for now.                        |

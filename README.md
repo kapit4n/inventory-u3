@@ -2,12 +2,13 @@
 
 A modern inventory management system for **Web** and **Desktop**.
 
-> **Phase 1 — Architecture / Foundation.**
-> This repository currently contains the technical foundation only: architecture
-> documentation, ADRs, the monorepo, tooling, organization/user/session support,
-> the database foundation, minimal runnable web/desktop/API shells, and the test
-> foundation. Inventory features are intentionally not implemented yet. See
-> [`docs/roadmap.md`](./docs/roadmap.md).
+> **Phase 1 — Business Foundation.**
+> The technical foundation is complete: monorepo, tooling, auth/session,
+> dual-engine database, shared React app, web/desktop shells and tests. The
+> business domain is now being built milestone by milestone, starting with
+> branches. No inventory operation is implemented yet. See
+> [`docs/project/PROJECT_OVERVIEW.md`](./docs/project/PROJECT_OVERVIEW.md) and
+> [`docs/development/IMPLEMENTATION_ROADMAP.md`](./docs/development/IMPLEMENTATION_ROADMAP.md).
 
 ## Principle
 
@@ -38,8 +39,9 @@ packages/
 database/
   schema/ migrations/ migrations-sqlite/ seed data
 e2e/         Playwright specs
-docs/        Architecture, domain, ADRs, roadmap, progress
-scripts/     check-boundaries.mjs (architecture guard)
+docs/        Project brief, requirements, domain, architecture, workflows,
+             ADRs, canonical roadmap, progress, current task, session log
+scripts/     check-boundaries.mjs (architecture guard), start.sh
 ```
 
 ## Getting started
@@ -78,8 +80,27 @@ Docker is not required for the default SQLite workflow.
 
 ## Documentation
 
+Start here:
+
+- [`docs/project/PROJECT_OVERVIEW.md`](./docs/project/PROJECT_OVERVIEW.md) — product, status, docs map
+- [`docs/project/BUSINESS_REQUIREMENTS.md`](./docs/project/BUSINESS_REQUIREMENTS.md) — confirmed requirements and scope
+- [`docs/project/BUSINESS_DOMAIN_MODEL.md`](./docs/project/BUSINESS_DOMAIN_MODEL.md) — implemented vs proposed domain
+- [`docs/project/TECHNICAL_ARCHITECTURE.md`](./docs/project/TECHNICAL_ARCHITECTURE.md) — actual architecture and gaps
+- [`docs/project/TECHNICAL_DECISIONS.md`](./docs/project/TECHNICAL_DECISIONS.md) — decision log
+- [`docs/development/IMPLEMENTATION_ROADMAP.md`](./docs/development/IMPLEMENTATION_ROADMAP.md) — canonical M1–M9 roadmap
+- [`docs/development/IMPLEMENTATION_PROGRESS.md`](./docs/development/IMPLEMENTATION_PROGRESS.md) — progress and verification
+- [`docs/development/CURRENT_TASK.md`](./docs/development/CURRENT_TASK.md) — the task in progress
+- [`docs/development/SESSION_LOG.md`](./docs/development/SESSION_LOG.md) — chronological session history
+- [`docs/development/KNOWN_ISSUES.md`](./docs/development/KNOWN_ISSUES.md) — bugs, debt, risks, workarounds
+
+Business workflows:
+
+- [`docs/workflows/`](./docs/workflows) — measurement, inventory, purchase, production, sales checkpoint, daily closing
+
+Detailed references:
+
 - [`docs/architecture.md`](./docs/architecture.md) — system architecture and layers
-- [`docs/domain.md`](./docs/domain.md) — current domain boundaries
+- [`docs/domain.md`](./docs/domain.md) — currently implemented domain boundaries
 - [`docs/frontend.md`](./docs/frontend.md) — React application architecture
 - [`docs/backend.md`](./docs/backend.md) — REST API architecture
 - [`docs/database.md`](./docs/database.md) — SQLite + PostgreSQL with Drizzle
@@ -87,7 +108,6 @@ Docker is not required for the default SQLite workflow.
 - [`docs/testing.md`](./docs/testing.md) — testing architecture
 - [`docs/security.md`](./docs/security.md) — security baseline (**no compliance claims**)
 - [`docs/open-questions.md`](./docs/open-questions.md) — questions needing product input
-- [`docs/roadmap.md`](./docs/roadmap.md) — milestone sequence
 - [`docs/decisions/`](./docs/decisions) — architecture decision records
 - [`AGENTS.md`](./AGENTS.md) — working agreement and session protocol
 

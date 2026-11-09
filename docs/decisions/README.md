@@ -1,5 +1,10 @@
 # Architecture decision records
 
+> Foundation ADRs are listed below. Product and technical decisions that are not
+> foundation architecture are recorded in
+> [TECHNICAL_DECISIONS.md](../project/TECHNICAL_DECISIONS.md). When a decision
+> changes the architecture, add an ADR here as well.
+
 ADRs retained for the Inventory U3 foundation:
 
 | ADR  | Decision                                                           |

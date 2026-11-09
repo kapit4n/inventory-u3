@@ -3,7 +3,8 @@
 > This file is the **durable memory** of this project. Read it FIRST, before any
 > other file, every time you start working on Inventory U3 — including after a
 > context reset, a new session, or a disconnect.
-> Update it and `docs/progress/STATE.md` at the end of every work session.
+> Update this file and the documents in `docs/development/` at the end of every
+> work session (see section 7).
 
 ---
 
@@ -22,23 +23,26 @@
 
 ## 2. Current phase
 
-**PHASE 1 — ARCHITECTURE / FOUNDATION (in progress).**
+**PHASE 1 — BUSINESS FOUNDATION (in progress).**
 
-The goal of this phase is _only_ the technical foundation: architecture docs,
-ADRs, monorepo, tooling, domain model boundaries, database foundation,
-minimal runnable web/desktop/API, test foundation.
+The technical foundation is **complete** (monorepo, tooling, auth/session,
+dual-engine database, shared React app, web/desktop shells, tests, boundary
+guard). The current phase builds the business domain milestone by milestone,
+starting with M1.
 
-**Explicitly NOT in scope right now** (do not implement, even if it looks
-tempting):
+- Canonical roadmap: `docs/development/IMPLEMENTATION_ROADMAP.md`.
+- Current task and status: `docs/development/CURRENT_TASK.md` and
+  `docs/development/IMPLEMENTATION_PROGRESS.md`.
+- Confirmed requirements: `docs/project/BUSINESS_REQUIREMENTS.md`.
+- Proposed domain model: `docs/project/BUSINESS_DOMAIN_MODEL.md`.
 
-- complete inventory item, category or supplier CRUD
-- complete stock movement, adjustment, transfer or receiving flows
-- complete dashboard, reporting, purchasing or billing features
-- complete authentication and user administration
-- offline mode, local desktop database, or synchronization
-- microservices, GraphQL, Redux
+**Do not jump ahead of the milestone.** A feature that belongs to M2–M9 must not
+be implemented while an earlier milestone is incomplete, even if it looks
+tempting. In particular, do not implement complete CRUD, stock, purchasing,
+production, sales, closing or reporting before its milestone says so.
 
-See `docs/roadmap.md` for the milestone sequence.
+See `docs/roadmap.md` only as a superseded pointer. Do not add new work against
+it.
 
 ## 3. The 25 non-negotiable architectural rules
 
@@ -99,7 +103,8 @@ database/
   migrations-sqlite/ Generated SQLite SQL migrations + journal
   seeds/     Development seed data
 e2e/         Playwright specs (web smoke + desktop strategy)
-docs/        Architecture, domain, ADRs, roadmap, progress
+docs/        Project brief, requirements, domain, architecture, workflows,
+             ADRs, canonical roadmap, progress, current task, session log
 ```
 
 Dependency direction (inward only):
@@ -152,15 +157,37 @@ pnpm run dev:desktop      # Tauri dev app
 At the **start** of a session:
 
 1. Read this file.
-2. Read `docs/progress/STATE.md` (current phase, done/pending checklist).
-3. Read `docs/roadmap.md` for what the next milestone is.
-4. `git status` / inspect the tree before changing anything.
+2. Read `docs/project/PROJECT_OVERVIEW.md` (product, status, docs map).
+3. Read `docs/development/IMPLEMENTATION_PROGRESS.md` (done/pending checklist)
+   and `docs/development/CURRENT_TASK.md` (the only task you should be doing).
+4. Read the requirements/domain/architecture/decisions documents relevant to the
+   task, then the source files involved.
+5. Read `docs/development/KNOWN_ISSUES.md` and `docs/open-questions.md` so you
+   do not silently resolve an open question or repeat a known workaround.
+6. `git status` and inspect the tree before changing anything.
+
+**Continuity rule:** the documentation is the durable memory. If documentation
+and code disagree, record the discrepancy in `KNOWN_ISSUES.md` and treat the code
+as the current state until a decision says otherwise. Never invent history,
+dates, test results or product requirements. If the task is unclear or an
+unresolved question blocks it, stop and ask.
 
 At the **end** of a session:
 
-1. Update the checklist + "Last session log" in `docs/progress/STATE.md`.
-2. Update `docs/progress/LOG.md` with what was done and the verification result.
-3. Report using the 13-section format in `docs/progress/REPORT_TEMPLATE.md`.
+1. Update the checklist and verification record in
+   `docs/development/IMPLEMENTATION_PROGRESS.md`.
+2. Update `docs/development/CURRENT_TASK.md` (status, remaining steps, or the
+   next task).
+3. Append a dated entry to `docs/development/SESSION_LOG.md` with objective,
+   work, files, decisions, verification, problems and next session.
+4. Add or update `docs/development/KNOWN_ISSUES.md` and
+   `docs/open-questions.md` for anything discovered or still unanswered.
+5. Update `docs/development/IMPLEMENTATION_ROADMAP.md` if a milestone status
+   changed.
+6. Record significant decisions in `docs/project/TECHNICAL_DECISIONS.md` and, when
+   architectural, add an ADR in `docs/decisions/`.
+7. Run the verification commands for the work done and report the real results.
+8. Report using the 13-section format in `docs/progress/REPORT_TEMPLATE.md`.
 
 ## 8. Environment notes for this machine
 

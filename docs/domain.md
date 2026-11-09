@@ -1,5 +1,11 @@
 # Domain
 
+> This file documents the domain **currently implemented in `packages/domain`**.
+> The proposed business domain (branches, products, units, stock, production,
+> sales checkpoints) is documented in
+> [BUSINESS_DOMAIN_MODEL.md](./project/BUSINESS_DOMAIN_MODEL.md). Do not read a
+> proposed entity from that document as implemented code.
+
 `packages/domain` is framework-independent TypeScript. It currently contains the
 organization, identity and session foundation. Inventory entities arrive in
 later milestones.

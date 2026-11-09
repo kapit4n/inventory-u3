@@ -1,5 +1,9 @@
 # Architecture
 
+> For the current-state summary and the business architecture gaps, see
+> [TECHNICAL_ARCHITECTURE.md](./project/TECHNICAL_ARCHITECTURE.md). This file
+> remains the detailed reference for the foundation layers described below.
+
 Inventory U3 is one domain, one React application and two deployment shells. The
 API owns persistence; the browser and desktop window never access a database.
 
