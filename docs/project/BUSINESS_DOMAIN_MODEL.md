@@ -3,9 +3,10 @@
 > Status: **PROPOSED business model** unless an entity is explicitly marked
 > **IMPLEMENTED** below. The current repository implements the
 > organization/user/session foundation, the `Branch` entity and the product
-> catalog identity (units, categories, products and presentations). Raw/processed
-> products, average weight, prices, stock and transactional records remain a
-> design target, not a description of working software.
+> catalog (units, categories, products, presentations, raw/processed kind and
+> average-weight configuration). Prices, estimated/measured weights, stock and
+> transactional records remain a design target, not a description of working
+> software.
 
 ## 1. Structure of the model
 
@@ -40,7 +41,7 @@ proposed.
 | MeasurementUnit       | Organization-owned code/name for a unit       | `packages/domain/src/product/measurement-unit.ts`     |
 | ProductCategory       | Organization-owned product grouping           | `packages/domain/src/product/product-category.ts`     |
 | Product               | Organization-owned item with explicit units   | `packages/domain/src/product/product.ts`              |
-| ProductPresentation   | Product packaging identity                    | `packages/domain/src/product/product-presentation.ts` |
+| ProductPresentation   | Product packaging with average weight         | `packages/domain/src/product/product-presentation.ts` |
 | User                  | Organization-scoped login account             | `packages/domain/src/organization/auth.ts`            |
 | Role                  | `ADMINISTRATOR`, `MANAGER`, `STAFF`           | `packages/domain/src/organization/roles.ts`           |
 | Permission            | Domain permission values checked by the API   | `packages/domain/src/organization/roles.ts`           |
@@ -73,7 +74,9 @@ names, update this table and the ADR before writing code.
 
 ## 3. Raw products vs processed products
 
-The distinction is central to measurement and to which workflow applies.
+The distinction is central to measurement and to which workflow applies. It is
+implemented as the required `ProductKind` (`RAW` or `PROCESSED`); the production
+and sales workflows that consume it are not.
 
 ### Raw product
 
@@ -106,11 +109,11 @@ production data requirements are confirmed.
 
 ## 4. Product measurement configuration
 
-The catalog identity is implemented; the configuration that depends on the
-raw/processed distinction is not. A product currently references an inventory
-unit and a sales unit, with optional purchase and production units. The following
-table mixes what exists with what M1-T3/M2 must add; do not read an unimplemented
-row as a column.
+The catalog identity, the raw/processed kind and the average weight per tray are
+implemented. A product references an inventory unit and a sales unit, with
+optional purchase and production units; a presentation carries a positive
+integer `averageWeightGrams`. The following table mixes what exists with what
+M2/M5/M6 must add; do not read an unimplemented row as a column.
 
 | Concept             | Applies to     | Meaning                                                          |
 | ------------------- | -------------- | ---------------------------------------------------------------- |
@@ -119,7 +122,7 @@ row as a column.
 | Production unit     | Processed      | Unit used when reporting production output (usually trays)       |
 | Sales unit          | Raw, processed | Unit used at the sales checkpoint (kg, unit or tray)             |
 | Presentation        | Processed      | Physical format, e.g. covered tray                               |
-| Average weight/tray | Processed      | Configurable kilograms per tray used to estimate weight          |
+| Average weight/tray | Processed      | Configured positive grams per tray; shown as kilograms           |
 | Selling price/kg    | Processed      | Price per kilogram used to value estimated weight                |
 | Selling price/unit  | Raw            | Price per configured unit where sold by unit                     |
 
@@ -131,6 +134,8 @@ Rules:
   implemented yet. Whether they are needed is an open question.
 - Currency and money values use the existing integer-minor-unit convention in
   `packages/types`.
+- Average weight is stored as integer grams (TD-010); no estimated or measured
+  weight record exists yet.
 
 ## 5. Historical snapshots
 

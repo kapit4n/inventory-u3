@@ -1,7 +1,7 @@
 # Inventory U3 — Project Overview
 
-> Last verified: 2026-11-09 against commit `d6b62d5` plus uncommitted working-tree
-> changes listed in [IMPLEMENTATION_PROGRESS](../development/IMPLEMENTATION_PROGRESS.md).
+> Last verified: 2026-11-09 against commit `4168462` (M1-T3). M1-T4 is not
+> started. See [IMPLEMENTATION_PROGRESS](../development/IMPLEMENTATION_PROGRESS.md).
 
 ## Purpose
 
@@ -65,17 +65,18 @@ product.** As of this document:
   `product_categories`, `products`, `product_presentations`, `users` and
   `sessions`.
 - The `Branch` and product-catalog domain entities and their SQLite/PostgreSQL
-  repositories are implemented. There are no master-data API routes or screens
-  yet.
-- The catalog currently has no prices, raw/processed flag or average weight.
-  Those are M1-T3/M2 work.
+  repositories are implemented. Products carry a required raw/processed kind and
+  presentations carry an average weight per tray. There are no master-data API
+  routes or screens yet.
+- The catalog has no prices or estimated/measured weight snapshots. Those are
+  M2/M5/M6 work.
 - The `/inventory` screen is a placeholder.
 - No employee, supplier, purchase, stock, production, sales checkpoint, daily
   closing or report feature exists.
 - The nine business milestones are defined in
   [IMPLEMENTATION_ROADMAP.md](../development/IMPLEMENTATION_ROADMAP.md). None of
-  them is complete. M1 is the current milestone; its first two tasks (branch and
-  product catalog foundation) are complete.
+  them is complete. M1 is the current milestone; its first three tasks (branch,
+  product catalog and measurement configuration) are complete.
 
 The inventory business model in this documentation is **proposed**. It separates
 confirmed product requirements from proposed design and from open questions. Do

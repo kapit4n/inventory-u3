@@ -202,3 +202,27 @@ averageWeightPerTray` and `estimatedValue = estimatedKg × sellingPricePerKg`.
   BQ-06 is later answered as branch-specific, prices and configuration need a
   deliberate extension rather than a reinterpretation of these rows. Every
   quantity must say which unit it uses until conversion is confirmed.
+
+### TD-010 — Product kind is required and average weight is exact integer grams
+
+- **Date:** 2026-11-09
+- **Status:** ACCEPTED for M1-T3.
+- **Context:** BR-015 requires a configurable average weight per tray for
+  processed products, and BR-021 says raw products use their configured unit
+  without tray conversion. The measurement rules proposed 0.001 kg precision.
+- **Decision:** Every product carries a required `RAW` or `PROCESSED` kind.
+  Every presentation carries a required positive `averageWeightGrams`. Integer
+  grams represent the proposed 0.001 kg precision exactly without floating-point
+  drift. The raw/processed kind is not duplicated on the presentation.
+- **Alternatives considered:** Store kilograms as a floating-point number;
+  rejected because it invites rounding drift. Store a decimal/string; rejected
+  because grams are sufficient at the documented precision and simpler to
+  validate. Make weight optional; rejected because a presentation is the
+  packaging of a processed product, and an unweighed presentation would leave
+  the confirmed requirement unenforced.
+- **Consequences:** Migrations add a non-null `products.kind` and
+  `product_presentations.average_weight_grams` with no hidden default. The
+  catalog tables were empty when the migration was written; a database with
+  existing rows must be backfilled explicitly. Display converts grams to
+  kilograms at the UI boundary. Estimated/measured weights and historical
+  snapshots still need later additions.

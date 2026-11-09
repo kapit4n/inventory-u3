@@ -48,7 +48,7 @@ rules. The dependency direction is inward only.
 
 | Package               | Responsibility                                                      | Status                                        |
 | --------------------- | ------------------------------------------------------------------- | --------------------------------------------- |
-| `packages/domain`     | Organization, branch, catalog, auth/session rules, roles, ports     | Implemented                                   |
+| `packages/domain`     | Organization, branch, catalog, measurement, auth/session, ports     | Implemented                                   |
 | `packages/validation` | Zod schemas for auth, organization, env and common primitives       | Implemented                                   |
 | `packages/types`      | Branded IDs, ISO time, money minor units                            | Implemented                                   |
 | `packages/api-client` | Typed REST client: headers, query strings, problem mapping, schemas | Implemented                                   |
@@ -118,9 +118,11 @@ engine (ADR 0025).
 
 The `branches` table and the four catalog tables are organization-owned and
 implemented on both engines. Catalog master data is organization-wide; branches
-own stock, not a separate catalog (TD-009). Prices, product kind, average weight,
-stock, production and sales tables do not exist yet. Every future operational row
-must carry organization and branch ownership.
+own stock, not a separate catalog (TD-009). `products.kind` distinguishes raw
+from processed products, and `product_presentations.average_weight_grams` stores
+the configured weight exactly (TD-010). Prices, estimated/measured weight
+snapshots, stock, production and sales tables do not exist yet. Every future
+operational row must carry organization and branch ownership.
 
 ## 7. Frontend architecture
 
@@ -173,8 +175,8 @@ persistence now exist; the following are not designed or built:
 
 1. Branch and catalog API routes and management UI (entities and repositories
    exist).
-2. Product price history, raw/processed flag and average-weight configuration.
-3. Stock ledger and balance strategy.
+2. Product price history and estimated/measured weight snapshots.
+3. Stock ledger, balance strategy and correction workflow.
 4. Purchase receiving and auditable correction model.
 5. Production batch inputs/outputs and snapshot fields.
 6. Aggregate sales checkpoint model and snapshot fields.

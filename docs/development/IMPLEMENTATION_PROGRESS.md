@@ -5,26 +5,25 @@
 
 ## Summary
 
-| Field                  | Value                                                                             |
-| ---------------------- | --------------------------------------------------------------------------------- |
-| Current milestone      | M1 — Business Domain Foundation                                                   |
-| Current task           | M1-T2 complete; next task is M1-T3 (raw/processed and average weight)             |
-| Overall project status | Foundation, branch and catalog identity complete; other business work not started |
-| Completed milestones   | None of M1–M9 (the foundation prerequisite is complete)                           |
-| In-progress milestones | M1                                                                                |
-| Blocked milestones     | M6 finalization is blocked on BR-013 (WhatsApp reporting format)                  |
-| Pending milestones     | M2, M3, M4, M5, M6, M7, M8, M9                                                    |
-| Last verified commit   | `10f882d` (M1-T2 catalog foundation)                                              |
-| Last update date       | 2026-11-09                                                                        |
-| Next recommended task  | M1-T3 — Raw/processed distinction and average-weight configuration                |
+| Field                  | Value                                                                                 |
+| ---------------------- | ------------------------------------------------------------------------------------- |
+| Current milestone      | M1 — Business Domain Foundation                                                       |
+| Current task           | M1-T3 complete; next task is M1-T4 (stock movement and balance concepts)              |
+| Overall project status | Foundation, branch, catalog and measurement configuration complete; stock not started |
+| Completed milestones   | None of M1–M9 (the foundation prerequisite is complete)                               |
+| In-progress milestones | M1                                                                                    |
+| Blocked milestones     | M6 finalization is blocked on BR-013 (WhatsApp reporting format)                      |
+| Pending milestones     | M2, M3, M4, M5, M6, M7, M8, M9                                                        |
+| Last verified commit   | `4168462` (M1-T3 product kind and tray weight)                                        |
+| Last update date       | 2026-11-09                                                                            |
+| Next recommended task  | M1-T4 — Stock movement and balance concepts with audit-safe corrections               |
 
 ### Working tree at the time of this update
 
-M1-T2 added the catalog domain entities, ports, both schemas, both migrations,
-eight repository implementations, repository wiring and tests. These changes are
-committed as `10f882d`. M1-T1 is committed as `d6b62d5`. The working tree used
-for the verification record below is therefore the M1-T2 commit plus its
-documentation update.
+M1-T3 added the required raw/processed product kind and the average weight per
+tray, extended both schemas and generated both migrations, updated all four
+catalog repositories and strengthened their tests. These changes are committed as
+`4168462`. M1-T1 is committed as `d6b62d5`; M1-T2 is committed as `10f882d`.
 
 ## Verification for this update
 
@@ -32,9 +31,9 @@ documentation update.
 | ---------------------------------- | -------------------------------------------------------------- |
 | `pnpm run typecheck`               | PASS — 12/12 tasks                                             |
 | `pnpm run lint`                    | PASS — 12/12 tasks, `BOUNDARY GUARD OK`                        |
-| `pnpm exec turbo run test --force` | PASS — 12/12 tasks, 147 passed, 3 skipped                      |
+| `pnpm exec turbo run test --force` | PASS — 12/12 tasks, 149 passed, 3 skipped                      |
 | `pnpm run test:integration`        | PASS with `TEST_DATABASE_URL=` — 4 files, 22 passed, 3 skipped |
-| `pnpm run db:migrate`              | PASS — SQLite catalog migration applied                        |
+| `pnpm run db:migrate`              | PASS — SQLite measurement migration applied                    |
 | `pnpm run db:seed`                 | PASS — existing development data reseeded                      |
 | `pnpm run test:e2e`                | NOT RUN; last recorded result was 18/18 on the foundation      |
 | `pnpm run format:check`            | PASS — all files use Prettier style                            |
@@ -42,7 +41,7 @@ documentation update.
 | `pnpm run build`                   | PASS — 5/5 tasks                                               |
 
 Test counts from the forced run: API 48 passed + 3 skipped, desktop 4, database
-6, api-client 15, app 48, domain 26. Total 147 passed and 3 skipped. The skipped
+6, api-client 15, app 48, domain 28. Total 149 passed and 3 skipped. The skipped
 tests are the PostgreSQL branch and catalog repository tests, which require a
 reachable `TEST_DATABASE_URL`.
 
@@ -63,8 +62,9 @@ integration files without the PostgreSQL half. See SI-06.
 
 - [x] Repository architecture, packages, persistence and guardrails inspected.
 - [x] Existing implemented domain documented: organization, user, session, role,
-      permission, organization settings.
-- [x] Actual database tables documented: organizations, branches, users, sessions.
+      permission, organization settings, branch and product catalog.
+- [x] Actual database tables documented: organizations, branches, catalog,
+      users and sessions.
 - [x] Confirmed business requirements separated from proposed design.
 - [x] Proposed business domain model documented, including branch ownership,
       raw/processed products, measurement and snapshot rules.
@@ -74,17 +74,18 @@ integration files without the PostgreSQL half. See SI-06.
       migrations and repository implementations with isolation tests.
 - [x] M1-T2: Product/category/unit/presentation domain model, dual-engine
       schema/migrations and repository implementations with isolation tests.
+- [x] M1-T3: Required raw/processed product kind and average-weight
+      configuration on presentations, both engines and repositories.
 
 ### In Progress
 
-- [ ] M1-T3: Raw/processed distinction and average-weight configuration.
-- [ ] M1-T4: Stock movement and balance concepts.
+- [ ] M1-T4: Stock movement, balance and audit-safe correction concepts.
 - [ ] M1-T5: Access model for central operator and future branch users.
 - [ ] M1-T6: Update technical docs and boundary guard for the remaining domain.
 
 ### Pending
 
-- [ ] Remaining M1 raw/processed, measurement and stock work.
+- [ ] Remaining M1 stock and access-foundation work.
 - [ ] Branch API route and management UI (M2).
 - [ ] Catalog API routes and management UI (M2).
 - [ ] Seed the three branches once their names and codes are confirmed.
@@ -93,32 +94,31 @@ integration files without the PostgreSQL half. See SI-06.
 ### Validation
 
 - Tests executed: `typecheck`, `lint`, unit/component/API tests (see summary).
-- Passed: typecheck 12/12, lint 12/12 with `BOUNDARY GUARD OK`, tests 147
+- Passed: typecheck 12/12, lint 12/12 with `BOUNDARY GUARD OK`, tests 149
   passed + 3 skipped.
-- SQLite catalog migration and seed applied successfully.
+- SQLite measurement migration and seed applied successfully.
 - Failed: default `test:integration` without clearing `TEST_DATABASE_URL`
   (SI-06); the SQLite path passes with the override.
 - Not executed: PostgreSQL integration tests, Playwright E2E.
 - Build passed 5/5.
-- New M1-T2 tests: 9 domain catalog tests and 4 SQLite catalog repository tests
-  (create/read, organization listing, cross-organization denial, unit
-  references and presentations); 1 PostgreSQL catalog test skipped.
-- The full API suite now has 48 passed + 3 skipped; the domain suite has 26
-  passed.
+- New M1-T3 tests: 2 domain tests (unknown product kind; non-positive or
+  fractional average weight). Existing catalog domain and repository tests now
+  assert kind and weight round-trips.
+- The full API suite has 48 passed + 3 skipped; the domain suite has 28 passed.
 - PostgreSQL repository tests exist but were skipped without a reachable
   `TEST_DATABASE_URL`.
 
 ### Relevant files and modules
 
 - `packages/domain/src/branch/*` — branch entity, validation and tests.
-- `packages/domain/src/product/*` — units, categories, products, presentations
-  and catalog tests.
+- `packages/domain/src/product/*` — units, categories, product kinds, products,
+  presentations and catalog tests.
 - `packages/domain/src/ports/index.ts` — catalog repository ports and
   `Repositories`.
 - `packages/types/src/identifiers.ts` — catalog branded ids.
-- `database/schema/branch.ts`, `database/schema/catalog.ts` and the SQLite
-  equivalents.
-- `database/migrations/0001_*`, `0002_*` and the SQLite equivalents.
+- `database/schema/branch.ts`, `database/schema/catalog.ts`,
+  `database/schema/enums.ts` and the SQLite equivalents.
+- `database/migrations/0001_*` to `0003_*` and the SQLite equivalents.
 - `apps/api/src/infrastructure/persistence/repositories/*` — PostgreSQL branch
   and catalog repositories.
 - `apps/api/src/infrastructure/persistence/sqlite/repositories/*` — SQLite
@@ -136,10 +136,10 @@ integration files without the PostgreSQL half. See SI-06.
   No conversion factor is stored while BQ-10 is open.
 - A product has one category, a required inventory unit, a required sales unit,
   and optional purchase/production units.
-- Presentations are product-owned identities; average weight is deferred to
-  M1-T3.
-- Prices and the raw/processed distinction are deferred; M1-T2 does not guess
-  them.
+- Products carry a required `RAW` or `PROCESSED` kind.
+- Presentations are product-owned identities and require a positive
+  `averageWeightGrams` (TD-010). The kind is not duplicated on the presentation.
+- Prices, estimated/measured weights and historical snapshots are deferred.
 - Branch and catalog reads take `organizationId` explicitly.
 - The old generic roadmap is superseded (TD-008).
 - Branch-scoped persistence is recorded in
@@ -149,7 +149,8 @@ integration files without the PostgreSQL half. See SI-06.
 
 - `Branch` and the catalog have no API routes or UI yet; they are
   domain/persistence slices.
-- Products do not yet have a raw/processed flag, average weight or prices.
+- Products have a kind and presentations have a configured average weight, but
+  prices, estimated/measured weights and snapshots do not exist.
 - No supplier, stock, purchase, production, sales or closing entity exists.
 - The only business-looking UI is a static inventory placeholder.
 - The three development branches are not seeded because their names are not confirmed.
@@ -158,8 +159,8 @@ integration files without the PostgreSQL half. See SI-06.
 
 ### Next action
 
-Implement **M1-T3**: classify products as raw or processed and add
-average-weight configuration to the appropriate presentation model. See
+Implement **M1-T4**: define stock movement, balance and audit-safe correction
+concepts in the domain without building the M4 stock ledger. See
 [CURRENT_TASK.md](./CURRENT_TASK.md).
 
 ---

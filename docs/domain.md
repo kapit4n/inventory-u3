@@ -1,14 +1,15 @@
 # Domain
 
 > This file documents the domain **currently implemented in `packages/domain`**.
-> The proposed remainder of the business domain (measurement configuration,
-> prices, stock, production, sales checkpoints) is documented in
+> The proposed remainder of the business domain (prices, estimated/measured
+> weights, stock, production, sales checkpoints) is documented in
 > [BUSINESS_DOMAIN_MODEL.md](./project/BUSINESS_DOMAIN_MODEL.md). Do not read a
 > proposed entity from that document as implemented code.
 
 `packages/domain` is framework-independent TypeScript. It contains the
-organization, identity, session, branch and product-catalog foundation. Stock
-and transactional entities arrive in later milestones.
+organization, identity, session, branch and product-catalog foundation,
+including the raw/processed kind and average-weight configuration. Stock and
+transactional entities arrive in later milestones.
 
 ## Branch
 
@@ -41,11 +42,13 @@ stock; it does not own a private copy of the catalog.
 - `Product` belongs to one organization and one category. It references an
   inventory unit and a sales unit; purchase and production units are optional
   because not every product is bought or prepared.
-- `ProductPresentation` belongs to one product and one organization. It records
-  the packaging/presentation identity. Average weight per tray is deliberately
-  not present yet; M1-T3 adds it.
-- Prices, the raw/processed distinction and average weight are not modelled yet.
-  Those are M1-T3/M2 work, not hidden properties of these entities.
+- A product has a required `RAW` or `PROCESSED` kind. Raw products use their
+  configured unit directly; processed products are prepared as trays.
+- `ProductPresentation` belongs to one product and one organization and carries
+  the configured `averageWeightGrams` per tray. The weight is a positive integer
+  because the documented 0.001 kg precision is exactly one gram.
+- Prices, estimated/measured weights and historical snapshots are not modelled
+  yet. Those are M2/M5/M6 work.
 
 ## Organization
 
@@ -111,9 +114,9 @@ implementations (ADR 0025).
 
 ## Not yet modeled
 
-- Raw vs processed product distinction, average weight per tray and prices
+- Prices, estimated/measured weights and historical snapshots
+- Stock movements, balances and adjustments
 - Suppliers, employees and purchases
-- Stock levels, movements, adjustments and transfers
 - Production batches
 - Sales checkpoints and daily closing
 - Reports and exports

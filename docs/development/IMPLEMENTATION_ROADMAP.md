@@ -37,7 +37,7 @@ Evidence: source tree, `database/migrations*`, `packages/domain`, `apps/api`,
 
 ## M1 — Business Domain Foundation
 
-**Status: IN_PROGRESS (branch and catalog identity complete; measurement configuration pending)**
+**Status: IN_PROGRESS (branch, catalog and measurement configuration complete; stock concepts pending)**
 
 ### Objective
 
@@ -65,7 +65,7 @@ foundation without building user-facing inventory features yet.
 | ----- | ---------------------------------------------------------------------------------------- | ----------- |
 | M1-T1 | Branch entity, branch ownership fields, repository port and dual-engine schema/migration | COMPLETED   |
 | M1-T2 | Product, category, measurement unit and presentation domain model                        | COMPLETED   |
-| M1-T3 | Raw/processed product distinction and average-weight configuration model                 | NOT_STARTED |
+| M1-T3 | Raw/processed product distinction and average-weight configuration model                 | COMPLETED   |
 | M1-T4 | Stock movement and balance concepts, including audit-safe correction principles          | NOT_STARTED |
 | M1-T5 | Access model note: central operator now, branch users later                              | NOT_STARTED |
 | M1-T6 | Update technical docs and boundary guard for the new domain                              | NOT_STARTED |
@@ -77,8 +77,8 @@ foundation without building user-facing inventory features yet.
 - [x] Every future operational entity has a documented branch ownership rule.
 - [x] Product/category/unit/presentation concepts exist in the domain without
       React, Drizzle or database imports.
-- [ ] Raw vs processed products are distinguishable in the model.
-- [ ] Average weight per tray is configurable on the appropriate presentation
+- [x] Raw vs processed products are distinguishable in the model.
+- [x] Average weight per tray is configurable on the appropriate presentation
       model; it is not hardcoded.
 - [x] Branch foundation table exists in **both** schema trees and both migration
       journals.
@@ -93,8 +93,8 @@ foundation without building user-facing inventory features yet.
 - `branches` (organization-owned).
 - `measurement_units`, `product_categories`, `products`,
   `product_presentations` (organization-owned catalog master data).
-- Average-weight and raw/processed columns land in M1-T3, not in these tables
-  yet.
+- `products.kind` and `product_presentations.average_weight_grams` carry the
+  M1-T3 measurement configuration.
 - Every table added to both `database/schema` trees and both migration journals.
 - Seed data may add the three development branches, but only if it stays
   idempotent and clearly development-only.
@@ -114,11 +114,11 @@ screens in this milestone.
 
 ### Notes
 
-The organization/user/session foundation, the branch entity and the catalog
-identity are real; the raw/processed distinction, average weight, prices and
-stock do not exist yet. Do not mark M1 complete because the catalog rows exist.
-The three development branches are intentionally not seeded until their names
-are confirmed.
+The organization/user/session foundation, the branch entity, the catalog
+identity and the raw/processed + average-weight configuration are real; prices,
+stock and transactional records do not exist yet. Do not mark M1 complete
+because the catalog rows exist. The three development branches are intentionally
+not seeded until their names are confirmed.
 
 ---
 
@@ -661,15 +661,15 @@ been executed." A passing unit suite is not a backup/restore drill.
 
 ## Status summary
 
-| Milestone               | Status      | Evidence                                                          |
-| ----------------------- | ----------- | ----------------------------------------------------------------- |
-| Foundation prerequisite | COMPLETED   | Foundation code, migrations, tests and recorded verification      |
-| M1                      | IN_PROGRESS | Branch and catalog identity done; raw/processed and stock pending |
-| M2                      | NOT_STARTED | No master-data tables or screens                                  |
-| M3                      | NOT_STARTED | No purchase/receiving tables or screens                           |
-| M4                      | NOT_STARTED | No stock tables or screens; inventory route is a placeholder      |
-| M5                      | NOT_STARTED | No production tables or screens                                   |
-| M6                      | NOT_STARTED | No checkpoint tables or screens; BR-013 pending                   |
-| M7                      | NOT_STARTED | No closing tables or screens                                      |
-| M8                      | NOT_STARTED | Dashboard is static foundation content; no reports                |
-| M9                      | NOT_STARTED | No CI, branch permissions, audit log or backup drill              |
+| Milestone               | Status      | Evidence                                                                   |
+| ----------------------- | ----------- | -------------------------------------------------------------------------- |
+| Foundation prerequisite | COMPLETED   | Foundation code, migrations, tests and recorded verification               |
+| M1                      | IN_PROGRESS | Branch, catalog and measurement configuration done; stock concepts pending |
+| M2                      | NOT_STARTED | Underlying catalog tables exist; no master-data API or screens             |
+| M3                      | NOT_STARTED | No purchase/receiving tables or screens                                    |
+| M4                      | NOT_STARTED | No stock tables or screens; inventory route is a placeholder               |
+| M5                      | NOT_STARTED | No production tables or screens                                            |
+| M6                      | NOT_STARTED | No checkpoint tables or screens; BR-013 pending                            |
+| M7                      | NOT_STARTED | No closing tables or screens                                               |
+| M8                      | NOT_STARTED | Dashboard is static foundation content; no reports                         |
+| M9                      | NOT_STARTED | No CI, branch permissions, audit log or backup drill                       |

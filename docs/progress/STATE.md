@@ -14,11 +14,12 @@
 - **Branch foundation:** entity, dual-engine schema, migrations and repositories
   are implemented. No branch API route or UI exists yet.
 - **Catalog identity:** units, categories, products and presentations have
-  domain + dual-engine persistence. No API route, UI, prices, raw/processed kind
-  or average weight exists yet.
-- **Next task:** M1-T3 — raw/processed distinction and average-weight
-  configuration.
+  domain + dual-engine persistence. Products carry a raw/processed kind and
+  presentations carry an average weight per tray. No API route, UI, prices or
+  weight snapshots exist yet.
+- **Next task:** M1-T4 — stock movement, balance and audit-safe correction
+  concepts.
 
 The previous foundation verification record is preserved in
-[SESSION_LOG.md](../development/SESSION_LOG.md) (Sessions 0–3).
+[SESSION_LOG.md](../development/SESSION_LOG.md) (Sessions 0–5).
 [LOG.md](./LOG.md) remains as a pointer to that history.

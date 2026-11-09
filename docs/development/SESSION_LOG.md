@@ -450,3 +450,106 @@ Read `AGENTS.md`, `PROJECT_OVERVIEW.md`,
 `IMPLEMENTATION_PROGRESS.md`, `CURRENT_TASK.md`, the product measurement rules
 and the M1-T2 slice, then implement M1-T3. Update this log and the progress
 documents before finishing.
+
+## Session 5 — 2026-11-09 — M1-T3 raw/processed and average weight
+
+### Objective
+
+Make the raw/processed distinction explicit, add the configured average weight
+per tray, and persist both on the two engines without implementing prices or
+weight snapshots.
+
+### Work completed
+
+- Added the domain `PRODUCT_KINDS` list (`RAW`, `PROCESSED`) and `ProductKind`.
+- Made `Product.kind` required and validated at creation.
+- Added required positive `ProductPresentation.averageWeightGrams`.
+- Added the PostgreSQL `product_kind` enum and the SQLite text + `CHECK` twin.
+- Added `products.kind` and `product_presentations.average_weight_grams` to both
+  schema trees and generated both migration journals.
+- Updated all four catalog repositories to persist and read the new fields.
+- Extended domain and repository tests for kind, weight, invalid values and
+  round-trips.
+- Applied the SQLite migration and reseeded the development database.
+- Updated the progress, roadmap, task, issue, architecture, domain, model,
+  measurement and open-question documents.
+
+### Files changed
+
+Created:
+
+- `packages/domain/src/product/product-kind.ts`
+- `database/migrations/0003_condemned_stick.sql`
+- `database/migrations-sqlite/0003_vengeful_enchantress.sql`
+
+Modified:
+
+- `packages/domain/src/product/product.ts`
+- `packages/domain/src/product/product-presentation.ts`
+- `packages/domain/src/product/index.ts`
+- `packages/domain/src/product/product-catalog.test.ts`
+- `database/schema/enums.ts`
+- `database/schema/catalog.ts`
+- `database/schema/sqlite/catalog.ts`
+- `apps/api/src/infrastructure/persistence/repositories/product-repository.ts`
+- `apps/api/src/infrastructure/persistence/repositories/product-presentation-repository.ts`
+- `apps/api/src/infrastructure/persistence/sqlite/repositories/product-repository.ts`
+- `apps/api/src/infrastructure/persistence/sqlite/repositories/product-presentation-repository.ts`
+- `apps/api/test/product-catalog-repository.integration.test.ts`
+- Generated migration metadata and journals on both engines.
+- `docs/development/IMPLEMENTATION_PROGRESS.md`,
+  `IMPLEMENTATION_ROADMAP.md`, `CURRENT_TASK.md`, `KNOWN_ISSUES.md` and this log.
+- `docs/domain.md`, `docs/open-questions.md`, `docs/progress/STATE.md`,
+  `docs/project/BUSINESS_DOMAIN_MODEL.md`, `PROJECT_OVERVIEW.md`,
+  `TECHNICAL_ARCHITECTURE.md`, `TECHNICAL_DECISIONS.md`.
+- `docs/workflows/PRODUCT_MEASUREMENT_RULES.md`.
+
+### Technical decisions
+
+- `ProductKind` is required and shared by both database engines (TD-010).
+- Average weight is stored as required positive integer grams; 0.001 kg is one
+  gram, so this is exact and avoids floating-point drift (TD-010).
+- The weight lives on the presentation; the product kind is not duplicated.
+- Migrations add non-null columns without a hidden default. The tables were
+  empty; a database with rows must be backfilled explicitly.
+- Prices, estimated/measured weights and historical snapshots remain out of
+  scope.
+- No API route, UI or seed product data was added.
+
+### Tests and validation
+
+- `pnpm run typecheck` — PASS, 12/12 tasks.
+- `pnpm run lint` — PASS, 12/12 tasks, `BOUNDARY GUARD OK`.
+- `pnpm exec turbo run test --force` — PASS, 12/12 tasks, 149 passed + 3 skipped.
+- `TEST_DATABASE_URL= pnpm --filter @inventory-u3/api test:integration` — PASS,
+  4 files, 22 passed + 3 skipped.
+- `pnpm run db:migrate` — PASS on SQLite, `0003` applied.
+- `pnpm run db:seed` — PASS on SQLite.
+- `pnpm run build` — PASS, 5/5 tasks.
+- PostgreSQL catalog repository tests — SKIPPED, no reachable server.
+- Default `pnpm run test:integration` — FAILS with `ECONNREFUSED` because `.env`
+  defines `TEST_DATABASE_URL`; use the empty override (SI-06).
+- E2E — NOT RUN.
+
+### Problems found
+
+- Drizzle's generated SQLite table-rebuild migration copied a `kind` column that
+  did not exist on the old `products` table. The INSERT was corrected to omit
+  `kind`: an empty table migrates, while a non-empty table fails loudly instead
+  of inventing a RAW/PROCESSED default.
+- No PostgreSQL server is available, so engine parity for the new kind and
+  weight columns is not verified on this machine.
+- M1-T3 was verified before being committed as `4168462`.
+
+### Pending work
+
+- Implement M1-T4: stock movement, balance and audit-safe correction concepts.
+- Confirm BQ-03, BQ-06, BQ-07, BQ-08, BQ-10 and BQ-19 before their dependent
+  milestones.
+
+### Next session
+
+Read `AGENTS.md`, `PROJECT_OVERVIEW.md`,
+`IMPLEMENTATION_PROGRESS.md`, `CURRENT_TASK.md`, the inventory workflow and the
+M1-T3 slice, then implement M1-T4 as a domain-only stock vocabulary. Update this
+log and the progress documents before finishing.

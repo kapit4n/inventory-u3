@@ -27,8 +27,8 @@ reproduced and confirmed in this review. Add an item here only with evidence
 | ---------------------------- | ------------------------------------------------------------------------------------------------------------------- |
 | Branch master data           | Entity and dual-engine persistence implemented. No API route or UI.                                                 |
 | Catalog identity             | Units, categories, products and presentations have domain + dual-engine persistence. No API route, UI or seed data. |
-| Raw/processed products       | Not implemented; the product kind is missing.                                                                       |
-| Average weight per tray      | Not implemented; presentation has no weight field yet.                                                              |
+| Raw/processed products       | Product kind implemented; production/sales workflows that use it are not.                                           |
+| Average weight per tray      | Configured weight implemented on presentations; estimation, measurement and snapshots are not.                      |
 | Product prices and history   | Not implemented; only documented.                                                                                   |
 | Suppliers and purchases      | Not implemented.                                                                                                    |
 | Stock movements and balances | Not implemented.                                                                                                    |
@@ -65,8 +65,8 @@ These are roadmap work, not defects. See
 - Browser E2E for the current working tree (last recorded run is from the
   foundation session).
 - Branch and catalog API/UI tests, because no routes or screens exist yet.
-- Raw/processed kind, average-weight configuration and price-history tests,
-  because those fields do not exist yet.
+- Estimated/measured weight, snapshot and price-history tests, because those
+  fields do not exist yet.
 - Stock, purchase, production, sales and closing tests, because those domains do
   not exist yet.
 - Backup/restore drill.

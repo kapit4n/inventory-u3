@@ -2,127 +2,125 @@
 
 > Last updated: 2026-11-09.
 >
-> **No feature task is currently in progress.** M1-T2 (catalog identity) is
-> complete. The next task is M1-T3.
+> **No feature task is currently in progress.** M1-T3 (raw/processed and
+> average-weight configuration) is complete. The next task is M1-T4.
 
 ## Task identity
 
-| Field        | Value                                                                |
-| ------------ | -------------------------------------------------------------------- |
-| Milestone    | M1 — Business Domain Foundation                                      |
-| Task ID      | M1-T3                                                                |
-| Task         | Raw/processed distinction and average-weight configuration           |
-| Status       | NOT_STARTED (ready)                                                  |
-| Dependencies | M1-T2 complete; TD-001, TD-009 and BQ-06 working assumption accepted |
-| Blocks       | M1-T4, M2, M3, M4, M5, M6, M7, M8                                    |
+| Field        | Value                                                      |
+| ------------ | ---------------------------------------------------------- |
+| Milestone    | M1 — Business Domain Foundation                            |
+| Task ID      | M1-T4                                                      |
+| Task         | Stock movement, balance and audit-safe correction concepts |
+| Status       | NOT_STARTED (ready)                                        |
+| Dependencies | M1-T3 complete; TD-001, TD-009 and TD-010 accepted         |
+| Blocks       | M1-T5, M1-T6, M4, M5, M6, M7                               |
 
 ## Objective
 
-Make the raw/processed distinction explicit in the product model and add the
-configured average weight per tray to the presentation model. Keep the work
-framework-independent and dual-engine. Do not add prices, conversion arithmetic
-or stock.
+Define the domain vocabulary and invariants for stock before any stock table or
+inventory screen exists. The movement is the append-only source of truth; a
+correction is another movement, never an edit that erases what happened.
+
+This task is conceptual and framework-independent. It must not build the stock
+ledger, balances, reconciliation screen or any API.
 
 ## Context
 
-- M1-T2 implemented units, categories, products and presentations on both
-  engines. Products have no kind yet; presentations have no weight yet.
-- BR-015–BR-020 distinguish processed products (trays, average weight) from
-  unprocessed products (configured unit, no tray conversion). BR-021 covers the
-  unprocessed case.
-- BQ-06 (organization-wide vs branch-specific price/weight configuration) is not
-  answered. TD-009 records the working assumption: catalog configuration is
-  organization-wide until product input says otherwise. Stop and ask if that
-  assumption blocks the task.
-- BQ-10 (unit conversion) remains open; do not add conversion factors.
-- The catalog tables are newly created and contain no seeded product data. Any
-  migration that adds a required column must still be explicit about existing
-  rows rather than hiding a business default.
+- Branch is the inventory boundary (TD-001); every movement belongs to one
+  organization and one branch.
+- Products now carry an inventory unit and a raw/processed kind. Quantities in
+  the stock domain use the product's inventory unit; no conversion is applied
+  (BQ-10).
+- M4 owns the persisted ledger, balance strategy and inventory UI. M1-T4 defines
+  the vocabulary those pieces must obey.
+- BQ-07 (derived vs cached balance), BQ-08 (negative stock), the initial-stock
+  rule and correction permissions are open. Do not resolve them by guessing.
+- Sales are aggregate checkpoints, not individual transactions (BR-009).
+- A correction must preserve the original record and be explainable later.
 
 Read before starting:
 
-1. [BUSINESS_REQUIREMENTS.md](../project/BUSINESS_REQUIREMENTS.md) — BR-014 to BR-021.
-2. [BUSINESS_DOMAIN_MODEL.md](../project/BUSINESS_DOMAIN_MODEL.md) — sections 3 and 4.
-3. [PRODUCT_MEASUREMENT_RULES.md](../workflows/PRODUCT_MEASUREMENT_RULES.md).
-4. [open-questions.md](../open-questions.md) — BQ-06 and BQ-10.
-5. The implemented catalog slice in `packages/domain/src/product`, both schema
-   trees, both migrations and the catalog repositories.
+1. [BUSINESS_REQUIREMENTS.md](../project/BUSINESS_REQUIREMENTS.md) — branch,
+   stock and sales requirements.
+2. [INVENTORY_WORKFLOW.md](../workflows/INVENTORY_WORKFLOW.md) — sections 2–5.
+3. [BUSINESS_DOMAIN_MODEL.md](../project/BUSINESS_DOMAIN_MODEL.md) — branch
+   ownership and stock entities.
+4. [open-questions.md](../open-questions.md) — BQ-03, BQ-07, BQ-08, BQ-10.
+5. The implemented branch/product slice and ADR 0039.
 
 ## Files and modules involved
 
-- `packages/domain/src/product/product.ts` and `product-presentation.ts`.
-- `packages/domain/src/product/product-catalog.test.ts`.
-- `packages/domain/src/ports/index.ts` only if a port signature changes.
-- `packages/types/src/identifiers.ts` only if a new branded id is required.
-- `database/schema/catalog.ts` and `database/schema/sqlite/catalog.ts`.
-- `database/migrations/` and `database/migrations-sqlite/` — generated together.
-- PostgreSQL and SQLite catalog repositories and their integration test.
+- `packages/domain/src/stock/` (new) and `packages/domain/src/index.ts`.
+- `packages/domain/src/ports/index.ts` only if a port is genuinely needed now.
+- Tests colocated with the domain.
+- `docs/decisions/` for the append-only correction decision if it is recorded as
+  an ADR.
 - Documentation after implementation.
 
-## Proposed model
+## Proposed domain concepts
 
-Keep the additions explicit and small:
+Keep the first version explicit and small:
 
-- `ProductKind` — domain union `"RAW" | "PROCESSED"` (or an equivalent
-  domain-specific representation). The product carries a required kind. Do not
-  use a numeric flag whose meaning is only known outside the domain.
-- `ProductPresentation.averageWeightGrams` — a positive integer or `undefined`.
-  The documented 0.001 kg precision is exactly one gram, so integer grams avoid
-  floating-point drift. Display conversion to kilograms belongs to the UI.
-- Because presentations belong to products, decide and document whether every
-  presentation requires a weight or only processed-product presentations do.
-  If the rule needs the product kind, enforce it where the product is available
-  rather than duplicating the kind on the presentation.
-- Do not add an estimated/measured weight, a price, a tray-to-unit conversion or
-  a historical snapshot in this task.
+- `StockMovementReason` — a controlled list covering receiving, production
+  input/output, sales checkpoint, adjustment, waste and correction. Do not add
+  reasons for workflows that do not exist.
+- `StockMovement` — immutable organization/branch/product reference, signed
+  `quantityDelta`, reason, optional source reference, optional
+  `correctsMovementId`, business time, recording time, actor and note.
+- `StockBalance` — a read-model concept for quantity on hand per branch and
+  product. Decide whether it is a type only in M1-T4; do not add a table while
+  BQ-07 is open.
+- A correction references the movement it corrects. The original is never
+  mutated or deleted. Do not implement reversal arithmetic without the original
+  row.
+- No negative-stock policy, opening-balance rule or approval workflow is
+  implemented in this task.
 
 ## Acceptance criteria
 
-- [ ] `ProductKind` is required on new products and persisted in both engines.
-- [ ] Raw and processed products are distinguishable without external lookup
-      tables or free-text notes.
-- [ ] `ProductPresentation` can store a configured average weight per tray; no
-      value is hardcoded.
-- [ ] Weight uses an exact integer representation; no floating kilograms and no
-      silent rounding.
-- [ ] The migration states how existing rows are handled; no business-meaning
-      default is hidden.
-- [ ] Domain tests cover valid/invalid kinds and weight values.
-- [ ] Repository tests cover the new fields on both engines where available,
-      including organization isolation.
-- [ ] Both schema trees and both migration journals change together.
+- [ ] Stock concepts are pure TypeScript and import only `@inventory-u3/types`
+      and domain shared modules.
+- [ ] A stock movement carries organization, branch, product, a non-zero signed
+      quantity, a controlled reason and its audit fields.
+- [ ] A movement is immutable in the type; no update/delete API is introduced.
+- [ ] A correction references the corrected movement id rather than replacing it.
+- [ ] Balance remains a concept only; no stock table or migration is added.
+- [ ] Open questions BQ-03, BQ-07 and BQ-08 are not silently answered.
+- [ ] Domain tests cover quantity, reason, correction and required-reference
+      invariants.
+- [ ] If the append-only rule is recorded as an ADR, the ADR is linked from the
+      implementation notes and decision index.
 - [ ] `pnpm run guard:boundaries`, `typecheck`, `lint` and `test` pass.
-- [ ] SQLite migration and seed run successfully.
-- [ ] Documentation distinguishes implemented configuration from still-proposed
-      measurement behaviour.
+- [ ] Documentation states what is conceptual versus persisted.
 
 ## Tests required
 
-- Domain tests for required kind, positive integer weight and revised
-  presentation invariants.
-- Repository round-trip tests for kind and average weight.
-- Cross-organization isolation remains covered.
-- SQLite migration smoke check.
-- PostgreSQL tests run when `TEST_DATABASE_URL` answers; otherwise skip and
-  record the skip.
+- Domain tests for valid movement creation.
+- Zero, non-finite and invalid-quantity rejection.
+- Unknown reason rejection.
+- Correction-reference validation.
+- A test asserting that the public model exposes no mutation of an existing
+  movement.
+
+No repository or migration test is required unless persistence is deliberately
+added; if it is, both engines must change together.
 
 ## Remaining steps
 
-1. Re-read the requirements, product rules, TD-009 and the M1-T2 slice.
-2. Decide and document the weight optionality rule before coding.
-3. Implement the domain changes and tests.
-4. Update both schemas, generate both migrations, and implement the repository
-   changes for both engines.
-5. Run the verification commands and the SQLite migration.
+1. Re-read the requirements, inventory workflow and open questions.
+2. Decide the exact M1-T4 domain boundary and record it here before coding.
+3. Implement the stock concepts and tests without adding stock tables.
+4. Record the append-only correction principle in an ADR if it is architectural.
+5. Run the verification commands.
 6. Update `IMPLEMENTATION_PROGRESS.md`, the roadmap, this file, `SESSION_LOG.md`,
-   `KNOWN_ISSUES.md` and the domain/model/measurement documents.
-7. Choose M1-T4 (stock movement and balance concepts) or the next roadmap task.
+   `KNOWN_ISSUES.md`, `docs/domain.md` and the model/workflow documents.
+7. Choose M1-T5 (access-model note) or the next roadmap task.
 
 ## Out of scope for this task
 
-- Product CRUD UI or API routes.
-- Prices or price history.
-- Estimated/measured weight records, sales snapshots and production snapshots.
-- Stock movements, purchases, production, sales checkpoints or closing.
+- Stock tables, migrations, repositories or API routes.
+- Balance calculation, negative-stock enforcement or cache strategy.
+- Purchases, production, sales checkpoints, reconciliation or closing.
+- Stock UI, reports or seeding.
 - Unit conversion arithmetic.
-- Seeding product data with invented business values.
