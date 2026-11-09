@@ -14,7 +14,7 @@
 | In-progress milestones | M2                                                                      |
 | Blocked milestones     | M6 finalization is blocked on BR-013 (WhatsApp reporting format)        |
 | Pending milestones     | M3, M4, M5, M6, M7, M8, M9                                              |
-| Last verified commit   | `814f397` (M2-T1) plus uncommitted M2-T2 working tree                   |
+| Last verified commit   | `6b50606` (M2-T2); M2-T1 `814f397`                                      |
 | Last update date       | 2026-11-09                                                              |
 | Next recommended task  | Continue M2 with supplier master data                                   |
 
@@ -27,7 +27,7 @@ section and tests. Employees carry organization and branch references, are
 validated against a branch in the same organization, and are deactivated rather
 than deleted. No employee seed was added because real names are unavailable.
 Branch-local employee ownership is an assumption pending BQ-20 (TD-012). The
-changes are uncommitted pending explicit authorization.
+changes are committed as `6b50606`.
 
 ## Verification for this update
 

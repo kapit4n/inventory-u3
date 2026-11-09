@@ -37,8 +37,7 @@
   parity and migration-journal parity.
 - **Next task:** continue M2 with supplier master data (M2-T3). Branch seeding
   waits for BQ-19; employee seed data waits for real names.
-- **Commits:** M1 closeout `bfdc9cb`; M2-T1 `814f397`. M2-T2 is currently
-  uncommitted in the working tree.
+- **Commits:** M1 closeout `bfdc9cb`; M2-T1 `814f397`; M2-T2 `6b50606`.
 
 The previous verification records are preserved in
 [SESSION_LOG.md](../development/SESSION_LOG.md) (Sessions 0–10).

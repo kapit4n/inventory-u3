@@ -1,7 +1,7 @@
 # Inventory U3 — Project Overview
 
-> Last verified: 2026-11-09. M1 is committed at `bfdc9cb` and M2-T1 at `814f397`;
-> M2-T2 employee master data is in the working tree. See
+> Last verified: 2026-11-09. M1 is committed at `bfdc9cb`, M2-T1 at `814f397`
+> and M2-T2 at `6b50606`. See
 > [IMPLEMENTATION_PROGRESS](../development/IMPLEMENTATION_PROGRESS.md).
 
 ## Purpose

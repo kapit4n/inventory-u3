@@ -4,8 +4,8 @@
 >
 > **M2-T2 is COMPLETE.** M2-T1 branch management is also complete. This slice adds
 > employee master data with a single branch assignment, so later production can
-> record who prepared a product. Employees do not log in. The work is uncommitted
-> pending explicit authorization.
+> record who prepared a product. Employees do not log in. The work is committed as
+> `6b50606`.
 
 ## Task identity
 
@@ -82,8 +82,8 @@ workflow can consume.
 
 ## Completion record
 
-- Implementation and documentation are in the working tree; no commit was made
-  without explicit authorization.
+- Implementation and documentation are committed as `6b50606` after explicit
+  authorization.
 - Verified: typecheck 12/12, lint 12/12 with `BOUNDARY GUARD OK`, unit/component
   209 passed + 6 skipped, SQLite integration 42 passed + 6 skipped, build 5/5,
   SQLite migrations through `0004`, seed, and formatting.

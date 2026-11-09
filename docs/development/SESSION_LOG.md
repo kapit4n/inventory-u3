@@ -969,6 +969,7 @@ names.
 - Updated domain, backend, database, testing, access, technical-decision,
   architecture, overview, roadmap, progress, state, known-issues and current-task
   documentation.
+- Committed after explicit authorization as `6b50606`.
 
 ### Files changed
 
@@ -1050,11 +1051,9 @@ Documentation:
   the employee component test.
 - The branch selector still has no dedicated component test, though the employee
   form exercises it.
-- M2-T2 is uncommitted pending explicit authorization.
 
 ### Pending work
 
-- Commit M2-T2 when explicitly authorized.
 - Continue M2 with supplier master data (M2-T3).
 - Seed branches only after BQ-19; seed employees only when real names are available.
 

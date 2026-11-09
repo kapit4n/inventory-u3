@@ -1,7 +1,7 @@
 # Inventory U3 — Phase 1 Business Foundation Report
 
-> Last updated: 2026-11-09. M1 is committed at `bfdc9cb`, M2-T1 at `814f397`;
-> M2-T2 employee master data is complete in the working tree.
+> Last updated: 2026-11-09. M1 is committed at `bfdc9cb`, M2-T1 at `814f397`
+> and M2-T2 at `6b50606`.
 
 ## 1. Architecture overview
 
@@ -109,4 +109,4 @@ that blocks M6 (BR-013).
 
 Continue **M2 — Master Data** with M2-T3 supplier master data, following the
 established domain, dual-engine persistence, API, typed-client, UI and test
-pattern. Commit M2-T2 first when explicitly authorized.
+pattern.

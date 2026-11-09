@@ -2,7 +2,7 @@
 
 > Canonical business roadmap. It supersedes the generic item/stock sequence in
 > the old [`docs/roadmap.md`](../roadmap.md), which now points here.
-> Last reviewed: 2026-11-09 after M2-T2 (employee master data working tree).
+> Last reviewed: 2026-11-09 after M2-T2 (employee master data, `6b50606`).
 
 Status values are used exactly as follows:
 
