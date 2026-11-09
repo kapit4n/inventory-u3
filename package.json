@@ -12,6 +12,7 @@
   },
   "scripts": {
     "build": "turbo run build",
+    "start": "bash scripts/start.sh",
     "dev:web": "turbo run dev --filter=@inventory-u3/web",
     "dev:api": "turbo run dev --filter=@inventory-u3/api",
     "dev:desktop": "turbo run dev --filter=@inventory-u3/desktop",
