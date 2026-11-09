@@ -2,7 +2,7 @@
 
 > Canonical business roadmap. It supersedes the generic item/stock sequence in
 > the old [`docs/roadmap.md`](../roadmap.md), which now points here.
-> Last reviewed: 2026-11-09 after M2-T1 (branch management working tree).
+> Last reviewed: 2026-11-09 after M2-T2 (employee master data working tree).
 
 Status values are used exactly as follows:
 
@@ -134,7 +134,7 @@ confirmed (BQ-19); that is M2 work, not an M1 gap.
 
 ## M2 — Master Data
 
-**Status: IN_PROGRESS (M2-T1 branch management complete).**
+**Status: IN_PROGRESS (M2-T1 branches and M2-T2 employees complete).**
 
 ### Objective
 
@@ -162,7 +162,7 @@ M1 (domain and persistence foundation).
 | ID    | Task                                                            | Status      |
 | ----- | --------------------------------------------------------------- | ----------- |
 | M2-T1 | Branch list/create/edit, permissions and branch selector        | COMPLETED   |
-| M2-T2 | Employee master data and branch assignment                      | NOT_STARTED |
+| M2-T2 | Employee master data and branch assignment                      | COMPLETED   |
 | M2-T3 | Supplier master data                                            | NOT_STARTED |
 | M2-T4 | Category, unit and presentation master data                     | NOT_STARTED |
 | M2-T5 | Product create/edit/list for raw and processed products         | NOT_STARTED |
@@ -677,7 +677,7 @@ been executed." A passing unit suite is not a backup/restore drill.
 | ----------------------- | ----------- | -------------------------------------------------------------------------- |
 | Foundation prerequisite | COMPLETED   | Foundation code, migrations, tests and recorded verification               |
 | M1                      | COMPLETED   | Branch, catalog, measurement, stock and access note; docs and guard closed |
-| M2                      | IN_PROGRESS | Branch list/create/edit API, Settings UI and selector complete             |
+| M2                      | IN_PROGRESS | Branch and employee master data, API, Settings UI and selector complete    |
 | M3                      | NOT_STARTED | No purchase/receiving tables or screens                                    |
 | M4                      | NOT_STARTED | No stock tables or screens; inventory route is a placeholder               |
 | M5                      | NOT_STARTED | No production tables or screens                                            |

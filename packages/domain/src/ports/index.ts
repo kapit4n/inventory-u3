@@ -8,6 +8,7 @@
 
 import type {
   BranchId,
+  EmployeeId,
   IsoDateTime,
   MeasurementUnitId,
   OrganizationId,
@@ -19,6 +20,7 @@ import type {
 } from '@inventory-u3/types';
 
 import type { Branch } from '../branch/branch.js';
+import type { Employee } from '../employee/employee.js';
 import type { AuthenticatedUser, Session, UserWithCredentials } from '../organization/auth.js';
 import type { Organization, OrganizationSettingsUpdate } from '../organization/organization.js';
 import type { MeasurementUnit } from '../product/measurement-unit.js';
@@ -39,6 +41,7 @@ export interface UnitOfWork {
 export interface Repositories {
   readonly organizations: OrganizationRepository;
   readonly branches: BranchRepository;
+  readonly employees: EmployeeRepository;
   readonly measurementUnits: MeasurementUnitRepository;
   readonly productCategories: ProductCategoryRepository;
   readonly products: ProductRepository;
@@ -63,6 +66,14 @@ export interface BranchRepository {
   create(branch: Branch): Promise<Branch>;
   /** Returns `undefined` when the branch does not belong to the organization. */
   update(branch: Branch): Promise<Branch | undefined>;
+}
+
+export interface EmployeeRepository {
+  findById(organizationId: OrganizationId, employeeId: EmployeeId): Promise<Employee | undefined>;
+  listByOrganization(organizationId: OrganizationId): Promise<readonly Employee[]>;
+  create(employee: Employee): Promise<Employee>;
+  /** Returns `undefined` when the employee does not belong to the organization. */
+  update(employee: Employee): Promise<Employee | undefined>;
 }
 
 export interface MeasurementUnitRepository {

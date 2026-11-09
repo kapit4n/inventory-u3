@@ -23,28 +23,32 @@ Secrets are read from the environment and never logged.
 
 ## Endpoints
 
-| Method | Path                         | Permission            |
-| ------ | ---------------------------- | --------------------- |
-| GET    | `/health`                    | public                |
-| POST   | `/api/v1/auth/login`         | public                |
-| POST   | `/api/v1/auth/logout`        | authenticated         |
-| GET    | `/api/v1/auth/me`            | authenticated         |
-| GET    | `/api/v1/auth/dev-users`     | non-production only   |
-| POST   | `/api/v1/auth/dev-login`     | non-production only   |
-| GET    | `/api/v1/organization`       | `organization:read`   |
-| PUT    | `/api/v1/organization`       | `organization:manage` |
-| GET    | `/api/v1/branches`           | `organization:read`   |
-| POST   | `/api/v1/branches`           | `organization:manage` |
-| PUT    | `/api/v1/branches/:branchId` | `organization:manage` |
+| Method | Path                            | Permission            |
+| ------ | ------------------------------- | --------------------- |
+| GET    | `/health`                       | public                |
+| POST   | `/api/v1/auth/login`            | public                |
+| POST   | `/api/v1/auth/logout`           | authenticated         |
+| GET    | `/api/v1/auth/me`               | authenticated         |
+| GET    | `/api/v1/auth/dev-users`        | non-production only   |
+| POST   | `/api/v1/auth/dev-login`        | non-production only   |
+| GET    | `/api/v1/organization`          | `organization:read`   |
+| PUT    | `/api/v1/organization`          | `organization:manage` |
+| GET    | `/api/v1/branches`              | `organization:read`   |
+| POST   | `/api/v1/branches`              | `organization:manage` |
+| PUT    | `/api/v1/branches/:branchId`    | `organization:manage` |
+| GET    | `/api/v1/employees`             | `organization:read`   |
+| POST   | `/api/v1/employees`             | `organization:manage` |
+| PUT    | `/api/v1/employees/:employeeId` | `organization:manage` |
 
-Branch routes are implemented with create, list and edit; there is no delete
-endpoint because branches are deactivated. Catalog entities have domain models
-and repository ports, but no HTTP route or UI yet. Inventory endpoints are
-intentionally absent until their milestone.
+Branch and employee routes are implemented with create, list and edit; there is
+no delete endpoint because both are deactivated. Employee creation and update
+validate that the assigned branch belongs to the caller's organization. Catalog
+entities have domain models and repository ports, but no HTTP route or UI yet.
+Inventory endpoints are intentionally absent until their milestone.
 
-The branch collection returns `{ "items": [...] }`. Duplicate names within an
-organization return a `DOMAIN_RULE_VIOLATION` problem rather than a database
-error.
+The branch and employee collections return `{ "items": [...] }`. Duplicate branch
+names within an organization return a `DOMAIN_RULE_VIOLATION` problem rather than
+a database error. Employee full names are not unique.
 
 ## Request pipeline
 
@@ -68,18 +72,18 @@ events, not dental or inventory-specific prose.
 both. SQLite is the default; PostgreSQL integration tests run only when a test
 database URL answers.
 
-Implemented repository ports: organization, branch, measurement unit, product
-category, product, product presentation, user and session. The branch and catalog
-ports are exercised through integration tests on both engines. Stock remains a
-domain vocabulary only; no stock repository exists.
+Implemented repository ports: organization, branch, employee, measurement unit,
+product category, product, product presentation, user and session. The branch,
+employee and catalog ports are exercised through integration tests on both
+engines. Stock remains a domain vocabulary only; no stock repository exists.
 
 ## Testing
 
 API unit tests cover configuration, problem mapping and authentication.
-Integration tests cover authentication, branch route permissions and validation,
-the organization plus branch and catalog repository round-trips on SQLite, a
-cross-organization isolation query, a repository constraint and a migration smoke
-path. The same integration files run against PostgreSQL when `TEST_DATABASE_URL`
-answers and skip otherwise. Domain and validation tests cover their invariants.
-Component tests cover branch management; browser tests mock the API through
-Playwright.
+Integration tests cover authentication, branch and employee route permissions and
+validation, the organization plus branch, employee and catalog repository
+round-trips on SQLite, cross-organization isolation, repository constraints and a
+migration smoke path. The same integration files run against PostgreSQL when
+`TEST_DATABASE_URL` answers and skip otherwise. Domain and validation tests cover
+their invariants. Component tests cover branch and employee management; browser
+tests mock the API through Playwright.

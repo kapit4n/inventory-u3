@@ -13,12 +13,14 @@ There is no third engine and no abstraction layer over the two (ADR 0025).
 database/schema/              PostgreSQL Drizzle schema
   branch.ts
   catalog.ts
+  employee.ts
   enums.ts
   organization.ts
   index.ts
   sqlite/                     SQLite Drizzle schema
     branch.ts
     catalog.ts
+    employee.ts
     defaults.ts
     enum-check.ts
     organization.ts
@@ -31,6 +33,7 @@ The current tables are:
 | ----------------------- | ------------------------ | -------------------------------------------------------- |
 | `organizations`         | tenant root              | Name, timezone, currency and active flag                 |
 | `branches`              | organization             | Physical location with independent inventory             |
+| `employees`             | organization and branch  | Person whose production work is recorded; no login       |
 | `measurement_units`     | organization             | Configurable unit code, name and active flag             |
 | `product_categories`    | organization             | Catalog grouping with a name and active flag             |
 | `products`              | organization             | Category, raw/processed kind and inventory/sales units   |
@@ -38,10 +41,10 @@ The current tables are:
 | `users`                 | organization             | Email, password hash, role and active flag               |
 | `sessions`              | organization and user    | Hashed opaque token, issue/expiry and revocation         |
 
-Branch and catalog tables carry `organization_id`. Catalog master data is
-organization-wide (TD-009); branches own stock, not a private catalog. Every
-future operational table must carry both `organization_id` and `branch_id`
-(ADR 0039). Products carry a required `kind` (`RAW` or `PROCESSED`; PostgreSQL enum and
+Branch, employee and catalog tables carry `organization_id`. Employees also carry
+`branch_id`; catalog master data is organization-wide (TD-009) because branches
+own stock, not a private catalog. Every operational table must carry both
+`organization_id` and `branch_id` (ADR 0039). Products carry a required `kind` (`RAW` or `PROCESSED`; PostgreSQL enum and
 SQLite `CHECK`) and presentations carry a non-null `average_weight_grams`,
 validated as a positive integer by the domain (TD-010).
 
@@ -52,8 +55,9 @@ database/migrations/          PostgreSQL migrations + journal
 database/migrations-sqlite/   SQLite migrations + journal
 ```
 
-Both journals currently contain four entries, `0000` through `0003`; `0002`
-adds branches and the catalog, and `0003` adds product kind and average weight.
+Both journals currently contain five entries, `0000` through `0004`; `0002` adds
+branches and the catalog, `0003` adds product kind and average weight, and `0004`
+adds employees with organization and branch references.
 Generate both engines when the schema changes:
 
 ```bash
@@ -80,8 +84,9 @@ empty, or write an explicit data migration and test it on a populated database.
 
 `database/development-data.ts` contains the fixed organization id and development
 users. `database/seed.ts` writes the organization and users using the same
-password hashing implementation the API uses. Branches and catalog rows are not
-seeded yet because the three branch names are unconfirmed (BQ-19).
+password hashing implementation the API uses. Branches, employees and catalog
+rows are not seeded yet; branch creation waits on the three branch names (BQ-19)
+and employee creation waits on real employee names.
 
 Development users:
 

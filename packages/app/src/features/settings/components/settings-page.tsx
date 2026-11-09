@@ -20,6 +20,7 @@ import {
 
 import { useTranslation } from '../../../i18n/index.js';
 import { BranchManagement } from '../../branches/components/branch-management.js';
+import { EmployeeManagement } from '../../employees/components/employee-management.js';
 import { useOrganizationSettings } from '../../organization/queries/organization-settings-query.js';
 import { useUpdateOrganizationSettings } from '../../organization/mutations/use-update-organization-settings.js';
 
@@ -60,6 +61,7 @@ export function SettingsPage() {
     <div className="flex flex-col gap-6">
       <OrganizationSettingsForm organization={organizationQuery.data} />
       <BranchManagement />
+      <EmployeeManagement />
     </div>
   );
 }

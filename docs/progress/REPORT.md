@@ -1,72 +1,112 @@
-# Inventory U3 — Foundation Report
+# Inventory U3 — Phase 1 Business Foundation Report
+
+> Last updated: 2026-11-09. M1 is committed at `bfdc9cb`, M2-T1 at `814f397`;
+> M2-T2 employee master data is complete in the working tree.
 
 ## 1. Architecture overview
 
 One React application, two deployment shells, one REST API and two explicit
-database engines. The domain is framework-independent and the API owns all
-database access.
+database engines. The domain is framework-independent, application workflows
+own business orchestration, and the API owns all database access. SQLite runs
+everything by default; PostgreSQL remains the second engine with matching
+schemas, migrations and repository implementations.
 
 ## 2. Repository structure
 
 `apps/api`, `apps/web`, `apps/desktop`; shared packages for app, UI, domain,
-validation, types, API client, config and TypeScript; database schemas,
-migrations, seed; E2E; docs.
+validation, types, API client, config and TypeScript; dual database schema and
+migration trees plus seed data; E2E; and the durable documentation set under
+`docs/`.
 
 ## 3. Package dependency graph
 
-Presentation -> application -> domain. Infrastructure implements domain ports.
-No circular package dependencies; the boundary guard passes.
+Presentation (`apps/web`, `apps/desktop`, `packages/app`, `packages/ui`) depends
+inward on the domain. Infrastructure (`apps/api`, Drizzle repositories, REST
+transport) implements domain ports. There are no circular package dependencies;
+`pnpm run guard:boundaries` passes dependency, database-access, thin-shell,
+domain-purity, schema-parity and migration-parity checks.
 
 ## 4. Domain boundaries
 
-Organization, user, role, session, permissions, errors, time and identifier
-primitives. Inventory entities are deliberately not modeled yet.
+Implemented domain areas are organization, user, role, session, permissions,
+organization settings, branch, employee, product catalog, stock movement
+concepts, errors, time and identifiers. Branch and employee master data are
+persisted through both engines. Product catalog identity exists in domain and
+persistence but has no API or UI yet. Stock concepts remain domain-only. No
+inventory balance, purchase, production, sales checkpoint or closing entity is
+implemented.
 
 ## 5. Web/Desktop strategy
 
-Both shells mount the shared `packages/app` entry point. The shell declares a
-runtime target. Desktop capabilities are exposed through the platform contract.
+Both shells mount the shared `packages/app` entry point and declare only their
+runtime target. Tauri capabilities are exposed through the platform contract;
+React code does not call Tauri APIs directly. Business screens are shared
+unchanged between web and desktop.
 
 ## 6. API architecture
 
-Fastify with Zod validation, opaque bearer authentication, domain use cases,
-repository ports, standard problem envelopes and structured redacted logs.
+Fastify with Zod validation at every boundary, opaque bearer authentication,
+domain use cases, repository ports, standard problem envelopes and structured
+redacted logs. Branch and employee routes are authenticated; writes require the
+administrator-only `organization:manage` permission and reads require
+`organization:read`. Employee assignments are validated against a branch in the
+caller's organization.
 
 ## 7. Database architecture
 
-SQLite is the default engine; PostgreSQL is retained. Both have schema trees,
-migration journals and repository implementations. The foundation tables are
-organizations, users and sessions.
+SQLite is the default engine; PostgreSQL is retained as the second engine. Both
+have schema trees, generated migrations and repository implementations. Current
+tables are organizations, branches, employees, measurement units, product
+categories, products, product presentations, users and sessions. SQLite
+migrations are applied through `0004`; seed data contains only the development
+organization and users because real branch and employee data is not confirmed.
 
 ## 8. State-management strategy
 
-TanStack Query for server state. Component state or small Zustand stores for local
-UI state. No global API-data store.
+TanStack Query owns server state. Forms use React Hook Form with Zod validation;
+local UI state stays in components or small feature-scoped stores. There is no
+global API-data store and no giant Zustand store.
 
 ## 9. Testing strategy
 
-Vitest domain/unit tests, API integration tests against SQLite, React Testing
-Library component tests, and Playwright browser tests with a mocked API.
+Vitest covers domain rules, REST-client behavior, API route integration,
+dual-engine repository behavior and React components with React Testing Library.
+SQLite integration tests run by default; PostgreSQL cases skip without a
+reachable server. Playwright remains the browser strategy but has no branch or
+employee admin flow yet. The default suites report 209 passed and 6 skipped; the
+separately invoked SQLite integration command reports 42 passed and 6 skipped.
+Typecheck, lint, build and formatting pass.
 
 ## 10. What was actually implemented
 
-The generic organization/user/session foundation, auth and organization settings
-API, minimal schemas and migrations, seed data, shared shell, dashboard,
-inventory placeholder, settings form, bilingual catalogue, and the full
-verification pipeline.
+The technical foundation is complete: monorepo and guardrails, auth/session,
+organization settings, dual-engine persistence, shared web/desktop shells,
+bilingual UI and the verification pipeline. M1 closeout documented the existing
+domain and architecture. M2-T1 added branch list/create/edit, permissions,
+migrations, repositories, REST client, Settings UI and an active-branch selector.
+M2-T2 added employee master data with organization and branch ownership,
+create/list/edit, deactivation instead of deletion, dual-engine migrations and
+repositories, authenticated routes, typed client, Settings UI and tests. Employee
+assignment assumes one branch per employee pending BQ-20 (TD-012).
 
 ## 11. What was intentionally NOT implemented
 
-Inventory CRUD, stock movements, reporting, purchasing, offline mode, local
-desktop database, synchronization, microservices, GraphQL and Redux.
+Employee login accounts, branch-scoped authorization, payroll, attendance,
+contact or identity data, suppliers, product/catalog API and UI, prices, weight
+snapshots, purchases, receiving, stock tables and balances, production, sales
+checkpoints, daily closing, reporting, offline mode, desktop-local data,
+synchronization, microservices, GraphQL and Redux.
 
 ## 12. Open architectural questions
 
-See `docs/open-questions.md`: physical stock model, units and conversions,
-movement-derived versus cached levels, negative stock policy, multi-organization
-membership, and reporting valuation.
+See `docs/open-questions.md`. Key questions include employee sharing across
+branches (BQ-20), real branch seeding (BQ-19), the physical stock model, units
+and conversions, movement-derived versus cached levels, negative stock policy,
+multi-organization membership, reporting valuation and the WhatsApp report format
+that blocks M6 (BR-013).
 
 ## 13. Recommended next milestone
 
-**Milestone 2 — Inventory Catalog.** Start with items, categories, units and
-organization-scoped read/write paths across both engines.
+Continue **M2 — Master Data** with M2-T3 supplier master data, following the
+established domain, dual-engine persistence, API, typed-client, UI and test
+pattern. Commit M2-T2 first when explicitly authorized.

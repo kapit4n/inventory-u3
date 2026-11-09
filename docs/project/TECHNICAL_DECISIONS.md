@@ -250,3 +250,27 @@ averageWeightPerTray` and `estimatedValue = estimatedKg × sellingPricePerKg`.
   branch administration, the account needs `organization:manage` or a deliberate
   permission change later. Branch names are unique per organization and a
   duplicate is reported as a domain conflict.
+
+### TD-012 — Employees are branch-owned master data, deactivated rather than deleted
+
+- **Date:** 2026-11-09
+- **Status:** ACCEPTED for M2-T2; branch sharing remains open (BQ-20).
+- **Context:** Later production records must identify who prepared a product.
+  That person is not an application user and does not need a login. The proposed
+  domain model places an employee in one branch, but the business has not
+  confirmed whether an employee may work across branches.
+- **Decision:** Store an employee with an organization, one branch, a trimmed full
+  name and an active flag. Listing uses `organization:read`; create and update use
+  `organization:manage`. Create and update verify that the branch belongs to the
+  caller's organization. Employees are deactivated, never hard-deleted. Names are
+  not unique. No account, contact, payroll, attendance or transfer-history fields
+  are added.
+- **Alternatives considered:** Make employees organization-wide and add a
+  user-branch join table now; rejected as premature while BQ-20 is unanswered and
+  because the proposed model starts branch-local. Delete employees; rejected
+  because later production rows need the preparer reference. Reuse application
+  users as employees; rejected because BR-008 says branch employees do not log in.
+- **Consequences:** M5 can reference an employee as the preparer. If employees
+  must be shared across branches later, a join table or an ownership change will
+  need an explicit migration rather than a silent reinterpretation of
+  `employee.branchId`.

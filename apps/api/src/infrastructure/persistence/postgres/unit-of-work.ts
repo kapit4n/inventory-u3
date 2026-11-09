@@ -2,6 +2,7 @@ import type { Repositories, UnitOfWork } from '@inventory-u3/domain';
 
 import type { InventoryDatabase } from './connection.js';
 import { DrizzleBranchRepository } from '../repositories/branch-repository.js';
+import { DrizzleEmployeeRepository } from '../repositories/employee-repository.js';
 import { DrizzleMeasurementUnitRepository } from '../repositories/measurement-unit-repository.js';
 import { DrizzleOrganizationRepository } from '../repositories/organization-repository.js';
 import { DrizzleProductCategoryRepository } from '../repositories/product-category-repository.js';
@@ -14,6 +15,7 @@ export function repositoriesFor(db: InventoryDatabase): Repositories {
   return {
     organizations: new DrizzleOrganizationRepository(db),
     branches: new DrizzleBranchRepository(db),
+    employees: new DrizzleEmployeeRepository(db),
     measurementUnits: new DrizzleMeasurementUnitRepository(db),
     productCategories: new DrizzleProductCategoryRepository(db),
     products: new DrizzleProductRepository(db),

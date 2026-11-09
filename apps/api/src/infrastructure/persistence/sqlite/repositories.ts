@@ -2,6 +2,7 @@ import type { Repositories } from '@inventory-u3/domain';
 
 import type { SqliteDatabase } from './connection.js';
 import { SQLiteBranchRepository } from './repositories/branch-repository.js';
+import { SQLiteEmployeeRepository } from './repositories/employee-repository.js';
 import { SQLiteMeasurementUnitRepository } from './repositories/measurement-unit-repository.js';
 import { SQLiteOrganizationRepository } from './repositories/organization-repository.js';
 import { SQLiteProductCategoryRepository } from './repositories/product-category-repository.js';
@@ -14,6 +15,7 @@ export function sqliteRepositoriesFor(db: SqliteDatabase): Repositories {
   return {
     organizations: new SQLiteOrganizationRepository(db),
     branches: new SQLiteBranchRepository(db),
+    employees: new SQLiteEmployeeRepository(db),
     measurementUnits: new SQLiteMeasurementUnitRepository(db),
     productCategories: new SQLiteProductCategoryRepository(db),
     products: new SQLiteProductRepository(db),

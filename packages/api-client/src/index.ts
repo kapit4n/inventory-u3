@@ -17,3 +17,4 @@ export {
   type RequestOptions,
 } from './http.js';
 export { createBranch, listBranches, updateBranch } from './branches.js';
+export { createEmployee, listEmployees, updateEmployee } from './employees.js';

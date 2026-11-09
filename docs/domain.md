@@ -7,10 +7,10 @@
 > proposed entity from that document as implemented code.
 
 `packages/domain` is framework-independent TypeScript. It contains the
-organization, identity, session, branch and product-catalog foundation,
-including the raw/processed kind and average-weight configuration. It also
-contains the stock movement vocabulary and balance shape; stock persistence and
-transactional entities arrive in later milestones.
+organization, identity, session, branch, employee and product-catalog
+foundation, including the raw/processed kind and average-weight configuration. It
+also contains the stock movement vocabulary and balance shape; stock persistence
+and transactional entities arrive in later milestones.
 
 ## Branch
 
@@ -33,6 +33,31 @@ interface Branch {
 A branch belongs to exactly one organization; operational records will belong to
 one branch. Branches are deactivated rather than deleted so future operational
 history keeps its reference. Names are unique within an organization.
+
+## Employee
+
+`Employee` identifies the person who prepared production, without creating an
+application login:
+
+```ts
+interface Employee {
+  id: EmployeeId;
+  organizationId: OrganizationId;
+  branchId: BranchId;
+  fullName: string;
+  isActive: boolean;
+  createdAt: IsoDateTime;
+  updatedAt: IsoDateTime;
+}
+```
+
+`createEmployee` trims and validates the full name (1–160 characters) and
+defaults `isActive` to `true`. `updateEmployee` applies the same name rule and
+can change the branch or active state while preserving identity, ownership and
+`createdAt`. Names are not unique: two real people may share a name. Employees
+are deactivated rather than deleted so later production rows keep their preparer
+reference. Each employee belongs to one branch today; whether employees can be
+shared across branches remains open (BQ-20).
 
 ## Product catalog
 
@@ -130,6 +155,8 @@ Repositories are declared in `packages/domain/src/ports`:
 - `OrganizationRepository`
 - `BranchRepository` — find by id or name, list, create and update, always scoped
   by organization
+- `EmployeeRepository` — find, list, create and update, always scoped by
+  organization
 - `MeasurementUnitRepository`
 - `ProductCategoryRepository`
 - `ProductRepository`
@@ -145,7 +172,7 @@ implementations (ADR 0025).
 
 - Prices, estimated/measured weights and historical snapshots
 - Persisted stock movements, balance strategy, reconciliation and adjustments
-- Suppliers, employees and purchases
+- Suppliers and purchases
 - Production batches
 - Sales checkpoints and daily closing
 - Reports and exports

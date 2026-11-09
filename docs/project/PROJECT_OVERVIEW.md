@@ -1,7 +1,7 @@
 # Inventory U3 — Project Overview
 
-> Last verified: 2026-11-09. M1 is committed at `bfdc9cb`; M2-T1 branch
-> management is in the working tree. See
+> Last verified: 2026-11-09. M1 is committed at `bfdc9cb` and M2-T1 at `814f397`;
+> M2-T2 employee master data is in the working tree. See
 > [IMPLEMENTATION_PROGRESS](../development/IMPLEMENTATION_PROGRESS.md).
 
 ## Purpose
@@ -62,21 +62,22 @@ product.** As of this document:
 
 - The monorepo, API, web shell, desktop shell, authentication, organization
   settings, SQLite/PostgreSQL persistence and test harness are implemented.
-- Persisted tables are `organizations`, `branches`, `measurement_units`,
-  `product_categories`, `products`, `product_presentations`, `users` and
-  `sessions`.
-- The `Branch` and product-catalog domain entities and their SQLite/PostgreSQL
-  repositories are implemented. Branch list/create/edit is available through the
-  API and the Settings screen, with a reusable active-branch selector. Products
-  carry a required raw/processed kind and presentations carry an average weight
-  per tray; catalog API routes and screens do not exist yet.
+- Persisted tables are `organizations`, `branches`, `employees`,
+  `measurement_units`, `product_categories`, `products`,
+  `product_presentations`, `users` and `sessions`.
+- The `Branch`, `Employee` and product-catalog domain entities and their
+  SQLite/PostgreSQL repositories are implemented. Branch and employee
+  list/create/edit are available through the API and the Settings screen, with a
+  reusable active-branch selector. Products carry a required raw/processed kind
+  and presentations carry an average weight per tray; catalog API routes and
+  screens do not exist yet.
 - The catalog has no prices or estimated/measured weight snapshots. Those are
   M2/M5/M6 work.
 - The domain defines append-only stock movement concepts and a balance shape,
   but there is no stock table, repository, API or screen (ADR 0040).
 - The `/inventory` screen is a placeholder.
-- No employee, supplier, purchase, stock, production, sales checkpoint, daily
-  closing or report feature exists.
+- No supplier, purchase, stock, production, sales checkpoint, daily closing or
+  report feature exists. Employees are master data only; they do not log in.
 - The initial access boundary is documented in
   [ACCESS_MODEL.md](./ACCESS_MODEL.md): one organization-wide central operator,
   no branch employee login, and no branch-scoped authorization yet.
@@ -84,8 +85,9 @@ product.** As of this document:
   [IMPLEMENTATION_ROADMAP.md](../development/IMPLEMENTATION_ROADMAP.md). M1 is
   complete: branch, product catalog, measurement configuration, stock concepts,
   the access note, technical docs and the dual-engine guard are done. M2 is in
-  progress with branch management and the branch selector foundation complete;
-  the real branches are not seeded until BQ-19 is answered.
+  progress with branch and employee management complete; the real branches are
+  not seeded until BQ-19 is answered, and employee sharing across branches remains
+  open (BQ-20).
 
 The inventory business model in this documentation is **proposed**. It separates
 confirmed product requirements from proposed design and from open questions. Do

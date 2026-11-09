@@ -18,6 +18,7 @@ import { registerCors } from './http/plugins/cors.js';
 import { registerAuth } from './http/plugins/auth.js';
 import { registerAuthRoutes } from './http/routes/auth.js';
 import { registerBranchRoutes } from './http/routes/branches.js';
+import { registerEmployeeRoutes } from './http/routes/employees.js';
 import { registerDevAuthRoutes } from './http/routes/dev-auth.js';
 import { registerHealthRoutes } from './http/routes/health.js';
 import { registerOrganizationRoutes } from './http/routes/organization.js';
@@ -90,6 +91,13 @@ export async function buildServer(env: EnvSource = process.env): Promise<Invento
   });
 
   await registerBranchRoutes(app, {
+    branches: connection.repositories.branches,
+    clock: systemClock,
+    ids: uuidGenerator,
+  });
+
+  await registerEmployeeRoutes(app, {
+    employees: connection.repositories.employees,
     branches: connection.repositories.branches,
     clock: systemClock,
     ids: uuidGenerator,

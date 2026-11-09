@@ -10,12 +10,17 @@
 ## Current status
 
 - **Foundation prerequisite:** complete.
-- **Business roadmap:** M1 is COMPLETED; M2 is IN_PROGRESS (branch slice
-  complete); M3–M9 are NOT_STARTED.
+- **Business roadmap:** M1 is COMPLETED; M2 is IN_PROGRESS (branch and employee
+  slices complete); M3–M9 are NOT_STARTED.
 - **Branch master data:** entity, dual-engine schema, migrations and repositories
   are implemented. `GET/POST/PUT /api/v1/branches`, the Settings management
   section and the reusable active-branch selector are implemented. The three
   real branches remain unseeded until BQ-19 is answered.
+- **Employee master data:** entity with organization and branch ownership,
+  dual-engine schema/migrations, repositories, `GET/POST/PUT /api/v1/employees`,
+  typed client, Settings management and tests are implemented. Employees are
+  deactivated, not deleted. No accounts or seed data exist; branch sharing remains
+  open (BQ-20).
 - **Catalog identity:** units, categories, products and presentations have
   domain + dual-engine persistence. Products carry a raw/processed kind and
   presentations carry an average weight per tray. No API route, UI, prices or
@@ -27,14 +32,14 @@
   organization-wide central operator initially. Branch users and assignment
   tables remain unimplemented.
 - **Technical docs and guard:** the database, backend, testing and architecture
-  references describe M1 and M2-T1. The boundary guard checks dependency
+  references describe M1, M2-T1 and M2-T2. The boundary guard checks dependency
   direction, database access, thin shells, domain Node built-ins, schema-table
   parity and migration-journal parity.
-- **Next task:** continue M2 with the next master-data slice; employee master data
-  is next in the roadmap. Branch seeding waits for BQ-19.
-- **M1 closeout commit:** `bfdc9cb`. M2-T1 is currently uncommitted in the working
-  tree.
+- **Next task:** continue M2 with supplier master data (M2-T3). Branch seeding
+  waits for BQ-19; employee seed data waits for real names.
+- **Commits:** M1 closeout `bfdc9cb`; M2-T1 `814f397`. M2-T2 is currently
+  uncommitted in the working tree.
 
-The previous foundation verification record is preserved in
-[SESSION_LOG.md](../development/SESSION_LOG.md) (Sessions 0–9).
+The previous verification records are preserved in
+[SESSION_LOG.md](../development/SESSION_LOG.md) (Sessions 0–10).
 [LOG.md](./LOG.md) remains as a pointer to that history.

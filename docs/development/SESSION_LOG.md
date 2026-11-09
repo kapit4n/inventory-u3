@@ -859,7 +859,7 @@ features.
 
 ### Files changed
 
-Uncommitted working tree.
+Committed after explicit authorization as `814f397`.
 
 Domain and ports:
 
@@ -924,7 +924,7 @@ Documentation:
 - The branch selector has no dedicated component test yet.
 - Duplicate-name handling is application-checked before insert; the database
   unique constraint remains the final authority.
-- M2-T1 is uncommitted pending explicit authorization.
+- M2-T1 was uncommitted during the session and later committed as `814f397`.
 
 ### Pending work
 
@@ -936,3 +936,130 @@ Documentation:
 Read `AGENTS.md`, `PROJECT_OVERVIEW.md`, `IMPLEMENTATION_PROGRESS.md`,
 `CURRENT_TASK.md`, `IMPLEMENTATION_ROADMAP.md` and the M2 section of the roadmap
 before starting the next master-data slice.
+
+## Session 10 — 2026-11-09 — M2-T2 employee master data and branch assignment
+
+### Objective
+
+Add employee master data end to end so later production can identify the person
+who prepared a product, without creating employee logins or seeding unconfirmed
+names.
+
+### Work completed
+
+- Added `EmployeeId`, `Employee`, `NewEmployee`, `EmployeeUpdate`,
+  `createEmployee`, `updateEmployee` and trimmed 1–160 character name validation.
+- Added `EmployeeRepository` with organization-scoped `findById`,
+  `listByOrganization`, `create` and `update`.
+- Added `employees` to both schema trees with organization and branch foreign keys
+  and an organization/branch/active index; generated `0004` migrations for both
+  engines.
+- Implemented SQLite and PostgreSQL employee repositories and wired them into the
+  repository aggregate.
+- Added employee validation schemas and inferred request/response types.
+- Added authenticated `GET/POST/PUT /api/v1/employees` routes. Reads use
+  `organization:read`; writes use `organization:manage`. Create and update require
+  a branch in the caller's organization and return 422 otherwise.
+- Added typed REST-client employee functions with response validation.
+- Added Settings employee management with branch names, create/edit/deactivate
+  dialog, branch selector, read-only state for non-administrators and English and
+  Spanish copy.
+- Added domain, REST-client, dual-engine repository, route and component tests.
+- Applied SQLite migrations through `0004` and re-ran the seed.
+- Updated domain, backend, database, testing, access, technical-decision,
+  architecture, overview, roadmap, progress, state, known-issues and current-task
+  documentation.
+
+### Files changed
+
+Domain, types and ports:
+
+- `packages/domain/src/employee/employee.ts`, `employee.test.ts`, `index.ts`
+- `packages/domain/src/index.ts`, `packages/domain/src/ports/index.ts`
+- `packages/types/src/identifiers.ts`
+
+Database:
+
+- `database/schema/employee.ts`, `database/schema/sqlite/employee.ts`
+- `database/schema/index.ts`, `database/schema/sqlite/index.ts`
+- `database/migrations/0004_fat_sauron.sql` and journal
+- `database/migrations-sqlite/0004_vengeful_roxanne_simpson.sql` and journal
+
+API and client:
+
+- `apps/api/src/infrastructure/persistence/repositories/employee-repository.ts`
+- `apps/api/src/infrastructure/persistence/sqlite/repositories/employee-repository.ts`
+- `apps/api/src/infrastructure/persistence/sqlite/repositories.ts`,
+  `apps/api/src/infrastructure/persistence/postgres/unit-of-work.ts`
+- `apps/api/src/http/routes/employees.ts`, `apps/api/src/app.ts`
+- `apps/api/test/employee-repository.integration.test.ts`,
+  `apps/api/test/employees.integration.test.ts`
+- `packages/validation/src/employee/index.ts`, validation indexes and package
+  exports
+- `packages/api-client/src/employees.ts`, `employees.test.ts`, `index.ts`
+
+Application UI and copy:
+
+- `packages/app/src/features/employees/**`
+- `packages/app/src/features/settings/components/settings-page.tsx`
+- `packages/app/src/i18n/locales/en/employees.ts`, `es/employees.ts` and indexes
+
+Documentation:
+
+- `docs/domain.md`, `docs/backend.md`, `docs/database.md`, `docs/testing.md`
+- `docs/project/ACCESS_MODEL.md`, `TECHNICAL_DECISIONS.md` (TD-012),
+  `PROJECT_OVERVIEW.md`, `TECHNICAL_ARCHITECTURE.md`
+- `docs/open-questions.md` (BQ-20), `docs/development/*`,
+  `docs/progress/STATE.md`, `docs/progress/REPORT.md`
+
+### Technical decisions
+
+- Employees are branch-owned for now because the proposed domain model places an
+  employee in one branch; shared employees remain open (BQ-20, TD-012).
+- Employee reads use `organization:read`; writes use `organization:manage`, the
+  same administration boundary as branches (TD-011).
+- Employees are deactivated, never deleted, to preserve future production
+  references. Full names are not unique.
+- No employee account, contact, payroll, attendance, identity-document or
+  branch-transfer history is modeled.
+- Create and update verify the branch belongs to the caller's organization; a
+  client-supplied branch id is not proof of authorization.
+- Employee collection responses use `{ "items": [...] }`.
+
+### Validation
+
+- `pnpm run typecheck` — PASS, 12/12 tasks.
+- `pnpm run lint` — PASS, 12/12 tasks, `BOUNDARY GUARD OK`.
+- `pnpm run test` — PASS, 12/12 tasks, 209 passed, 6 skipped.
+- `TEST_DATABASE_URL= pnpm --filter @inventory-u3/api run test:integration` —
+  PASS, 7 files, 42 passed, 6 skipped.
+- `pnpm run build` — PASS, 5/5 tasks; only Vite chunk-size warnings.
+- `pnpm run db:migrate` — PASS; SQLite migrations applied through `0004`.
+- `pnpm run db:seed` — PASS; organization and development users only.
+- `pnpm run format:check` — PASS.
+- Typecheck, lint, unit/component/integration tests, build and the SQLite
+  integration suite were re-run after the final Prettier pass; all passed.
+- Not run: Playwright E2E; PostgreSQL integration cases (no server).
+
+### Problems found
+
+- The first full typecheck after adding the component test failed because the
+  mock's indexed employee could be `undefined`; fixed with an explicit lookup and
+  404 fallback.
+- Radix Select interaction in jsdom required pointer-capture and scroll shims in
+  the employee component test.
+- The branch selector still has no dedicated component test, though the employee
+  form exercises it.
+- M2-T2 is uncommitted pending explicit authorization.
+
+### Pending work
+
+- Commit M2-T2 when explicitly authorized.
+- Continue M2 with supplier master data (M2-T3).
+- Seed branches only after BQ-19; seed employees only when real names are available.
+
+### Next session
+
+Read `AGENTS.md`, `PROJECT_OVERVIEW.md`, `IMPLEMENTATION_PROGRESS.md`,
+`CURRENT_TASK.md`, `IMPLEMENTATION_ROADMAP.md` and the M2 section of the roadmap
+before starting supplier master data.

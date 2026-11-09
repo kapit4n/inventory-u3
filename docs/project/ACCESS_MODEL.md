@@ -1,8 +1,8 @@
 # Access Model
 
-> Status: **M1-T5 access note.** This document defines the confirmed access
-> boundary, the implemented foundation and the future branch-access constraint.
-> It does not implement branch authorization or settle BQ-09.
+> Status: **Access note through M2-T2.** This document defines the confirmed
+> access boundary, the implemented foundation and the future branch-access
+> constraint. It does not implement branch authorization or settle BQ-09.
 
 ## 1. Confirmed requirements
 
@@ -59,6 +59,17 @@ Branch master data follows the same organization-wide model:
 - Edits may rename or deactivate a branch. There is no hard delete, because later
   operational rows will reference the branch.
 
+Employee master data follows the same organization-wide administration boundary:
+
+- `GET /api/v1/employees` requires `organization:read`; every current role can
+  read the employee list.
+- `POST /api/v1/employees` and `PUT /api/v1/employees/:employeeId` require
+  `organization:manage`, which only `ADMINISTRATOR` carries today.
+- Creating or editing an employee requires a branch in the caller's organization.
+  The API checks this; the selector is only a choice.
+- Employees are deactivated, not deleted, so later production rows can keep their
+  preparer reference. An employee has no application account.
+
 ## 3. Business actors and the initial version
 
 | Actor              | Initial application access                         | Notes                                                                                           |
@@ -97,6 +108,7 @@ ownership, which makes branch-scoped filtering possible later.
 
 - No `UserBranchAssignment` table or repository.
 - No branch-scoped authorization middleware.
+- No employee-to-user account link.
 - No new `OWNER`, `OPERATOR` or `BRANCH_USER` role.
 - No permission changes or UI gating.
 - No user administration screen.
