@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { asBranchId, asOrganizationId } from '@inventory-u3/types';
 
-import { BRANCH_NAME_MAX_LENGTH, createBranch } from './branch.js';
+import { BRANCH_NAME_MAX_LENGTH, createBranch, updateBranch } from './branch.js';
 
 const NOW = '2026-11-09T12:00:00.000Z';
 const ORGANIZATION_ID = asOrganizationId('11111111-1111-4111-8111-111111111111');
@@ -58,6 +58,50 @@ describe('createBranch', () => {
           name: 'a'.repeat(BRANCH_NAME_MAX_LENGTH + 1),
         },
         NOW,
+      ),
+    ).toThrowError('Branch name must be between 1 and 120 characters');
+  });
+});
+
+describe('updateBranch', () => {
+  const branch = createBranch(
+    {
+      id: BRANCH_ID,
+      organizationId: ORGANIZATION_ID,
+      name: 'Central Market',
+    },
+    NOW,
+  );
+
+  it('trims the name, changes the active state and advances updatedAt', () => {
+    const updated = updateBranch(
+      branch,
+      { name: '  Central Market Renamed  ', isActive: false },
+      '2026-11-09T13:00:00.000Z',
+    );
+
+    expect(updated).toEqual({
+      ...branch,
+      name: 'Central Market Renamed',
+      isActive: false,
+      updatedAt: '2026-11-09T13:00:00.000Z',
+    });
+    expect(updated.createdAt).toBe(branch.createdAt);
+    expect(updated.organizationId).toBe(branch.organizationId);
+  });
+
+  it('rejects an empty update name', () => {
+    expect(() =>
+      updateBranch(branch, { name: '   ', isActive: true }, '2026-11-09T13:00:00.000Z'),
+    ).toThrowError('Branch name must be between 1 and 120 characters');
+  });
+
+  it('rejects an update name longer than the allowed maximum', () => {
+    expect(() =>
+      updateBranch(
+        branch,
+        { name: 'a'.repeat(BRANCH_NAME_MAX_LENGTH + 1), isActive: true },
+        '2026-11-09T13:00:00.000Z',
       ),
     ).toThrowError('Branch name must be between 1 and 120 characters');
   });

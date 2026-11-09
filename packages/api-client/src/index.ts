@@ -16,3 +16,4 @@ export {
   type QueryValue,
   type RequestOptions,
 } from './http.js';
+export { createBranch, listBranches, updateBranch } from './branches.js';

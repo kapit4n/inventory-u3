@@ -27,17 +27,15 @@ export interface NewBranch {
   readonly isActive?: boolean;
 }
 
+export interface BranchUpdate {
+  readonly name: string;
+  readonly isActive: boolean;
+}
+
 export const BRANCH_NAME_MAX_LENGTH = 120;
 
 export function createBranch(input: NewBranch, now: IsoDateTime): Branch {
-  const name = input.name.trim();
-
-  if (name.length === 0 || name.length > BRANCH_NAME_MAX_LENGTH) {
-    throw new DomainError(
-      'INVALID_INPUT',
-      `Branch name must be between 1 and ${BRANCH_NAME_MAX_LENGTH} characters`,
-    );
-  }
+  const name = validateBranchName(input.name);
 
   return {
     id: input.id,
@@ -47,4 +45,32 @@ export function createBranch(input: NewBranch, now: IsoDateTime): Branch {
     createdAt: now,
     updatedAt: now,
   };
+}
+
+/**
+ * Edit the mutable part of a branch.
+ *
+ * Branches are deactivated rather than deleted once later milestones reference
+ * them, so `isActive` is part of the edit rather than a separate operation.
+ */
+export function updateBranch(branch: Branch, update: BranchUpdate, at: IsoDateTime): Branch {
+  return {
+    ...branch,
+    name: validateBranchName(update.name),
+    isActive: update.isActive,
+    updatedAt: at,
+  };
+}
+
+function validateBranchName(candidate: string): string {
+  const name = candidate.trim();
+
+  if (name.length === 0 || name.length > BRANCH_NAME_MAX_LENGTH) {
+    throw new DomainError(
+      'INVALID_INPUT',
+      `Branch name must be between 1 and ${BRANCH_NAME_MAX_LENGTH} characters`,
+    );
+  }
+
+  return name;
 }

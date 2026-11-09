@@ -34,6 +34,16 @@ export class DrizzleBranchRepository implements BranchRepository {
     return row ? toBranch(row) : undefined;
   }
 
+  async findByName(organizationId: OrganizationId, name: string): Promise<Branch | undefined> {
+    const [row] = await this.db
+      .select()
+      .from(branches)
+      .where(and(eq(branches.organizationId, organizationId), eq(branches.name, name)))
+      .limit(1);
+
+    return row ? toBranch(row) : undefined;
+  }
+
   async listByOrganization(organizationId: OrganizationId): Promise<readonly Branch[]> {
     const rows = await this.db
       .select()
@@ -62,6 +72,20 @@ export class DrizzleBranchRepository implements BranchRepository {
     }
 
     return toBranch(row);
+  }
+
+  async update(branch: Branch): Promise<Branch | undefined> {
+    const [row] = await this.db
+      .update(branches)
+      .set({
+        name: branch.name,
+        isActive: branch.isActive,
+        updatedAt: new Date(branch.updatedAt),
+      })
+      .where(and(eq(branches.organizationId, branch.organizationId), eq(branches.id, branch.id)))
+      .returning();
+
+    return row ? toBranch(row) : undefined;
   }
 }
 

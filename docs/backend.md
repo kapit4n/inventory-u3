@@ -23,20 +23,28 @@ Secrets are read from the environment and never logged.
 
 ## Endpoints
 
-| Method | Path                     | Permission            |
-| ------ | ------------------------ | --------------------- |
-| GET    | `/health`                | public                |
-| POST   | `/api/v1/auth/login`     | public                |
-| POST   | `/api/v1/auth/logout`    | authenticated         |
-| GET    | `/api/v1/auth/me`        | authenticated         |
-| GET    | `/api/v1/auth/dev-users` | non-production only   |
-| POST   | `/api/v1/auth/dev-login` | non-production only   |
-| GET    | `/api/v1/organization`   | `organization:read`   |
-| PUT    | `/api/v1/organization`   | `organization:manage` |
+| Method | Path                         | Permission            |
+| ------ | ---------------------------- | --------------------- |
+| GET    | `/health`                    | public                |
+| POST   | `/api/v1/auth/login`         | public                |
+| POST   | `/api/v1/auth/logout`        | authenticated         |
+| GET    | `/api/v1/auth/me`            | authenticated         |
+| GET    | `/api/v1/auth/dev-users`     | non-production only   |
+| POST   | `/api/v1/auth/dev-login`     | non-production only   |
+| GET    | `/api/v1/organization`       | `organization:read`   |
+| PUT    | `/api/v1/organization`       | `organization:manage` |
+| GET    | `/api/v1/branches`           | `organization:read`   |
+| POST   | `/api/v1/branches`           | `organization:manage` |
+| PUT    | `/api/v1/branches/:branchId` | `organization:manage` |
 
-Inventory endpoints are intentionally absent until their milestone. Branch and
-catalog entities have domain models and repository ports, but no HTTP route or
-UI yet.
+Branch routes are implemented with create, list and edit; there is no delete
+endpoint because branches are deactivated. Catalog entities have domain models
+and repository ports, but no HTTP route or UI yet. Inventory endpoints are
+intentionally absent until their milestone.
+
+The branch collection returns `{ "items": [...] }`. Duplicate names within an
+organization return a `DOMAIN_RULE_VIOLATION` problem rather than a database
+error.
 
 ## Request pipeline
 
@@ -68,9 +76,10 @@ domain vocabulary only; no stock repository exists.
 ## Testing
 
 API unit tests cover configuration, problem mapping and authentication.
-Integration tests cover authentication, the organization plus branch and catalog
-repository round-trips on SQLite, a cross-organization isolation query, a
-repository constraint and a migration smoke path. The same integration files run against
-PostgreSQL when `TEST_DATABASE_URL` answers and skip otherwise. Domain and
-validation tests cover their invariants. Browser tests mock the API through
+Integration tests cover authentication, branch route permissions and validation,
+the organization plus branch and catalog repository round-trips on SQLite, a
+cross-organization isolation query, a repository constraint and a migration smoke
+path. The same integration files run against PostgreSQL when `TEST_DATABASE_URL`
+answers and skip otherwise. Domain and validation tests cover their invariants.
+Component tests cover branch management; browser tests mock the API through
 Playwright.

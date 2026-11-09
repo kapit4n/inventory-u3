@@ -2,7 +2,7 @@
 
 > Canonical business roadmap. It supersedes the generic item/stock sequence in
 > the old [`docs/roadmap.md`](../roadmap.md), which now points here.
-> Last reviewed: 2026-11-09 against commit `bfdc9cb` (M1 closeout).
+> Last reviewed: 2026-11-09 after M2-T1 (branch management working tree).
 
 Status values are used exactly as follows:
 
@@ -134,7 +134,7 @@ confirmed (BQ-19); that is M2 work, not an M1 gap.
 
 ## M2 — Master Data
 
-**Status: NOT_STARTED**
+**Status: IN_PROGRESS (M2-T1 branch management complete).**
 
 ### Objective
 
@@ -159,19 +159,21 @@ M1 (domain and persistence foundation).
 
 ### Tasks
 
-- Branch CRUD and branch selector foundation.
-- Employee master data and branch assignment.
-- Supplier master data.
-- Category, unit and presentation master data.
-- Product create/edit/list for raw and processed products.
-- Average weight and selling-price configuration with effective history.
-- API routes, validation, problem mapping and tests.
-- UI screens for each master-data area.
+| ID    | Task                                                            | Status      |
+| ----- | --------------------------------------------------------------- | ----------- |
+| M2-T1 | Branch list/create/edit, permissions and branch selector        | COMPLETED   |
+| M2-T2 | Employee master data and branch assignment                      | NOT_STARTED |
+| M2-T3 | Supplier master data                                            | NOT_STARTED |
+| M2-T4 | Category, unit and presentation master data                     | NOT_STARTED |
+| M2-T5 | Product create/edit/list for raw and processed products         | NOT_STARTED |
+| M2-T6 | Average weight and selling-price configuration with history     | NOT_STARTED |
+| M2-T7 | Remaining API routes, validation, problem mapping, UI and tests | NOT_STARTED |
 
 ### Acceptance criteria
 
-- [ ] Operator can create, list and edit branches, employees, suppliers,
-      categories, units and products.
+- [x] Operator can create, list and edit branches.
+- [ ] Operator can create, list and edit employees, suppliers, categories, units
+      and products.
 - [ ] Every record is organization-scoped; branch-owned records carry a branch.
 - [ ] A processed product can have a presentation, average weight per tray and
       selling price per kilogram.
@@ -675,7 +677,7 @@ been executed." A passing unit suite is not a backup/restore drill.
 | ----------------------- | ----------- | -------------------------------------------------------------------------- |
 | Foundation prerequisite | COMPLETED   | Foundation code, migrations, tests and recorded verification               |
 | M1                      | COMPLETED   | Branch, catalog, measurement, stock and access note; docs and guard closed |
-| M2                      | NOT_STARTED | Underlying catalog tables exist; no master-data API or screens             |
+| M2                      | IN_PROGRESS | Branch list/create/edit API, Settings UI and selector complete             |
 | M3                      | NOT_STARTED | No purchase/receiving tables or screens                                    |
 | M4                      | NOT_STARTED | No stock tables or screens; inventory route is a placeholder               |
 | M5                      | NOT_STARTED | No production tables or screens                                            |

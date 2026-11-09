@@ -828,3 +828,111 @@ Modified:
 Read `AGENTS.md`, `PROJECT_OVERVIEW.md`, `IMPLEMENTATION_PROGRESS.md`,
 `CURRENT_TASK.md`, `IMPLEMENTATION_ROADMAP.md`, `docs/project/ACCESS_MODEL.md`
 and the M2 section of the roadmap before starting branch CRUD.
+
+## Session 9 — 2026-11-09 — M2-T1 branch management and selector
+
+### Objective
+
+Deliver the first M2 master-data slice: branch list/create/edit end-to-end and a
+reusable active-branch selector, without seeding branches or adding later-milestone
+features.
+
+### Work completed
+
+- Added `BranchUpdate`, shared trimmed-name validation and `updateBranch` to the
+  domain; update can rename and activate/deactivate while preserving identity,
+  ownership and `createdAt`.
+- Added `findByName` and `update` to `BranchRepository` and implemented both for
+  SQLite and PostgreSQL with organization-scoped reads.
+- Added branch validation schemas and inferred request/response types.
+- Added authenticated `GET/POST/PUT /api/v1/branches` routes. Reads use
+  `organization:read`; writes use `organization:manage`. Duplicate names return a
+  domain conflict, missing branches return 404 and invalid bodies return 422.
+- Added typed REST-client branch functions with response-schema validation.
+- Added the Settings branch management section, create/edit dialog, query and
+  mutation hooks, and a reusable selector that lists active branches by default.
+- Added domain, REST-client, route, dual-engine repository and component tests.
+- Updated domain, backend, access, technical-decision, testing, progress, roadmap,
+  state, known-issues, current-task, overview and architecture documentation.
+- Fixed the component test fetch mock typing that the full typecheck exposed
+  (`Mock<typeof fetch>` plus `vi.fn<typeof fetch>`).
+
+### Files changed
+
+Uncommitted working tree.
+
+Domain and ports:
+
+- `packages/domain/src/branch/branch.ts`, `branch.test.ts`
+- `packages/domain/src/ports/index.ts`
+
+Persistence:
+
+- `apps/api/src/infrastructure/persistence/repositories/branch-repository.ts`
+- `apps/api/src/infrastructure/persistence/sqlite/repositories/branch-repository.ts`
+- `apps/api/test/branch-repository.integration.test.ts`
+
+Validation, API and client:
+
+- `packages/validation/src/branch/index.ts`, `packages/validation/src/index.ts`,
+  `packages/validation/package.json`
+- `apps/api/src/http/routes/branches.ts`, `apps/api/src/app.ts`
+- `apps/api/test/branches.integration.test.ts`
+- `packages/api-client/src/branches.ts`, `branches.test.ts`, `index.ts`
+
+Application UI and copy:
+
+- `packages/app/src/features/branches/**`
+- `packages/app/src/features/settings/components/settings-page.tsx`
+- `packages/app/src/i18n/locales/en/branches.ts`, `es/branches.ts` and indexes
+
+Documentation:
+
+- `docs/domain.md`, `docs/backend.md`, `docs/testing.md`,
+  `docs/project/ACCESS_MODEL.md`, `docs/project/TECHNICAL_DECISIONS.md` (TD-011),
+  `docs/project/PROJECT_OVERVIEW.md`, `docs/project/TECHNICAL_ARCHITECTURE.md`,
+  `docs/development/*` and `docs/progress/STATE.md`.
+
+### Technical decisions
+
+- Branch writes are administrator-only through `organization:manage`; reads use
+  `organization:read` (TD-011). UI hiding is not authorization.
+- Branches are deactivated, never hard-deleted, to preserve future operational
+  references.
+- Duplicate names are rejected with HTTP 409 `DOMAIN_RULE_VIOLATION`.
+- Branch collection responses use `{ "items": [...] }`.
+- The selector is a foundation component and currently unused by screens.
+- Branch seeding is deferred because BQ-19 is unanswered.
+- Branch-level authorization remains M9 / BQ-09 scope.
+
+### Validation
+
+- `pnpm run typecheck` — PASS, 12/12 tasks.
+- `pnpm run lint` — PASS, 12/12 tasks, `BOUNDARY GUARD OK`.
+- `pnpm run test` — PASS, 12/12 tasks, 183 passed, 4 skipped.
+- `TEST_DATABASE_URL= pnpm --filter @inventory-u3/api run test:integration` —
+  PASS, 5 files, 30 passed, 4 skipped.
+- `pnpm run build` — PASS, 5/5 tasks; only Vite chunk-size warnings.
+- `pnpm run format:check` — PASS.
+- `pnpm run format` — applied.
+- Not run: Playwright E2E; PostgreSQL integration cases (no server).
+
+### Problems found
+
+- The first full typecheck failed on the new component test's fetch mock cast;
+  fixed with Vitest's `Mock<typeof fetch>` and `vi.fn<typeof fetch>`.
+- The branch selector has no dedicated component test yet.
+- Duplicate-name handling is application-checked before insert; the database
+  unique constraint remains the final authority.
+- M2-T1 is uncommitted pending explicit authorization.
+
+### Pending work
+
+- Continue M2 with employee master data and branch assignment.
+- Seed the three branches only after BQ-19 is answered.
+
+### Next session
+
+Read `AGENTS.md`, `PROJECT_OVERVIEW.md`, `IMPLEMENTATION_PROGRESS.md`,
+`CURRENT_TASK.md`, `IMPLEMENTATION_ROADMAP.md` and the M2 section of the roadmap
+before starting the next master-data slice.

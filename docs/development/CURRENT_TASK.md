@@ -2,54 +2,82 @@
 
 > Last updated: 2026-11-09.
 >
-> **M1-T6 is complete. M1 is complete.** The next task is the first M2 slice
-> (branch CRUD and selector foundation), not started. The M1 closeout is committed
-> as `bfdc9cb`.
+> **M2-T1 is COMPLETED.** M1 is complete. The first M2 slice implements branch
+> list/create/edit and the reusable branch-selector foundation. Branch seeding
+> remains blocked on BQ-19.
 
 ## Task identity
 
-| Field        | Value                                          |
-| ------------ | ---------------------------------------------- |
-| Milestone    | M1 completed; next is M2 — Master Data         |
-| Task ID      | M1-T6 completed; next M2 branch CRUD slice     |
-| Task         | Close out M1 technical docs and boundary guard |
-| Status       | M1-T6 COMPLETED; M2 NOT_STARTED                |
-| Dependencies | M1-T1 to M1-T5 complete                        |
-| Blocks       | None; M1 is complete and M2 is next            |
+| Field        | Value                                               |
+| ------------ | --------------------------------------------------- |
+| Milestone    | M2 — Master Data                                    |
+| Task ID      | M2-T1                                               |
+| Task         | Branch management and branch-selector foundation    |
+| Status       | COMPLETED                                           |
+| Dependencies | M1 complete; access model documented                |
+| Blocks       | M2 employee master data and branch-owned M3 records |
 
 ## Objective
 
-Make the technical reference documents describe the domain that is actually
-implemented, and make the automated boundary guard enforce the dual-engine and
-domain-purity rules that M1 relies on.
+Let an authenticated administrator list, create and edit branches through the API
+and the shared React application, and provide a reusable branch selector for the
+branch-owned forms that arrive in later milestones.
 
-## Scope completed
+## Scope
 
-- Reconciled `docs/database.md` with the branch and catalog tables, both schema
-  trees, both migration journals and the current seed state.
-- Updated `docs/backend.md`, `docs/testing.md` and `docs/architecture.md` where
-  they still described only the original organization foundation.
-- Extended `scripts/check-boundaries.mjs` to reject:
-  - Node built-ins imported by shipped `packages/domain` code;
-  - a table declared in only one schema tree;
-  - a migration journal with a different entry count.
-- Kept the existing dependency-direction, database-access and thin-shell rules.
-- Updated progress, roadmap, state, known issues and the session log.
+- Add domain update behavior for a branch name and active state.
+- Add `findByName` and `update` to the branch repository port and implement both
+  for SQLite and PostgreSQL.
+- Add HTTP validation schemas and typed REST-client functions.
+- Add `GET`, `POST` and `PUT /api/v1/branches` routes.
+- Use `organization:read` for listing and `organization:manage` for writes. A
+  branch is deactivated, never hard-deleted, so future operational history keeps
+  its reference.
+- Add branch management to the Settings screen, visible read-only to every
+  authenticated role and editable by administrators.
+- Add a reusable branch selector that lists active branches by default.
+- Add domain, repository, route, validation and REST-client tests.
+- Update backend, domain, access, progress, roadmap, state, known-issues and
+  session documentation.
+
+## Out of scope
+
+- Seeding the three real branches (BQ-19 is unanswered).
+- Deleting branches or cascading operational data.
+- Branch-specific authorization, user-branch assignment or a branch switcher in
+  the application shell.
+- Employee, supplier, category, unit, product or price master data.
+- Inventory screens or stock records.
 
 ## Acceptance criteria
 
-- [x] `docs/database.md` lists every current table and both migration journals.
-- [x] Technical docs no longer claim the database has only three tables.
-- [x] The boundary guard rejects a one-engine table or migration-journal change.
-- [x] The boundary guard rejects Node built-in imports from shipped domain code.
-- [x] `guard:boundaries`, `typecheck`, `lint`, `test`, `build`, `format:check`
-      and the Markdown link check pass.
-- [x] No domain, schema, migration, API or UI behavior changes.
+- [x] A branch name is trimmed and validated by the domain on create and update.
+- [x] Branches are unique by name within an organization, with a clear conflict
+      response rather than a database error.
+- [x] Both engines implement `findByName` and `update`, and reads stay
+      organization-scoped.
+- [x] Branch routes require authentication and the documented permissions.
+- [x] The Settings screen lists branches and lets an administrator create and
+      edit them, including deactivation.
+- [x] The reusable selector exposes active branches and is ready for M3/M4 forms.
+- [x] Tests cover the domain rule, both repository methods, route permissions and
+      validation, and the REST-client contract.
+- [x] Typecheck, lint, unit/integration tests, guard, build and formatting pass.
+
+## Completion record
+
+- Domain, dual-engine repositories, HTTP routes, REST client and Settings UI are
+  implemented and tested.
+- Branch writes are administrator-only through `organization:manage`; branch
+  reads use `organization:read`.
+- Branches are deactivated, never hard-deleted. The selector lists active branches
+  by default.
+- Verified on 2026-11-09: full typecheck, lint, boundary guard, unit/component
+  tests, integration tests, build and formatting pass. PostgreSQL integration
+  cases skip because no server is available.
+- M2-T1 is uncommitted in the working tree pending explicit commit authorization.
 
 ## Next task
 
-Start M2 with branch CRUD and the branch selector foundation. Do not seed the
-three branches until their names and codes are confirmed (BQ-19). Do not start
-purchases, stock or production in M2.
-
-The M1-T5 and M1-T6 changes are committed as `bfdc9cb`; M2 may begin.
+After M2-T1, continue M2 with the next confirmed master-data slice. Do not seed
+branches until BQ-19 is answered.

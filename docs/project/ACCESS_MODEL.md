@@ -48,6 +48,17 @@ These roles are **organization-wide**. There is no user-to-branch assignment, no
 branch dimension in a permission check, and no branch-aware route. Every
 authenticated user who has a permission can use it on organization data.
 
+Branch master data follows the same organization-wide model:
+
+- `GET /api/v1/branches` requires `organization:read`; every current role can
+  read the branch list, including selectors in later operational forms.
+- `POST /api/v1/branches` and `PUT /api/v1/branches/:branchId` require
+  `organization:manage`, which only `ADMINISTRATOR` carries today.
+- The UI hides create/edit controls from other roles, but the API check is the
+  control.
+- Edits may rename or deactivate a branch. There is no hard delete, because later
+  operational rows will reference the branch.
+
 ## 3. Business actors and the initial version
 
 | Actor              | Initial application access                         | Notes                                                                                           |

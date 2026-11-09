@@ -162,10 +162,10 @@ desktop shell does not open a database; it talks to the API over HTTP.
 
 PostgreSQL integration tests require `TEST_DATABASE_URL` and are skipped on this
 machine because no PostgreSQL server is available. The current integration files
-cover authentication, organization, branch and catalog repository round-trips, a
-cross-organization isolation query, a repository constraint and a migration smoke
-path. No
-stock or workflow API exists yet.
+cover authentication, organization, branch and catalog repository round-trips,
+branch route permissions and validation, a cross-organization isolation query, a
+repository constraint and a migration smoke path. No stock or workflow API exists
+yet.
 
 ## 10. Guardrails and quality gates
 
@@ -181,11 +181,11 @@ stock or workflow API exists yet.
 
 ## 11. Architecture gaps for the business milestones
 
-The existing foundation is reusable. The branch entity and its dual-engine
-persistence now exist; the following are not designed or built:
+The existing foundation is reusable. The branch entity, its dual-engine
+persistence, branch API routes and Settings UI now exist; the following are not
+designed or built:
 
-1. Branch and catalog API routes and management UI (entities and repositories
-   exist).
+1. Catalog API routes and management UI (entities and repositories exist).
 2. Product price history and estimated/measured weight snapshots.
 3. Persisted stock ledger, balance strategy and reconciliation.
 4. Purchase receiving and auditable correction model.

@@ -19,6 +19,7 @@ import {
 } from '@inventory-u3/ui';
 
 import { useTranslation } from '../../../i18n/index.js';
+import { BranchManagement } from '../../branches/components/branch-management.js';
 import { useOrganizationSettings } from '../../organization/queries/organization-settings-query.js';
 import { useUpdateOrganizationSettings } from '../../organization/mutations/use-update-organization-settings.js';
 
@@ -55,7 +56,12 @@ export function SettingsPage() {
     );
   }
 
-  return <OrganizationSettingsForm organization={organizationQuery.data} />;
+  return (
+    <div className="flex flex-col gap-6">
+      <OrganizationSettingsForm organization={organizationQuery.data} />
+      <BranchManagement />
+    </div>
+  );
 }
 
 function OrganizationSettingsForm({ organization }: { readonly organization: Organization }) {

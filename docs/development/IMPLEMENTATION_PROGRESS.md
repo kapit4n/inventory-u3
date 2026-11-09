@@ -5,53 +5,49 @@
 
 ## Summary
 
-| Field                  | Value                                                                     |
-| ---------------------- | ------------------------------------------------------------------------- |
-| Current milestone      | M2 — Master Data (not started); M1 is complete                            |
-| Current task           | M1-T6 complete; next task is M2 branch CRUD and selector foundation       |
-| Overall project status | M1 complete: domain, persistence, access note, docs and dual-engine guard |
-| Completed milestones   | M1; the foundation prerequisite is also complete                          |
-| In-progress milestones | None                                                                      |
-| Blocked milestones     | M6 finalization is blocked on BR-013 (WhatsApp reporting format)          |
-| Pending milestones     | M2, M3, M4, M5, M6, M7, M8, M9                                            |
-| Last verified commit   | `bfdc9cb` (M1 closeout)                                                   |
-| Last update date       | 2026-11-09                                                                |
-| Next recommended task  | Start M2 with branch CRUD and the branch selector foundation              |
+| Field                  | Value                                                                           |
+| ---------------------- | ------------------------------------------------------------------------------- |
+| Current milestone      | M2 — Master Data (in progress); M1 is complete                                  |
+| Current task           | M2-T1 complete; next task is the next confirmed M2 master-data slice            |
+| Overall project status | Branch master data delivered end-to-end on the completed M1 business foundation |
+| Completed milestones   | M1; the foundation prerequisite is also complete                                |
+| In-progress milestones | M2                                                                              |
+| Blocked milestones     | M6 finalization is blocked on BR-013 (WhatsApp reporting format)                |
+| Pending milestones     | M3, M4, M5, M6, M7, M8, M9                                                      |
+| Last verified commit   | `bfdc9cb` (M1) plus uncommitted M2-T1 working tree                              |
+| Last update date       | 2026-11-09                                                                      |
+| Next recommended task  | Continue M2 with employee master data and branch assignment                     |
 
 ### Working tree at the time of this update
 
-M1-T5 adds `docs/project/ACCESS_MODEL.md`; M1-T6 reconciles the technical
-reference documents and extends `scripts/check-boundaries.mjs`. Both are
-committed as `bfdc9cb`. No domain, schema, migration, API or UI behavior changed.
-M1-T1 is committed as `d6b62d5`; M1-T2 as `10f882d`; M1-T3 as `4168462`; M1-T4 as
-`afc1cee`, with its docs at `366c5d9`.
+M2-T1 adds branch update behavior, `BranchRepository.findByName/update` on both
+engines, branch validation, `GET/POST/PUT /api/v1/branches`, typed REST-client
+functions, the Settings branch-management section, a reusable active-branch
+selector, tests and documentation. No schema, migration or seed change was
+required. Branch seeding remains blocked on BQ-19. The changes are uncommitted
+pending explicit authorization.
 
 ## Verification for this update
 
-M1-T6 changes documentation and the boundary guard only. The full suite was
-forced after the guard change; no domain/schema/API/UI behavior changed.
+M2-T1 changes the domain, both repository implementations, API routes, REST
+client, React UI, tests and documentation.
 
-| Command                             | Result                                                           |
-| ----------------------------------- | ---------------------------------------------------------------- |
-| `pnpm run typecheck`                | PASS — 12/12 tasks                                               |
-| `pnpm run lint`                     | PASS — 12/12 tasks, `BOUNDARY GUARD OK`                          |
-| `pnpm run guard:boundaries`         | PASS — `BOUNDARY GUARD OK`                                       |
-| Guard probe: missing SQLite table   | PASS — rejected with a `SCHEMA` failure (temporary file removed) |
-| Guard probe: `node:fs` in domain    | PASS — rejected with a `DOMAIN` failure (temporary file removed) |
-| Guard probe: journal count mismatch | PASS — rejected with a `MIGRATIONS` failure (journal restored)   |
-| `pnpm exec turbo run test --force`  | PASS — 12/12 tasks, 166 passed, 3 skipped                        |
-| `pnpm run test:integration`         | PASS with `TEST_DATABASE_URL=` — 4 files, 22 passed, 3 skipped   |
-| `pnpm run db:migrate`               | NOT NEEDED — M1-T6 adds no schema change                         |
-| `pnpm run db:seed`                  | NOT NEEDED — M1-T6 adds no persisted data                        |
-| `pnpm run test:e2e`                 | NOT RUN; last recorded result was 18/18 on the foundation        |
-| `pnpm run format:check`             | PASS — all files use Prettier style                              |
-| Local Markdown link check           | PASS — all local links resolve                                   |
-| `pnpm run build`                    | PASS — 5/5 tasks                                                 |
+| Command                                                                   | Result                                                          |
+| ------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| `pnpm run typecheck`                                                      | PASS — 12/12 tasks                                              |
+| `pnpm run lint`                                                           | PASS — 12/12 tasks, `BOUNDARY GUARD OK`                         |
+| `pnpm run guard:boundaries`                                               | PASS via lint — `BOUNDARY GUARD OK`                             |
+| `pnpm run test`                                                           | PASS — 12/12 tasks, 183 passed, 4 skipped                       |
+| `TEST_DATABASE_URL= pnpm --filter @inventory-u3/api run test:integration` | PASS — 5 files, 30 passed, 4 skipped                            |
+| `pnpm run build`                                                          | PASS — 5/5 tasks; Vite chunk-size warnings only                 |
+| `pnpm run format:check`                                                   | PASS — all files use Prettier style                             |
+| `pnpm run db:migrate`                                                     | NOT NEEDED — M2-T1 adds no schema change                        |
+| `pnpm run db:seed`                                                        | NOT NEEDED — M2-T1 adds no persisted data                       |
+| `pnpm run test:e2e`                                                       | NOT RUN; branch management has RTL and API integration coverage |
 
-Test counts from the forced run: API 48 passed + 3 skipped, desktop 4, database
-6, api-client 15, app 48, domain 45. Total 166 passed and 3 skipped. The domain
-suite includes 17 stock-movement tests. The skipped tests are the PostgreSQL
-branch and catalog repository tests, which require a reachable
+Current test counts: domain 48, api-client 19, app 50, API 56 passed + 4 skipped,
+database 6 and desktop 4 — 183 passed and 4 skipped in total. The skipped tests
+are the PostgreSQL branch and catalog repository cases, which require a reachable
 `TEST_DATABASE_URL`.
 
 PostgreSQL integration tests were not executed because no PostgreSQL server is
@@ -100,7 +96,7 @@ None. M1 is complete.
 
 ### Pending
 
-- [ ] Branch API route and management UI (M2).
+- [x] Branch API route and management UI (completed in M2-T1).
 - [ ] Catalog API routes and management UI (M2).
 - [ ] Seed the three branches once their names and codes are confirmed.
 - [ ] Product prices and price history (M2).
@@ -187,8 +183,8 @@ None. M1 is complete.
 
 ### Known limitations
 
-- `Branch` and the catalog have no API routes or UI yet; they are
-  domain/persistence slices.
+- At M1 closeout, `Branch` and the catalog had no API routes or UI. Branch was
+  completed in M2-T1; the catalog remains a domain/persistence slice.
 - Products have a kind and presentations have a configured average weight, but
   prices, estimated/measured weights and snapshots do not exist.
 - Stock exists as a domain vocabulary only; there is no stock table, repository,
@@ -202,24 +198,34 @@ None. M1 is complete.
 
 ### Next action
 
-M1 is complete and committed as `bfdc9cb`.
-After they are committed, start M2 with branch CRUD and the branch selector
-foundation. See [CURRENT_TASK.md](./CURRENT_TASK.md).
+M1 is complete and committed as `bfdc9cb`. M2 is now in progress; M2-T1 is
+complete. See [CURRENT_TASK.md](./CURRENT_TASK.md).
 
 ---
 
 ## M2 — Master Data
 
-**Status: NOT_STARTED**
+**Status: IN_PROGRESS (M2-T1 complete)**
 
 ### Completed
 
-- [ ] Nothing.
+- [x] M2-T1 branch name/active-state update behavior in the domain.
+- [x] M2-T1 `BranchRepository.findByName` and `update` on SQLite and PostgreSQL.
+- [x] M2-T1 branch validation schemas and inferred types.
+- [x] M2-T1 authenticated `GET/POST/PUT /api/v1/branches` routes with
+      `organization:read`/`organization:manage` permissions.
+- [x] M2-T1 duplicate-name conflict, not-found and validation problem mapping.
+- [x] M2-T1 typed REST-client branch functions with response validation.
+- [x] M2-T1 Settings branch list/create/edit/deactivate UI for administrators,
+      read-only for other authenticated roles.
+- [x] M2-T1 reusable active-branch selector foundation.
+- [x] M2-T1 domain, REST-client, dual-engine repository, route and component
+      tests.
+- [x] M2-T1 documentation and TD-011 access decision.
 
 ### Pending
 
-- [ ] Branch management UI/API.
-- [ ] Employee master data.
+- [ ] Employee master data and branch assignment.
 - [ ] Supplier master data.
 - [ ] Product categories.
 - [ ] Products (raw and processed).
@@ -231,15 +237,25 @@ foundation. See [CURRENT_TASK.md](./CURRENT_TASK.md).
 
 ### Validation
 
-No implementation and no tests.
+- Domain: 4 files, 48 passed.
+- API client: 2 files, 19 passed.
+- App: 9 files, 50 passed.
+- API: 9 files, 56 passed + 4 skipped.
+- SQLite integration command: 5 files, 30 passed + 4 skipped.
+- Full typecheck, lint with boundary guard, build and formatting pass.
+- PostgreSQL cases skip without a reachable `TEST_DATABASE_URL`.
+- No browser E2E spec was added for branch management.
 
 ### Notes
 
-Depends on M1. See roadmap acceptance criteria.
+Branch writes are administrator-only through `organization:manage` (TD-011).
+Branches are deactivated, never hard-deleted. The selector lists active branches
+by default and has no dedicated test yet. Branch seeding waits for BQ-19.
 
 ### Next action
 
-Start after M1 acceptance criteria are verified.
+Continue M2 with employee master data and branch assignment. See
+[CURRENT_TASK.md](./CURRENT_TASK.md).
 
 ---
 

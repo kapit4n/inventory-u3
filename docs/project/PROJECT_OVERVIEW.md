@@ -1,6 +1,7 @@
 # Inventory U3 — Project Overview
 
-> Last verified: 2026-11-09 against commit `bfdc9cb` (M1 closeout). See
+> Last verified: 2026-11-09. M1 is committed at `bfdc9cb`; M2-T1 branch
+> management is in the working tree. See
 > [IMPLEMENTATION_PROGRESS](../development/IMPLEMENTATION_PROGRESS.md).
 
 ## Purpose
@@ -65,9 +66,10 @@ product.** As of this document:
   `product_categories`, `products`, `product_presentations`, `users` and
   `sessions`.
 - The `Branch` and product-catalog domain entities and their SQLite/PostgreSQL
-  repositories are implemented. Products carry a required raw/processed kind and
-  presentations carry an average weight per tray. There are no master-data API
-  routes or screens yet.
+  repositories are implemented. Branch list/create/edit is available through the
+  API and the Settings screen, with a reusable active-branch selector. Products
+  carry a required raw/processed kind and presentations carry an average weight
+  per tray; catalog API routes and screens do not exist yet.
 - The catalog has no prices or estimated/measured weight snapshots. Those are
   M2/M5/M6 work.
 - The domain defines append-only stock movement concepts and a balance shape,
@@ -81,7 +83,9 @@ product.** As of this document:
 - The nine business milestones are defined in
   [IMPLEMENTATION_ROADMAP.md](../development/IMPLEMENTATION_ROADMAP.md). M1 is
   complete: branch, product catalog, measurement configuration, stock concepts,
-  the access note, technical docs and the dual-engine guard are done. M2 is next.
+  the access note, technical docs and the dual-engine guard are done. M2 is in
+  progress with branch management and the branch selector foundation complete;
+  the real branches are not seeded until BQ-19 is answered.
 
 The inventory business model in this documentation is **proposed**. It separates
 confirmed product requirements from proposed design and from open questions. Do

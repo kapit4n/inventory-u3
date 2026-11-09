@@ -28,8 +28,11 @@ interface Branch {
 ```
 
 `createBranch` trims and validates the name (1–120 characters) and defaults
-`isActive` to `true`. A branch belongs to exactly one organization; operational
-records will belong to one branch.
+`isActive` to `true`. `updateBranch` applies the same name rule and can change
+`isActive`; it advances `updatedAt` and leaves identity and ownership unchanged.
+A branch belongs to exactly one organization; operational records will belong to
+one branch. Branches are deactivated rather than deleted so future operational
+history keeps its reference. Names are unique within an organization.
 
 ## Product catalog
 
@@ -125,7 +128,8 @@ The HTTP layer maps these to status codes and wire error codes.
 Repositories are declared in `packages/domain/src/ports`:
 
 - `OrganizationRepository`
-- `BranchRepository`
+- `BranchRepository` — find by id or name, list, create and update, always scoped
+  by organization
 - `MeasurementUnitRepository`
 - `ProductCategoryRepository`
 - `ProductRepository`

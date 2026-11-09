@@ -226,3 +226,27 @@ averageWeightPerTray` and `estimatedValue = estimatedKg × sellingPricePerKg`.
   existing rows must be backfilled explicitly. Display converts grams to
   kilograms at the UI boundary. Estimated/measured weights and historical
   snapshots still need later additions.
+
+### TD-011 — Branches are administered through organization permissions and deactivated, not deleted
+
+- **Date:** 2026-11-09
+- **Status:** ACCEPTED for M2-T1.
+- **Context:** Branch master data is organization-wide, while the existing role
+  matrix already separates organization reading from organization management.
+  Later purchases, stock movements, production, sales checkpoints and closings
+  will reference a branch, so deleting the row would either destroy history or
+  require cascades that are not part of the confirmed model.
+- **Decision:** Branch listing uses `organization:read`; creating and editing a
+  branch uses `organization:manage`. There is no hard-delete endpoint. The edit
+  operation changes the name and `isActive` flag, and inactive branches are
+  hidden by the reusable selector unless a caller explicitly includes them.
+- **Alternatives considered:** Use `inventory:write` for branch writes; rejected
+  because a branch is organization master data, not an inventory transaction.
+  Hard-delete branches; rejected because operational history must retain its
+  branch reference. Add a new branch-specific permission; rejected as premature
+  before branch-scoped access exists (BQ-09).
+- **Consequences:** Only administrators can create or edit branches today. Other
+  roles can read the list and use branch selectors. If the central operator needs
+  branch administration, the account needs `organization:manage` or a deliberate
+  permission change later. Branch names are unique per organization and a
+  duplicate is reported as a domain conflict.

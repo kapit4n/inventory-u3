@@ -19,7 +19,7 @@ import { inArray } from 'drizzle-orm';
 
 import * as pgSchema from '@inventory-u3/database/schema';
 import * as sqliteSchema from '@inventory-u3/database/schema/sqlite';
-import { createBranch, type Branch } from '@inventory-u3/domain';
+import { createBranch, updateBranch, type Branch } from '@inventory-u3/domain';
 import {
   asBranchId,
   asOrganizationId,
@@ -140,6 +140,35 @@ describe('branch repository (SQLite)', () => {
 
     await expect(repository.findById(ORGANIZATION_B, branch.id)).resolves.toBeUndefined();
   });
+
+  it('finds a branch by name and updates only within its organization', async () => {
+    const branch = await repository.create(
+      createBranch(
+        {
+          id: asBranchId('a4444444-4444-4444-8444-444444444444'),
+          organizationId: ORGANIZATION_A,
+          name: 'Editable Market',
+        },
+        NOW,
+      ),
+    );
+
+    await expect(repository.findByName(ORGANIZATION_A, 'Editable Market')).resolves.toEqual(branch);
+    await expect(repository.findByName(ORGANIZATION_B, 'Editable Market')).resolves.toBeUndefined();
+
+    const updated = updateBranch(
+      branch,
+      { name: 'Editable Market Renamed', isActive: false },
+      '2026-11-09T13:00:00.000Z',
+    );
+    await expect(repository.update(updated)).resolves.toEqual(updated);
+    await expect(repository.findById(ORGANIZATION_A, branch.id)).resolves.toEqual(updated);
+
+    await expect(
+      repository.update({ ...updated, organizationId: ORGANIZATION_B }),
+    ).resolves.toBeUndefined();
+    await expect(repository.findById(ORGANIZATION_A, branch.id)).resolves.toEqual(updated);
+  });
 });
 
 const postgresUrl = process.env.TEST_DATABASE_URL;
@@ -222,5 +251,25 @@ describe.skipIf(!postgresUrl)('branch repository (PostgreSQL)', () => {
     const branch = await createTestBranch(organizationA, 'Isolation Market');
 
     await expect(repository.findById(organizationB, branch.id)).resolves.toBeUndefined();
+  });
+
+  it('finds a branch by name and updates only within its organization', async () => {
+    const branch = await createTestBranch(organizationA, 'Editable Market');
+
+    await expect(repository.findByName(organizationA, 'Editable Market')).resolves.toEqual(branch);
+    await expect(repository.findByName(organizationB, 'Editable Market')).resolves.toBeUndefined();
+
+    const updated = updateBranch(
+      branch,
+      { name: 'Editable Market Renamed', isActive: false },
+      '2026-11-09T13:00:00.000Z',
+    );
+    await expect(repository.update(updated)).resolves.toEqual(updated);
+    await expect(repository.findById(organizationA, branch.id)).resolves.toEqual(updated);
+
+    await expect(
+      repository.update({ ...updated, organizationId: organizationB }),
+    ).resolves.toBeUndefined();
+    await expect(repository.findById(organizationA, branch.id)).resolves.toEqual(updated);
   });
 });

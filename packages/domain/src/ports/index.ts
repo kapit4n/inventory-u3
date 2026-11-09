@@ -58,8 +58,11 @@ export interface OrganizationRepository {
 
 export interface BranchRepository {
   findById(organizationId: OrganizationId, branchId: BranchId): Promise<Branch | undefined>;
+  findByName(organizationId: OrganizationId, name: string): Promise<Branch | undefined>;
   listByOrganization(organizationId: OrganizationId): Promise<readonly Branch[]>;
   create(branch: Branch): Promise<Branch>;
+  /** Returns `undefined` when the branch does not belong to the organization. */
+  update(branch: Branch): Promise<Branch | undefined>;
 }
 
 export interface MeasurementUnitRepository {
