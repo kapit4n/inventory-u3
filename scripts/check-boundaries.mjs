@@ -10,6 +10,9 @@
  *   3. No package outside the API imports a database driver.
  *   4. The deployment shells stay thin: no route files, no feature folders.
  *   5. The required workspace packages exist.
+ *   6. FullCalendar stays behind its adapters (ADR 0011).
+ *   7. The PostgreSQL and SQLite schema trees declare the same tables, and their
+ *      migration journals have the same number of entries (ADR 0025).
  *
  * It scans BOTH the real source import graph and the package manifests, because
  * a manifest alone cannot prove where an import happens, and the import graph
@@ -59,6 +62,9 @@ const CALENDAR_ADAPTER_ALLOWED = [
   'features/agenda/components/agenda-calendar.tsx',
   'features/agenda/components/agenda-calendar.test.tsx',
 ];
+
+/** Node/runtime prefixes the shipped domain may never import. */
+const DOMAIN_FORBIDDEN_PREFIXES = ['node:', 'bun:', 'deno:'];
 
 /** Specifiers `packages/domain` may never import, at any depth. */
 const DOMAIN_FORBIDDEN_SPECIFIERS = [
@@ -221,7 +227,9 @@ function main() {
 
       if (
         DOMAIN_FORBIDDEN_SPECIFIERS.includes(specifier) ||
-        DOMAIN_FORBIDDEN_SPECIFIERS.some((forbidden) => specifier.startsWith(`${forbidden}/`))
+        DOMAIN_FORBIDDEN_SPECIFIERS.some((forbidden) => specifier.startsWith(`${forbidden}/`)) ||
+        (!isTestFile &&
+          DOMAIN_FORBIDDEN_PREFIXES.some((forbidden) => specifier.startsWith(forbidden)))
       ) {
         errors.push(`DOMAIN: ${label} imports forbidden specifier "${specifier}".`);
         continue;
@@ -347,7 +355,63 @@ function main() {
     }
   }
 
+  // ---- rule 7: both engines stay in lockstep (ADR 0025) ----------------
+  //
+  // A schema change must land in both trees, and a migration must land in both
+  // journals. Without this check the second engine silently drifts until an
+  // integration test or a user discovers it.
+  const pgSchemaDir = path.join(root, 'database/schema');
+  const sqliteSchemaDir = path.join(root, 'database/schema/sqlite');
+  const pgTables = collectDeclaredTables(pgSchemaDir, 'pgTable');
+  const sqliteTables = collectDeclaredTables(sqliteSchemaDir, 'sqliteTable');
+
+  for (const table of pgTables) {
+    if (!sqliteTables.has(table)) {
+      errors.push(`SCHEMA: table "${table}" is declared in PostgreSQL but missing from SQLite.`);
+    }
+  }
+  for (const table of sqliteTables) {
+    if (!pgTables.has(table)) {
+      errors.push(`SCHEMA: table "${table}" is declared in SQLite but missing from PostgreSQL.`);
+    }
+  }
+
+  const pgJournal = readJournalCount(path.join(root, 'database/migrations/meta/_journal.json'));
+  const sqliteJournal = readJournalCount(
+    path.join(root, 'database/migrations-sqlite/meta/_journal.json'),
+  );
+  if (pgJournal === null) {
+    errors.push('MIGRATIONS: PostgreSQL journal is missing or has no entries array.');
+  }
+  if (sqliteJournal === null) {
+    errors.push('MIGRATIONS: SQLite journal is missing or has no entries array.');
+  }
+  if (pgJournal !== null && sqliteJournal !== null && pgJournal !== sqliteJournal) {
+    errors.push(
+      `MIGRATIONS: PostgreSQL has ${pgJournal} journal entries but SQLite has ${sqliteJournal}; both engines must receive every migration.`,
+    );
+  }
+
   report(errors, warnings);
+}
+
+function collectDeclaredTables(dir, factory) {
+  const tables = new Set();
+  const pattern = new RegExp(
+    `export\\s+const\\s+\\w+\\s*=\\s*${factory}\\s*\\(\\s*['\"]([^'\"]+)['\"]`,
+    'g',
+  );
+  for (const file of listSourceFiles(dir)) {
+    for (const match of fs.readFileSync(file, 'utf8').matchAll(pattern)) {
+      tables.add(match[1]);
+    }
+  }
+  return tables;
+}
+
+function readJournalCount(file) {
+  const journal = readJsonIfExists(file);
+  return Array.isArray(journal?.entries) ? journal.entries.length : null;
 }
 
 function report(errors, warnings) {

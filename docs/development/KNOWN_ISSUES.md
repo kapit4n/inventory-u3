@@ -37,7 +37,7 @@ reproduced and confirmed in this review. Add an item here only with evidence
 | Daily closing                | Not implemented.                                                                                                       |
 | Consolidated reports         | Not implemented. `/dashboard` shows static foundation content.                                                         |
 | User administration          | Not implemented, although `users:read`/`users:manage` permissions exist.                                               |
-| Branch-specific access       | Not implemented. All current authenticated users can reach all routes.                                                 |
+| Branch-specific access       | Documented in `docs/project/ACCESS_MODEL.md`; no assignment, authorization or UI gate is implemented.                  |
 | Audit log                    | Not implemented.                                                                                                       |
 | Inventory UI                 | `/inventory` is a placeholder card; it does not list or edit stock.                                                    |
 
@@ -46,16 +46,17 @@ These are roadmap work, not defects. See
 
 ## 4. Technical debt
 
-| ID    | Debt                                                                                                                                                          | Impact                                                                 |
-| ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
-| TD-01 | Unused dependencies in `packages/app`: `@fullcalendar/*`, `luxon`, `date-fns`, `zustand`, `@tanstack/react-table`. Some are planned, none are imported today. | Larger install, misleading stack signals, supply-chain surface.        |
-| TD-02 | `docs/architecture.md`, `docs/domain.md` and the new `docs/project/` set overlap. The new documents are canonical summaries; the old ones hold detail.        | Risk of drift if one is updated without the other.                     |
-| TD-03 | The existing ADRs are undated.                                                                                                                                | Harder to reconstruct decision chronology; new decisions record dates. |
-| TD-04 | The foundation-era roadmap and state files had to be reconciled with the business roadmap.                                                                    | A reader could follow an old link; pointers are now in place.          |
-| TD-05 | Password/session security is deliberately simple: bearer token in `localStorage`, in-process rate limiting.                                                   | Acceptable for the foundation, not a production security posture.      |
-| TD-06 | PostgreSQL integration tests cannot run on this machine.                                                                                                      | Engine parity is not continuously verified here.                       |
-| TD-07 | The desktop shell was not rebuilt in the latest verification session.                                                                                         | Rust/Tauri drift would not be caught by unit tests.                    |
-| TD-08 | No database backup/restore procedure exists.                                                                                                                  | Operational risk once real data is entered.                            |
+| ID    | Debt                                                                                                                                                                       | Impact                                                                             |
+| ----- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| TD-01 | Unused dependencies in `packages/app`: `@fullcalendar/*`, `luxon`, `date-fns`, `zustand`, `@tanstack/react-table`. Some are planned, none are imported today.              | Larger install, misleading stack signals, supply-chain surface.                    |
+| TD-02 | `docs/architecture.md`, `docs/domain.md` and the new `docs/project/` set overlap. The new documents are canonical summaries; the old ones hold detail.                     | Risk of drift if one is updated without the other.                                 |
+| TD-03 | The existing ADRs are undated.                                                                                                                                             | Harder to reconstruct decision chronology; new decisions record dates.             |
+| TD-04 | The foundation-era roadmap and state files had to be reconciled with the business roadmap.                                                                                 | A reader could follow an old link; pointers are now in place.                      |
+| TD-05 | Password/session security is deliberately simple: bearer token in `localStorage`, in-process rate limiting.                                                                | Acceptable for the foundation, not a production security posture.                  |
+| TD-06 | PostgreSQL integration tests cannot run on this machine.                                                                                                                   | Engine parity is not continuously verified here.                                   |
+| TD-07 | The desktop shell was not rebuilt in the latest verification session.                                                                                                      | Rust/Tauri drift would not be caught by unit tests.                                |
+| TD-08 | No database backup/restore procedure exists.                                                                                                                               | Operational risk once real data is entered.                                        |
+| TD-09 | The boundary guard compares schema table names and journal entry counts, not columns, indexes, foreign keys or migration contents. The guard script has no permanent spec. | Integration tests remain the authority for engine parity; guard drift is possible. |
 
 ## 5. Missing tests
 
@@ -65,10 +66,12 @@ These are roadmap work, not defects. See
 - Browser E2E for the current working tree (last recorded run is from the
   foundation session).
 - Branch, catalog and stock API/UI tests, because no routes or screens exist yet.
+- User-to-branch assignment and branch-scoped authorization tests (M9).
 - Estimated/measured weight, snapshot and price-history tests, because those
   fields do not exist yet.
 - Stock domain tests exist; stock repository, balance, correction and UI tests
   await M4. Purchase, production, sales and closing domains do not exist yet.
+- Boundary-guard regression tests; the current checks are exercised manually and by running the guard.
 - Backup/restore drill.
 - Performance/load tests for movement and report queries.
 

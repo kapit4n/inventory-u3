@@ -5,41 +5,48 @@
 
 ## Summary
 
-| Field                  | Value                                                                             |
-| ---------------------- | --------------------------------------------------------------------------------- |
-| Current milestone      | M1 — Business Domain Foundation                                                   |
-| Current task           | M1-T4 complete; next task is M1-T5 (access model note)                            |
-| Overall project status | Foundation, branch, catalog, measurement and stock concepts complete; no stock UI |
-| Completed milestones   | None of M1–M9 (the foundation prerequisite is complete)                           |
-| In-progress milestones | M1                                                                                |
-| Blocked milestones     | M6 finalization is blocked on BR-013 (WhatsApp reporting format)                  |
-| Pending milestones     | M2, M3, M4, M5, M6, M7, M8, M9                                                    |
-| Last verified commit   | `afc1cee` (M1-T4 stock movement concepts)                                         |
-| Last update date       | 2026-11-09                                                                        |
-| Next recommended task  | M1-T5 — Access model note: central operator now, branch users later               |
+| Field                  | Value                                                                     |
+| ---------------------- | ------------------------------------------------------------------------- |
+| Current milestone      | M2 — Master Data (not started); M1 is complete                            |
+| Current task           | M1-T6 complete; next task is M2 branch CRUD and selector foundation       |
+| Overall project status | M1 complete: domain, persistence, access note, docs and dual-engine guard |
+| Completed milestones   | M1; the foundation prerequisite is also complete                          |
+| In-progress milestones | None                                                                      |
+| Blocked milestones     | M6 finalization is blocked on BR-013 (WhatsApp reporting format)          |
+| Pending milestones     | M2, M3, M4, M5, M6, M7, M8, M9                                            |
+| Last verified commit   | `366c5d9` (M1-T4 docs) plus uncommitted M1-T5/M1-T6 changes               |
+| Last update date       | 2026-11-09                                                                |
+| Next recommended task  | Start M2 with branch CRUD and the branch selector foundation              |
 
 ### Working tree at the time of this update
 
-M1-T4 added the append-only stock movement vocabulary, correction invariants and
-a balance read-model type without adding a table, port or API. These changes are
-committed as `afc1cee`. M1-T1 is committed as `d6b62d5`; M1-T2 as `10f882d`;
-M1-T3 as `4168462`.
+M1-T5 adds `docs/project/ACCESS_MODEL.md`; M1-T6 reconciles the technical
+reference documents and extends `scripts/check-boundaries.mjs`. Both are
+uncommitted. No domain, schema, migration, API or UI behavior changed. M1-T1 is
+committed as `d6b62d5`; M1-T2 as `10f882d`; M1-T3 as `4168462`; M1-T4 as
+`afc1cee`, with its docs at `366c5d9`.
 
 ## Verification for this update
 
-| Command                            | Result                                                         |
-| ---------------------------------- | -------------------------------------------------------------- |
-| `pnpm run typecheck`               | PASS — 12/12 tasks                                             |
-| `pnpm run lint`                    | PASS — 12/12 tasks, `BOUNDARY GUARD OK`                        |
-| `pnpm run guard:boundaries`        | PASS — `BOUNDARY GUARD OK`                                     |
-| `pnpm exec turbo run test --force` | PASS — 12/12 tasks, 166 passed, 3 skipped                      |
-| `pnpm run test:integration`        | PASS with `TEST_DATABASE_URL=` — 4 files, 22 passed, 3 skipped |
-| `pnpm run db:migrate`              | NOT NEEDED — M1-T4 adds no schema change                       |
-| `pnpm run db:seed`                 | NOT NEEDED — M1-T4 adds no persisted data                      |
-| `pnpm run test:e2e`                | NOT RUN; last recorded result was 18/18 on the foundation      |
-| `pnpm run format:check`            | PASS — all files use Prettier style                            |
-| Local Markdown link check          | PASS — all local links resolve                                 |
-| `pnpm run build`                   | PASS — 5/5 tasks                                               |
+M1-T6 changes documentation and the boundary guard only. The full suite was
+forced after the guard change; no domain/schema/API/UI behavior changed.
+
+| Command                             | Result                                                           |
+| ----------------------------------- | ---------------------------------------------------------------- |
+| `pnpm run typecheck`                | PASS — 12/12 tasks                                               |
+| `pnpm run lint`                     | PASS — 12/12 tasks, `BOUNDARY GUARD OK`                          |
+| `pnpm run guard:boundaries`         | PASS — `BOUNDARY GUARD OK`                                       |
+| Guard probe: missing SQLite table   | PASS — rejected with a `SCHEMA` failure (temporary file removed) |
+| Guard probe: `node:fs` in domain    | PASS — rejected with a `DOMAIN` failure (temporary file removed) |
+| Guard probe: journal count mismatch | PASS — rejected with a `MIGRATIONS` failure (journal restored)   |
+| `pnpm exec turbo run test --force`  | PASS — 12/12 tasks, 166 passed, 3 skipped                        |
+| `pnpm run test:integration`         | PASS with `TEST_DATABASE_URL=` — 4 files, 22 passed, 3 skipped   |
+| `pnpm run db:migrate`               | NOT NEEDED — M1-T6 adds no schema change                         |
+| `pnpm run db:seed`                  | NOT NEEDED — M1-T6 adds no persisted data                        |
+| `pnpm run test:e2e`                 | NOT RUN; last recorded result was 18/18 on the foundation        |
+| `pnpm run format:check`             | PASS — all files use Prettier style                              |
+| Local Markdown link check           | PASS — all local links resolve                                   |
+| `pnpm run build`                    | PASS — 5/5 tasks                                                 |
 
 Test counts from the forced run: API 48 passed + 3 skipped, desktop 4, database
 6, api-client 15, app 48, domain 45. Total 166 passed and 3 skipped. The domain
@@ -58,7 +65,7 @@ integration files without the PostgreSQL half. See SI-06.
 
 ## M1 — Business Domain Foundation
 
-**Status: IN_PROGRESS**
+**Status: COMPLETED**
 
 ### Completed
 
@@ -66,8 +73,8 @@ integration files without the PostgreSQL half. See SI-06.
 - [x] Existing implemented domain documented: organization, user, session, role,
       permission, organization settings, branch, product catalog and stock
       concepts.
-- [x] Actual database tables documented: organizations, branches, catalog,
-      users and sessions.
+- [x] Actual database tables documented: organizations, branches, measurement
+      units, product categories, products, presentations, users and sessions.
 - [x] Confirmed business requirements separated from proposed design.
 - [x] Proposed business domain model documented, including branch ownership,
       raw/processed products, measurement and snapshot rules.
@@ -81,15 +88,18 @@ integration files without the PostgreSQL half. See SI-06.
       configuration on presentations, both engines and repositories.
 - [x] M1-T4: Stock movement, reason, source, balance and audit-safe correction
       concepts, with no stock table, port or API.
+- [x] M1-T5: Access-model note covering the confirmed operator-only boundary,
+      current roles and future branch-scope invariants, with no code changes.
+- [x] M1-T6: Technical reference documents reconciled and the boundary guard
+      extended for domain Node imports, schema-table parity and migration-journal
+      parity.
 
 ### In Progress
 
-None. M1-T4 is complete; M1-T5 is not started.
+None. M1 is complete.
 
 ### Pending
 
-- [ ] M1-T5: Access model note for the central operator and future branch users.
-- [ ] M1-T6: Update technical docs and boundary guard for the remaining domain.
 - [ ] Branch API route and management UI (M2).
 - [ ] Catalog API routes and management UI (M2).
 - [ ] Seed the three branches once their names and codes are confirmed.
@@ -104,7 +114,11 @@ None. M1-T4 is complete; M1-T5 is not started.
 - Failed: default `test:integration` without clearing `TEST_DATABASE_URL`
   (SI-06); the SQLite path passes with the override.
 - Not executed: PostgreSQL integration tests, Playwright E2E.
-- No schema change, migration, seed or database test was required for M1-T4.
+- No schema change, migration, seed or database test was required for M1-T6.
+- M1-T5 changed documentation only; M1-T6 changed documentation and the guard.
+  The forced suite was run after the guard change.
+- The guard probes proved it rejects a one-engine table, a missing migration
+  journal entry and a Node built-in import from shipped domain code.
 - New M1-T4 tests: 17 stock tests covering valid creation, signed/finite/non-zero
   quantity, known reason, source reference, correction reference and runtime
   immutability.
@@ -119,6 +133,13 @@ None. M1-T4 is complete; M1-T5 is not started.
   presentations and catalog tests.
 - `packages/domain/src/stock/*` — movement reasons, source types, movement
   factory, balance type and stock tests.
+- `docs/project/ACCESS_MODEL.md` — confirmed access boundary, current roles and
+  future branch-scope invariants.
+- `docs/database.md` — current tables, both schema trees and both journals.
+- `docs/backend.md`, `docs/testing.md`, `docs/architecture.md` — reconciled with
+  the M1 domain, repository tests and guard behavior.
+- `scripts/check-boundaries.mjs` — domain built-in ban plus schema/migration
+  parity checks.
 - `packages/domain/src/ports/index.ts` — catalog repository ports and
   `Repositories`.
 - `packages/types/src/identifiers.ts` — catalog and stock movement branded ids.
@@ -154,8 +175,15 @@ None. M1-T4 is complete; M1-T5 is not started.
   source reference and required organization, branch, product and actor.
 - `StockBalance` is a type only; derived-versus-cached and negative-stock
   policies remain open (BQ-07, BQ-08).
+- The initial access model is one organization-wide central operator; branch
+  employees have no login. Future branch scope must be server-derived and is not
+  implemented (BQ-09).
 - Branch-scoped persistence is recorded in
   [ADR 0039](../decisions/0039-branch-scoped-persistence.md).
+- The guard now rejects Node built-ins in shipped domain code. Tests may still
+  use Node tooling.
+- The guard compares declared table names in both schema trees and journal entry
+  counts in both engines, so a one-engine schema or migration change fails.
 
 ### Known limitations
 
@@ -169,13 +197,14 @@ None. M1-T4 is complete; M1-T5 is not started.
 - The only business-looking UI is a static inventory placeholder.
 - The three development branches are not seeded because their names are not confirmed.
 - The existing roles are foundation roles, not the owner/operator/branch model.
+- There is no user-to-branch assignment or branch-scoped authorization.
 - `data/` is git-ignored; a fresh clone must run migrations and seed.
 
 ### Next action
 
-Implement **M1-T5**: document the access model for the central operator now and
-future branch users later, without building branch authorization. See
-[CURRENT_TASK.md](./CURRENT_TASK.md).
+M1 is complete. The M1-T5/M1-T6 changes are uncommitted pending authorization.
+After they are committed, start M2 with branch CRUD and the branch selector
+foundation. See [CURRENT_TASK.md](./CURRENT_TASK.md).
 
 ---
 

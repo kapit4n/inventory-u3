@@ -34,7 +34,9 @@ Secrets are read from the environment and never logged.
 | GET    | `/api/v1/organization`   | `organization:read`   |
 | PUT    | `/api/v1/organization`   | `organization:manage` |
 
-Inventory endpoints are intentionally absent until their milestone.
+Inventory endpoints are intentionally absent until their milestone. Branch and
+catalog entities have domain models and repository ports, but no HTTP route or
+UI yet.
 
 ## Request pipeline
 
@@ -58,8 +60,17 @@ events, not dental or inventory-specific prose.
 both. SQLite is the default; PostgreSQL integration tests run only when a test
 database URL answers.
 
+Implemented repository ports: organization, branch, measurement unit, product
+category, product, product presentation, user and session. The branch and catalog
+ports are exercised through integration tests on both engines. Stock remains a
+domain vocabulary only; no stock repository exists.
+
 ## Testing
 
-API tests cover configuration, problem mapping, authentication integration and a
-SQLite smoke path. Domain and validation tests cover rules. Browser tests mock the
-API through Playwright.
+API unit tests cover configuration, problem mapping and authentication.
+Integration tests cover authentication, the organization plus branch and catalog
+repository round-trips on SQLite, a cross-organization isolation query, a
+repository constraint and a migration smoke path. The same integration files run against
+PostgreSQL when `TEST_DATABASE_URL` answers and skip otherwise. Domain and
+validation tests cover their invariants. Browser tests mock the API through
+Playwright.

@@ -1,0 +1,116 @@
+# Access Model
+
+> Status: **M1-T5 access note.** This document defines the confirmed access
+> boundary, the implemented foundation and the future branch-access constraint.
+> It does not implement branch authorization or settle BQ-09.
+
+## 1. Confirmed requirements
+
+| ID     | Requirement                                                                   | Status    |
+| ------ | ----------------------------------------------------------------------------- | --------- |
+| BR-007 | One central operator enters information for all three branches.               | CONFIRMED |
+| BR-008 | Branch employees do not access the application in the initial version.        | CONFIRMED |
+| BR-010 | The owner receives consolidated information across all branches.              | CONFIRMED |
+| BR-024 | Owner reports consolidate all three branches.                                 | CONFIRMED |
+| BR-025 | The architecture should support future branch-specific users and permissions. | CONFIRMED |
+| BR-026 | Initially, only the central operator needs application access.                | CONFIRMED |
+
+Two consequences are often confused:
+
+- **Today:** one operator account, organization-wide operational access.
+- **Later:** a branch user may see only assigned branches. The date, roles and
+  visible data remain **PENDING** (BQ-09).
+
+## 2. Implemented foundation
+
+The authentication and authorization foundation exists:
+
+- A user belongs to one organization.
+- A session belongs to one active user and one organization.
+- Protected API routes require a permission; the auth plugin fails closed.
+- The request's organization scope comes from the resolved session, never from
+  client input.
+- The UI may hide an action, but the API permission check is the control.
+
+The existing roles and organization-wide permissions are:
+
+| Permission            | ADMINISTRATOR | MANAGER | STAFF |
+| --------------------- | :-----------: | :-----: | :---: |
+| `organization:read`   |       ✓       |    ✓    |   ✓   |
+| `organization:manage` |       ✓       |         |       |
+| `users:read`          |       ✓       |    ✓    |       |
+| `users:manage`        |       ✓       |         |       |
+| `inventory:read`      |       ✓       |    ✓    |   ✓   |
+| `inventory:write`     |       ✓       |    ✓    |   ✓   |
+| `reports:read`        |       ✓       |    ✓    |       |
+
+These roles are **organization-wide**. There is no user-to-branch assignment, no
+branch dimension in a permission check, and no branch-aware route. Every
+authenticated user who has a permission can use it on organization data.
+
+## 3. Business actors and the initial version
+
+| Actor              | Initial application access                         | Notes                                                                                           |
+| ------------------ | -------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| Owner              | None required in the first version                 | Receives consolidated information. Whether the owner later gets a read-only account is PENDING. |
+| Central operator   | One account; all three branches                    | Enters purchases, production, checkpoints, adjustments and closing data.                        |
+| Branch employee    | None                                               | Reports through WhatsApp; does not log in (BR-008).                                             |
+| Future branch user | Not implemented                                    | Would be restricted to assigned branches; timing and visible data are PENDING (BQ-09).          |
+| Administrator      | Existing foundation role, not a business actor yet | Manages organization settings and users when such administration exists.                        |
+
+The initial operator can use an existing account with `inventory:read` and
+`inventory:write`. If that person also manages users or organization settings,
+the account needs the corresponding permissions; this is a deployment choice, not
+a new role. Business roles are **PROPOSED**, not implemented.
+
+## 4. Future branch-scoped access
+
+When branch users are introduced, the following invariants apply:
+
+1. A branch assignment is stored server-side and resolved from the authenticated
+   user.
+2. A client-supplied branch id is a selection, never proof of authorization.
+3. A branch user may read or write only assigned branches.
+4. Consolidated reports may cross branches only with the required permission,
+   and are owner-facing rather than branch-user-facing.
+5. The organization boundary is still enforced on every query; branch scope is
+   an additional restriction, not a replacement.
+6. Audit fields use the authenticated actor, never a client-supplied user id.
+
+The future data shape is expected to include a user-to-branch assignment. No
+table, repository, role or permission value is created in M1-T5. ADR 0039
+already requires every operational row to carry both organization and branch
+ownership, which makes branch-scoped filtering possible later.
+
+## 5. Explicit non-goals for M1-T5
+
+- No `UserBranchAssignment` table or repository.
+- No branch-scoped authorization middleware.
+- No new `OWNER`, `OPERATOR` or `BRANCH_USER` role.
+- No permission changes or UI gating.
+- No user administration screen.
+- No audit-log implementation.
+
+## 6. Open questions
+
+| ID    | Question                                                                                      | Status                                                    |
+| ----- | --------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
+| BQ-09 | When do branch users need access, and what may they see?                                      | PENDING; nothing is implemented.                          |
+| BQ-03 | Who may correct confirmed records, and what approval/audit evidence is required?              | PENDING; the stock correction shape exists in the domain. |
+| —     | Does the owner need an application account, or receive reports outside the app?               | PENDING.                                                  |
+| —     | May one user belong to more than one branch, and may they also have organization-wide access? | PENDING.                                                  |
+| —     | Who administers users and passwords beyond the initial operator?                              | PENDING.                                                  |
+
+## 7. Implementation path
+
+M9 owns branch-scoped authorization and user-branch administration. Until then:
+
+- the central operator remains organization-wide;
+- branch employees have no accounts;
+- all branch-owned records still carry both `organizationId` and `branchId`;
+- every new repository must enforce organization scope and be ready to enforce a
+  server-derived branch restriction.
+
+See [ADR 0039](../decisions/0039-branch-scoped-persistence.md),
+[BUSINESS_REQUIREMENTS.md](./BUSINESS_REQUIREMENTS.md) and
+[open-questions.md](../open-questions.md).

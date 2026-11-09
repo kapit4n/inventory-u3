@@ -192,6 +192,8 @@ transaction rather than joining to current configuration.
   organization.
 - The current `Organization` tenant remains the top-level security boundary. A
   branch is a business boundary inside it, not a replacement for it.
+- Initial and future access rules are recorded in
+  [ACCESS_MODEL.md](./ACCESS_MODEL.md).
 
 ## 7. What is deliberately not modeled yet
 

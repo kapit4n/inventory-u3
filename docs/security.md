@@ -17,6 +17,14 @@ This document describes implemented safeguards. It makes **no compliance claims*
 - A request's organization scope comes from the resolved principal and the
   configured organization, never from client input.
 
+## Business access model
+
+The initial version has one central operator with organization-wide operational
+access. Branch employees do not log in, and no branch-scoped authorization is
+implemented. The roles above are foundation roles, not the final business roles.
+See [ACCESS_MODEL.md](./project/ACCESS_MODEL.md) for the confirmed boundary,
+current mapping and future branch-access invariants.
+
 ## Rate limiting
 
 - Login attempts are counted in process per normalized email and client address.

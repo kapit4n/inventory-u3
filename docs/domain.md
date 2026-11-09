@@ -97,6 +97,9 @@ timezone and requires an uppercase three-letter currency code.
 - Permissions are `organization:read`, `organization:manage`, `users:read`,
   `users:manage`, `inventory:read`, `inventory:write` and `reports:read`.
 - `hasPermission(role, permission)` is the single role matrix.
+- The roles are organization-wide. The initial central-operator boundary and the
+  future branch-scope requirement are in
+  [ACCESS_MODEL.md](./project/ACCESS_MODEL.md).
 
 ## Sessions
 

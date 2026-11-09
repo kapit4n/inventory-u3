@@ -38,7 +38,7 @@ supplied.
 
 | Package               | Responsibility                                              |
 | --------------------- | ----------------------------------------------------------- |
-| `packages/domain`     | Entities, invariants, ports and framework-free use cases    |
+| `packages/domain`     | Organization, branch, catalog, stock vocabulary, ports      |
 | `packages/validation` | Zod schemas used at every boundary                          |
 | `packages/types`      | Branded identifiers, time and currency primitives           |
 | `packages/api-client` | Typed REST transport, error mapping and bearer token header |
@@ -46,7 +46,6 @@ supplied.
 | `packages/ui`         | Tokens, layout-safe primitives and shadcn/ui-derived UI     |
 | `packages/config`     | Shared ESLint, Vitest, Tailwind and TypeScript config       |
 | `packages/tsconfig`   | Base TypeScript configurations                              |
-| `packages/api-client` | Client used by web, desktop and tests                       |
 
 ## Web and desktop
 
@@ -59,8 +58,9 @@ imports in features.
 
 SQLite is the default development and product engine. PostgreSQL is retained as
 a second engine. The two are explicit implementations over the same repository
-ports; there is no abstraction layer over them (ADR 0025). Schemas and
-migrations live in separate directories:
+ports; there is no abstraction layer over them (ADR 0025). Branch and catalog
+rows are organization-owned; branches own stock, not a private catalog. Schemas
+and migrations live in separate directories:
 
 ```
 database/schema/           PostgreSQL Drizzle schema
@@ -99,5 +99,6 @@ belongs in `packages/app/src/i18n/locales`; domain data remains literal.
 
 ## Guardrails
 
-`pnpm run guard:boundaries` checks dependency direction. Typecheck, lint and tests
-run across the workspace with Turbo.
+`pnpm run guard:boundaries` checks dependency direction, database access, thin
+shells, domain purity and dual-engine schema/migration parity. Typecheck, lint
+and tests run across the workspace with Turbo.

@@ -22,6 +22,18 @@ pnpm run format:check
 pnpm run build
 ```
 
+Domain tests cover branch ownership, catalog invariants (including raw/processed
+kind and average weight), stock-movement corrections and shared time rules. API
+integration tests exercise the branch and catalog repositories on a real SQLite
+database; the same files run against PostgreSQL when a server is configured.
+
+For SQLite integration tests on this machine, override the `.env` PostgreSQL test
+URL:
+
+```bash
+TEST_DATABASE_URL= pnpm --filter @inventory-u3/api test:integration
+```
+
 The E2E suite needs a built web app and installed Chromium:
 
 ```bash
@@ -47,4 +59,15 @@ paths, so a wrong base URL does not silently reach the network.
 
 PostgreSQL integration tests run only when `TEST_DATABASE_URL` answers. On the
 current machine no server is available, so those checks are skipped. SQLite is
-the default engine and must pass on every change.
+the default engine and must pass on every change. The boundary guard separately
+checks that both schema trees declare the same tables and both migration journals
+have the same entry count.
+
+## Current gaps
+
+- No stock, purchase, production, sales-checkpoint or closing tests exist because
+  those features do not exist.
+- No branch-scoped authorization tests exist until branch users are implemented.
+- E2E covers the foundation shell and settings only; no inventory workflow screen
+  exists yet.
+- There is no CI workflow; the commands above are run locally.

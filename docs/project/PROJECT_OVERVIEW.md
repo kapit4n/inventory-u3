@@ -1,7 +1,7 @@
 # Inventory U3 — Project Overview
 
-> Last verified: 2026-11-09 against commit `afc1cee` (M1-T4). M1-T5 is not
-> started. See [IMPLEMENTATION_PROGRESS](../development/IMPLEMENTATION_PROGRESS.md).
+> Last verified: 2026-11-09 against commit `366c5d9` plus the M1-T5/M1-T6
+> documentation. See [IMPLEMENTATION_PROGRESS](../development/IMPLEMENTATION_PROGRESS.md).
 
 ## Purpose
 
@@ -75,10 +75,13 @@ product.** As of this document:
 - The `/inventory` screen is a placeholder.
 - No employee, supplier, purchase, stock, production, sales checkpoint, daily
   closing or report feature exists.
+- The initial access boundary is documented in
+  [ACCESS_MODEL.md](./ACCESS_MODEL.md): one organization-wide central operator,
+  no branch employee login, and no branch-scoped authorization yet.
 - The nine business milestones are defined in
-  [IMPLEMENTATION_ROADMAP.md](../development/IMPLEMENTATION_ROADMAP.md). None of
-  them is complete. M1 is the current milestone; its first four tasks (branch,
-  product catalog, measurement configuration and stock concepts) are complete.
+  [IMPLEMENTATION_ROADMAP.md](../development/IMPLEMENTATION_ROADMAP.md). M1 is
+  complete: branch, product catalog, measurement configuration, stock concepts,
+  the access note, technical docs and the dual-engine guard are done. M2 is next.
 
 The inventory business model in this documentation is **proposed**. It separates
 confirmed product requirements from proposed design and from open questions. Do
@@ -194,6 +197,7 @@ it were current.
 - [BUSINESS_DOMAIN_MODEL.md](./BUSINESS_DOMAIN_MODEL.md)
 - [TECHNICAL_ARCHITECTURE.md](./TECHNICAL_ARCHITECTURE.md)
 - [TECHNICAL_DECISIONS.md](./TECHNICAL_DECISIONS.md)
+- [ACCESS_MODEL.md](./ACCESS_MODEL.md)
 
 ### Workflows
 

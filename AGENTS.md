@@ -78,7 +78,8 @@ it.
     `common2`, `manager`, `service2`. Prefer `ItemRepository`,
     `CreateStockMovement`, `SearchItems`, `GetItem`, `AdjustStockLevel`.
 
-There is an automated guard for the dependency-direction rules:
+There is an automated guard for dependency direction, domain purity, database
+access, thin shells and dual-engine schema/migration parity:
 `pnpm run guard:boundaries` (see `scripts/check-boundaries.mjs`).
 
 ## 4. Repository map
@@ -143,7 +144,7 @@ pnpm run format           # prettier --write .
 pnpm run format:check
 pnpm run test             # vitest unit/component tests
 pnpm run test:e2e         # playwright (needs browsers installed)
-pnpm run guard:boundaries # architectural dependency rules
+pnpm run guard:boundaries # dependency, domain-purity and engine-parity rules
 pnpm run db:up | db:down  # start/stop local PostgreSQL (docker, optional)
 pnpm run db:migrate       # apply drizzle migrations
 pnpm run db:seed          # seed development data

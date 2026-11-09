@@ -656,3 +656,173 @@ Modified:
 Read `AGENTS.md`, `PROJECT_OVERVIEW.md`, `IMPLEMENTATION_PROGRESS.md`,
 `CURRENT_TASK.md`, `docs/security.md` and the role matrix, then write the M1-T5
 access note. Update this log and the progress documents before finishing.
+
+## Session 7 — 2026-11-09 — M1-T5 access model note
+
+### Objective
+
+Document the initial central-operator access boundary and the constraints for
+future branch-scoped access without implementing branch authorization.
+
+### Work completed
+
+- Added [ACCESS_MODEL.md](../project/ACCESS_MODEL.md) with confirmed
+  requirements, implemented roles/permissions, business actors, initial access,
+  future branch scope, non-goals and open questions.
+- Linked the access note from the security, architecture, domain-model and
+  project-overview documents.
+- Updated the roadmap, progress, current-task, known-issues, open-question and
+  state documents.
+- Kept BQ-09 open: no branch assignment, role, permission, route or UI changed.
+- No code, schema, migration or seed changed.
+
+### Files changed
+
+Created:
+
+- `docs/project/ACCESS_MODEL.md`
+
+Modified:
+
+- `docs/security.md`
+- `docs/project/PROJECT_OVERVIEW.md`
+- `docs/project/TECHNICAL_ARCHITECTURE.md`
+- `docs/project/BUSINESS_DOMAIN_MODEL.md`
+- `docs/development/IMPLEMENTATION_PROGRESS.md`
+- `docs/development/IMPLEMENTATION_ROADMAP.md`
+- `docs/development/CURRENT_TASK.md`
+- `docs/development/KNOWN_ISSUES.md`
+- `docs/open-questions.md`
+- `docs/progress/STATE.md`
+- This log.
+
+### Technical decisions
+
+- The initial version has one central operator with organization-wide operational
+  access; branch employees do not log in.
+- Existing `ADMINISTRATOR`/`MANAGER`/`STAFF` roles remain foundation roles.
+  They are not renamed into business roles in this task.
+- A future branch assignment must be resolved server-side. A client-supplied
+  branch id is a selection, not authorization.
+- The organization boundary remains mandatory; branch scope adds a restriction.
+- Consolidated reports may cross branches only with permission and are
+  owner-facing, not branch-user-facing.
+- M1-T5 does not resolve BQ-09 or introduce `UserBranchAssignment`.
+
+### Validation
+
+- Documentation-only change; the M1-T4 code suite remains the last code run
+  (typecheck 12/12, lint 12/12, tests 166 passed + 3 skipped, build 5/5 at
+  `afc1cee`).
+- `pnpm run format:check` — PASS after the documentation edits.
+- Local Markdown link check — PASS after the documentation edits.
+- No code test was added or required.
+
+### Problems found
+
+- None. The existing missing branch authorization is documented rather than
+  implemented, as intended for this task.
+
+### Pending work
+
+- Commit the M1-T5 documentation.
+- M1-T6: reconcile the technical docs, confirm the boundary guard covers the
+  finished domain and close out M1.
+
+### Next session
+
+Read `AGENTS.md`, `PROJECT_OVERVIEW.md`, `IMPLEMENTATION_PROGRESS.md`,
+`CURRENT_TASK.md`, `TECHNICAL_ARCHITECTURE.md` and `docs/domain.md`, then perform
+the M1-T6 documentation/boundary closeout.
+
+## Session 8 — 2026-11-09 — M1-T6 docs and boundary guard closeout
+
+### Objective
+
+Reconcile the technical reference documents with M1 and extend the automated
+boundary guard for the finished domain.
+
+### Work completed
+
+- Rewrote `docs/database.md` for the current eight tables, both schema trees,
+  both migration journals, the seed state and the SQLite table-rebuild caveat.
+- Updated `docs/backend.md`, `docs/testing.md` and `docs/architecture.md` for the
+  branch/catalog repositories, integration coverage and guard scope.
+- Extended `scripts/check-boundaries.mjs`:
+  - shipped domain source may not import `node:`, `bun:` or `deno:` built-ins;
+  - PostgreSQL and SQLite schema trees must declare the same table names;
+  - both migration journals must have the same entry count.
+- Verified the new rules with temporary failing probes:
+  - a PostgreSQL-only table was rejected;
+  - `import 'node:fs'` in domain source was rejected;
+  - a SQLite journal with one entry removed was rejected.
+- Updated the roadmap, progress, current task, known issues, state and M1 status.
+
+### Files changed
+
+Created: none beyond the previous session's `docs/project/ACCESS_MODEL.md`.
+
+Modified:
+
+- `scripts/check-boundaries.mjs`
+- `docs/database.md`
+- `docs/backend.md`
+- `docs/testing.md`
+- `docs/architecture.md`
+- `docs/domain.md`
+- `docs/security.md`
+- `docs/project/PROJECT_OVERVIEW.md`
+- `docs/project/TECHNICAL_ARCHITECTURE.md`
+- `docs/project/BUSINESS_DOMAIN_MODEL.md`
+- `docs/development/IMPLEMENTATION_PROGRESS.md`
+- `docs/development/IMPLEMENTATION_ROADMAP.md`
+- `docs/development/CURRENT_TASK.md`
+- `docs/development/KNOWN_ISSUES.md`
+- `docs/open-questions.md`
+- `docs/progress/STATE.md`
+- This log.
+
+### Technical decisions
+
+- Schema parity at the guard level is table-name and journal-count parity, not a
+  full column/index/migration-content comparison. Integration tests remain the
+  authority for detailed parity (TD-09).
+- Domain purity now includes a ban on Node/runtime built-ins in shipped source;
+  test files may still use node tooling.
+- M1 is complete. No new business behavior was added in M1-T6.
+- The branch repository test is a cross-organization isolation test. Cross-branch
+  tests begin with the first branch-owned operational tables (M3/M4); the M1
+  acceptance wording was corrected to match the code.
+
+### Validation
+
+- `pnpm run typecheck` — PASS, 12/12 tasks.
+- `pnpm run lint` — PASS, 12/12 tasks, `BOUNDARY GUARD OK`.
+- `pnpm run guard:boundaries` — PASS, `BOUNDARY GUARD OK`.
+- Guard negative probes — all three rejected as expected; probe files/journal
+  restored.
+- `pnpm exec turbo run test --force` — 12/12 tasks, 166 passed, 3 skipped.
+- `TEST_DATABASE_URL= pnpm --filter @inventory-u3/api test:integration` — 4 files,
+  22 passed, 3 skipped.
+- `pnpm run build` — PASS, 5/5 tasks.
+- `pnpm run format:check` — PASS.
+- Local Markdown link check — PASS.
+- Not run: Playwright E2E; PostgreSQL integration tests (no server).
+
+### Problems found
+
+- The guard cannot prove column-level schema parity or migration-content parity;
+  recorded as TD-09 rather than claiming full parity.
+- The M1-T5/M1-T6 changes are still uncommitted.
+
+### Pending work
+
+- Commit the M1-T5/M1-T6 changes when authorized.
+- Start M2 with branch CRUD and the branch selector foundation.
+- Seed the three branches only after BQ-19 is answered.
+
+### Next session
+
+Read `AGENTS.md`, `PROJECT_OVERVIEW.md`, `IMPLEMENTATION_PROGRESS.md`,
+`CURRENT_TASK.md`, `IMPLEMENTATION_ROADMAP.md`, `docs/project/ACCESS_MODEL.md`
+and the M2 section of the roadmap before starting branch CRUD.

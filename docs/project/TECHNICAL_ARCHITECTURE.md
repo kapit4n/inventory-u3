@@ -102,6 +102,10 @@ Not implemented:
 - User administration endpoints.
 - Password reset, MFA or account lifecycle management.
 
+The initial access boundary and future branch-scope invariants are documented in
+[ACCESS_MODEL.md](./ACCESS_MODEL.md). Until branch authorization exists, the
+central operator is organization-wide and branch employees have no accounts.
+
 ## 6. Persistence
 
 SQLite is the default engine. PostgreSQL is retained as an explicit second
@@ -157,13 +161,18 @@ desktop shell does not open a database; it talks to the API over HTTP.
 | Browser E2E      | Playwright + mocked API | `e2e/web/*.spec.ts`              |
 
 PostgreSQL integration tests require `TEST_DATABASE_URL` and are skipped on this
-machine because no PostgreSQL server is available.
+machine because no PostgreSQL server is available. The current integration files
+cover authentication, organization, branch and catalog repository round-trips, a
+cross-organization isolation query, a repository constraint and a migration smoke
+path. No
+stock or workflow API exists yet.
 
 ## 10. Guardrails and quality gates
 
 - TypeScript strict everywhere.
 - ESLint flat config; Prettier.
-- Boundary guard for dependency-direction violations.
+- Boundary guard for dependency-direction violations, database access, thin
+  shells, Node built-ins in the domain, and dual-engine schema/journal parity.
 - Zod at every external boundary.
 - No business logic or database access in React components.
 - No Drizzle/React/Tauri/browser APIs in the domain.
