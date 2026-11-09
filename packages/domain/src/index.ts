@@ -11,3 +11,4 @@ export * from './organization/index.js';
 export * from './ports/index.js';
 export * from './product/index.js';
 export * from './shared/index.js';
+export * from './stock/index.js';

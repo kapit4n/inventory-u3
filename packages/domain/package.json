@@ -10,7 +10,8 @@
     "./branch": "./src/branch/index.ts",
     "./organization": "./src/organization/index.ts",
     "./ports": "./src/ports/index.ts",
-    "./product": "./src/product/index.ts"
+    "./product": "./src/product/index.ts",
+    "./stock": "./src/stock/index.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
