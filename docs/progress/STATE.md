@@ -13,7 +13,11 @@
 - **Business roadmap:** M1 is IN_PROGRESS; M2–M9 are NOT_STARTED.
 - **Branch foundation:** entity, dual-engine schema, migrations and repositories
   are implemented. No branch API route or UI exists yet.
-- **Next task:** M1-T2 — product, category, unit and presentation model.
+- **Catalog identity:** units, categories, products and presentations have
+  domain + dual-engine persistence. No API route, UI, prices, raw/processed kind
+  or average weight exists yet.
+- **Next task:** M1-T3 — raw/processed distinction and average-weight
+  configuration.
 
 The previous foundation verification record is preserved in
 [SESSION_LOG.md](../development/SESSION_LOG.md) (Sessions 0–3).

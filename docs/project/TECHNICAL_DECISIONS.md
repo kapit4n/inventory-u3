@@ -179,3 +179,26 @@ averageWeightPerTray` and `estimatedValue = estimatedKg × sellingPricePerKg`.
   plans are worse than a single superseded pointer.
 - **Consequences:** New work must be scheduled against M1–M9. Adding a milestone
   requires updating the roadmap and progress file together.
+
+### TD-009 — Catalog master data is organization-wide and units are explicit
+
+- **Date:** 2026-11-09
+- **Status:** ACCEPTED for M1-T2; scope may be revised if BQ-06 is answered
+  differently.
+- **Context:** The business has independent branches but one central operator.
+  BQ-06 asks whether prices and average weights are organization-wide or
+  branch-specific; the confirmed requirements do not answer it. BQ-10 leaves
+  unit conversion open.
+- **Decision:** Measurement units, categories, products and presentations are
+  organization-owned master data. A product references explicit inventory,
+  sales and optional purchase/production units. No conversion factor is stored
+  or applied. Branch ownership starts with stock and operational records, not
+  with the catalog row.
+- **Alternatives considered:** Duplicate the catalog per branch; rejected because
+  it would fragment master data before a confirmed requirement. Store a
+  conversion factor per product; rejected because BQ-10 is unresolved and a
+  guessed factor would silently corrupt quantities.
+- **Consequences:** Catalog reads are scoped by organization, not branch. If
+  BQ-06 is later answered as branch-specific, prices and configuration need a
+  deliberate extension rather than a reinterpretation of these rows. Every
+  quantity must say which unit it uses until conversion is confirmed.

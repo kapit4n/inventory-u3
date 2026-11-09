@@ -9,7 +9,8 @@
     ".": "./src/index.ts",
     "./branch": "./src/branch/index.ts",
     "./organization": "./src/organization/index.ts",
-    "./ports": "./src/ports/index.ts"
+    "./ports": "./src/ports/index.ts",
+    "./product": "./src/product/index.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",

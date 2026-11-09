@@ -334,3 +334,120 @@ Read `AGENTS.md`, `PROJECT_OVERVIEW.md`,
 `IMPLEMENTATION_PROGRESS.md`, `CURRENT_TASK.md`, the product requirements and
 the branch slice, then implement M1-T2. Update this log and the progress
 documents before finishing.
+
+## Session 4 — 2026-11-09 — M1-T2 product catalog foundation
+
+### Objective
+
+Commit the M1-T1 branch slice, then implement the org-wide catalog identity:
+measurement units, categories, products and presentations on both engines.
+
+### Work completed
+
+- Committed M1-T1 as `d6b62d5` — branch entity, dual-engine schema/migrations,
+  repositories, tests, ADR 0039 and documentation.
+- Added branded catalog identifiers and constructors for measurement units,
+  categories, products and presentations.
+- Added the four catalog entities and validation to `packages/domain` without
+  React, Drizzle or database imports.
+- Added catalog repository ports and extended `Repositories`.
+- Added PostgreSQL and SQLite catalog tables, indexes, foreign keys and both
+  migration journals.
+- Implemented the eight PostgreSQL/SQLite catalog repositories and wired them
+  into both repository builders.
+- Added domain catalog tests and a dual-engine repository integration test with
+  organization-isolation coverage.
+- Applied the SQLite migration and reseeded the development database.
+- Updated the progress, roadmap, task, issue, architecture, domain and overview
+  documents.
+
+### Files changed
+
+Created:
+
+- `packages/domain/src/product/measurement-unit.ts`
+- `packages/domain/src/product/product-category.ts`
+- `packages/domain/src/product/product.ts`
+- `packages/domain/src/product/product-presentation.ts`
+- `packages/domain/src/product/index.ts`
+- `packages/domain/src/product/product-catalog.test.ts`
+- `database/schema/catalog.ts`
+- `database/schema/sqlite/catalog.ts`
+- `database/migrations/0002_tranquil_lady_vermin.sql`
+- `database/migrations-sqlite/0002_massive_white_tiger.sql`
+- `apps/api/src/infrastructure/persistence/repositories/measurement-unit-repository.ts`
+- `apps/api/src/infrastructure/persistence/repositories/product-category-repository.ts`
+- `apps/api/src/infrastructure/persistence/repositories/product-repository.ts`
+- `apps/api/src/infrastructure/persistence/repositories/product-presentation-repository.ts`
+- `apps/api/src/infrastructure/persistence/sqlite/repositories/measurement-unit-repository.ts`
+- `apps/api/src/infrastructure/persistence/sqlite/repositories/product-category-repository.ts`
+- `apps/api/src/infrastructure/persistence/sqlite/repositories/product-repository.ts`
+- `apps/api/src/infrastructure/persistence/sqlite/repositories/product-presentation-repository.ts`
+- `apps/api/test/product-catalog-repository.integration.test.ts`
+
+Modified:
+
+- `packages/types/src/identifiers.ts`.
+- `packages/domain/src/ports/index.ts` and `packages/domain/src/index.ts`.
+- `packages/domain/package.json`.
+- `database/schema/index.ts` and `database/schema/sqlite/index.ts`.
+- `apps/api/src/infrastructure/persistence/postgres/unit-of-work.ts`.
+- `apps/api/src/infrastructure/persistence/sqlite/repositories.ts`.
+- Generated migration metadata and journals on both engines.
+- `docs/development/IMPLEMENTATION_PROGRESS.md`,
+  `IMPLEMENTATION_ROADMAP.md`, `CURRENT_TASK.md`, `KNOWN_ISSUES.md` and this log.
+- `docs/domain.md`, `docs/project/BUSINESS_DOMAIN_MODEL.md`,
+  `PROJECT_OVERVIEW.md`, `TECHNICAL_ARCHITECTURE.md`,
+  `TECHNICAL_DECISIONS.md`.
+- `docs/workflows/PRODUCT_MEASUREMENT_RULES.md`, `docs/progress/STATE.md`.
+
+### Technical decisions
+
+- Catalog master data is organization-wide; stock will be branch-owned (TD-009).
+- Units are explicit organization-owned rows referenced by id; no conversion
+  factor is stored while BQ-10 is open.
+- Products require inventory and sales units; purchase and production units are
+  optional.
+- Product names, category names, unit codes and presentation names are unique in
+  their documented scope.
+- Raw/processed kind, average weight and prices are deliberately absent; they
+  belong to M1-T3/M2.
+- No API route, UI or seed product data was added.
+
+### Tests and validation
+
+- `pnpm run typecheck` — PASS, 12/12 tasks.
+- `pnpm run lint` — PASS, 12/12 tasks, `BOUNDARY GUARD OK`.
+- `pnpm exec turbo run test --force` — PASS, 12/12 tasks, 147 passed + 3 skipped.
+- `TEST_DATABASE_URL= pnpm --filter @inventory-u3/api test:integration` — PASS,
+  4 files, 22 passed + 3 skipped.
+- `pnpm run db:migrate` — PASS on SQLite, `0002` applied.
+- `pnpm run db:seed` — PASS on SQLite.
+- `pnpm run build` — PASS, 5/5 tasks.
+- Generated Drizzle `meta/*.json` files were Prettier-formatted.
+- PostgreSQL catalog repository tests — SKIPPED, no reachable server.
+- Default `pnpm run test:integration` — FAILS with `ECONNREFUSED` because `.env`
+  defines `TEST_DATABASE_URL`; use the empty override (SI-06).
+- E2E — NOT RUN.
+
+### Problems found
+
+- No PostgreSQL server is available, so engine parity for the catalog repos is
+  not verified on this machine.
+- The default integration command still needs the empty `TEST_DATABASE_URL`
+  override.
+- Raw/processed, average weight and prices are still unimplemented by design.
+- M1-T2 remains uncommitted at the time of this entry.
+
+### Pending work
+
+- Commit M1-T2 when requested.
+- Implement M1-T3: raw/processed product kind and average-weight configuration.
+- Confirm BQ-06, BQ-10 and BQ-19 before their dependent milestones.
+
+### Next session
+
+Read `AGENTS.md`, `PROJECT_OVERVIEW.md`,
+`IMPLEMENTATION_PROGRESS.md`, `CURRENT_TASK.md`, the product measurement rules
+and the M1-T2 slice, then implement M1-T3. Update this log and the progress
+documents before finishing.

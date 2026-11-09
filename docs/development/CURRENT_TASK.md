@@ -2,118 +2,127 @@
 
 > Last updated: 2026-11-09.
 >
-> **No feature task is currently in progress.** M1-T1 (branch foundation) is
-> complete. The next task is M1-T2.
+> **No feature task is currently in progress.** M1-T2 (catalog identity) is
+> complete. The next task is M1-T3.
 
 ## Task identity
 
-| Field        | Value                                                             |
-| ------------ | ----------------------------------------------------------------- |
-| Milestone    | M1 — Business Domain Foundation                                   |
-| Task ID      | M1-T2                                                             |
-| Task         | Product, category, measurement unit and presentation domain model |
-| Status       | NOT_STARTED (ready)                                               |
-| Dependencies | M1-T1 complete; TD-001 and TD-003 accepted                        |
-| Blocks       | M1-T3, M1-T4, M2, M3, M4, M5, M6, M7, M8                          |
+| Field        | Value                                                                |
+| ------------ | -------------------------------------------------------------------- |
+| Milestone    | M1 — Business Domain Foundation                                      |
+| Task ID      | M1-T3                                                                |
+| Task         | Raw/processed distinction and average-weight configuration           |
+| Status       | NOT_STARTED (ready)                                                  |
+| Dependencies | M1-T2 complete; TD-001, TD-009 and BQ-06 working assumption accepted |
+| Blocks       | M1-T4, M2, M3, M4, M5, M6, M7, M8                                    |
 
 ## Objective
 
-Define the master-data concepts every operational record will reference:
-categories, measurement units, products and product presentations. Keep the
-model independent of React, Drizzle, the database engines and the API.
-
-This task establishes the vocabulary. It must not build product CRUD screens or
-sales/purchase workflows.
+Make the raw/processed distinction explicit in the product model and add the
+configured average weight per tray to the presentation model. Keep the work
+framework-independent and dual-engine. Do not add prices, conversion arithmetic
+or stock.
 
 ## Context
 
-- Branch is now implemented on both engines.
-- A processed product uses trays and an average weight per tray (BR-015–BR-020).
-- Unprocessed products use their configured unit without tray conversion
-  (BR-021).
-- A product may be sold in a different unit than it is purchased in; conversion
-  support is still open (BQ-10).
-- Raw vs processed distinction and average-weight configuration are M1-T3, but
-  the T2 model must not make them impossible to add.
+- M1-T2 implemented units, categories, products and presentations on both
+  engines. Products have no kind yet; presentations have no weight yet.
+- BR-015–BR-020 distinguish processed products (trays, average weight) from
+  unprocessed products (configured unit, no tray conversion). BR-021 covers the
+  unprocessed case.
+- BQ-06 (organization-wide vs branch-specific price/weight configuration) is not
+  answered. TD-009 records the working assumption: catalog configuration is
+  organization-wide until product input says otherwise. Stop and ask if that
+  assumption blocks the task.
+- BQ-10 (unit conversion) remains open; do not add conversion factors.
+- The catalog tables are newly created and contain no seeded product data. Any
+  migration that adds a required column must still be explicit about existing
+  rows rather than hiding a business default.
 
 Read before starting:
 
 1. [BUSINESS_REQUIREMENTS.md](../project/BUSINESS_REQUIREMENTS.md) — BR-014 to BR-021.
 2. [BUSINESS_DOMAIN_MODEL.md](../project/BUSINESS_DOMAIN_MODEL.md) — sections 3 and 4.
 3. [PRODUCT_MEASUREMENT_RULES.md](../workflows/PRODUCT_MEASUREMENT_RULES.md).
-4. [open-questions.md](../open-questions.md) — BQ-06, BQ-10, BQ-11.
-5. The implemented branch slice in `packages/domain/src/branch`, both schema
-   trees and both repository builders.
+4. [open-questions.md](../open-questions.md) — BQ-06 and BQ-10.
+5. The implemented catalog slice in `packages/domain/src/product`, both schema
+   trees, both migrations and the catalog repositories.
 
 ## Files and modules involved
 
-- `packages/domain/src/product/` (new) and `packages/domain/src/index.ts`.
-- `packages/domain/src/ports/index.ts` — new repositories if persistence lands.
-- `packages/types/src/identifiers.ts` — new branded ids if required.
-- `database/schema/` and `database/schema/sqlite/` — only if persistence lands.
+- `packages/domain/src/product/product.ts` and `product-presentation.ts`.
+- `packages/domain/src/product/product-catalog.test.ts`.
+- `packages/domain/src/ports/index.ts` only if a port signature changes.
+- `packages/types/src/identifiers.ts` only if a new branded id is required.
+- `database/schema/catalog.ts` and `database/schema/sqlite/catalog.ts`.
 - `database/migrations/` and `database/migrations-sqlite/` — generated together.
-- `apps/api/src/infrastructure/persistence/` — repositories and wiring if
-  persistence lands.
-- Tests colocated with the domain and in `apps/api/test/`.
+- PostgreSQL and SQLite catalog repositories and their integration test.
 - Documentation after implementation.
 
-## Proposed domain concepts
+## Proposed model
 
-Keep the first version explicit and small:
+Keep the additions explicit and small:
 
-- `MeasurementUnit` — a code/name such as `KILOGRAM`, `UNIT`, `TRAY`, with the
-  information needed to display and compare it. Do not invent conversion factors
-  (BQ-10).
-- `ProductCategory` — organization-owned grouping with a name.
-- `Product` — organization-owned item with a name, category, sale unit and an
-  inventory/purchase unit. Do not add prices yet; price history is M2.
-- `ProductPresentation` — a product packaging/presentation (for example a
-  covered tray). Average weight per tray belongs to T3 unless the design makes
-  it inseparable; document the choice.
-
-Avoid inventing SKU formats, tax fields, supplier links, barcodes or recipes.
+- `ProductKind` — domain union `"RAW" | "PROCESSED"` (or an equivalent
+  domain-specific representation). The product carries a required kind. Do not
+  use a numeric flag whose meaning is only known outside the domain.
+- `ProductPresentation.averageWeightGrams` — a positive integer or `undefined`.
+  The documented 0.001 kg precision is exactly one gram, so integer grams avoid
+  floating-point drift. Display conversion to kilograms belongs to the UI.
+- Because presentations belong to products, decide and document whether every
+  presentation requires a weight or only processed-product presentations do.
+  If the rule needs the product kind, enforce it where the product is available
+  rather than duplicating the kind on the presentation.
+- Do not add an estimated/measured weight, a price, a tray-to-unit conversion or
+  a historical snapshot in this task.
 
 ## Acceptance criteria
 
-- [ ] New concepts are pure TypeScript and import only `@inventory-u3/types` and
-      domain shared modules.
-- [ ] Names are domain-specific; no generic `manager`, `service` or `helper`.
-- [ ] A product belongs to exactly one organization and one category.
-- [ ] Units are explicit values, not free-text guesses at every call site.
-- [ ] Raw vs processed and average-weight rules remain implementable by M1-T3.
-- [ ] If persistence is added, both schema trees and both migration journals
-      change together, with repository implementations for both engines.
-- [ ] Organization scoping is explicit in every repository method.
+- [ ] `ProductKind` is required on new products and persisted in both engines.
+- [ ] Raw and processed products are distinguishable without external lookup
+      tables or free-text notes.
+- [ ] `ProductPresentation` can store a configured average weight per tray; no
+      value is hardcoded.
+- [ ] Weight uses an exact integer representation; no floating kilograms and no
+      silent rounding.
+- [ ] The migration states how existing rows are handled; no business-meaning
+      default is hidden.
+- [ ] Domain tests cover valid/invalid kinds and weight values.
+- [ ] Repository tests cover the new fields on both engines where available,
+      including organization isolation.
+- [ ] Both schema trees and both migration journals change together.
 - [ ] `pnpm run guard:boundaries`, `typecheck`, `lint` and `test` pass.
-- [ ] Documentation states what is implemented versus proposed.
+- [ ] SQLite migration and seed run successfully.
+- [ ] Documentation distinguishes implemented configuration from still-proposed
+      measurement behaviour.
 
 ## Tests required
 
-- Domain tests for valid and invalid names/units.
-- Domain tests for organization/category ownership and any invariants introduced.
-- Repository tests for each new port method if persistence lands, on both
-  engines where available.
-- A cross-organization isolation test for each new repository.
-- SQLite migration smoke check if tables are added.
+- Domain tests for required kind, positive integer weight and revised
+  presentation invariants.
+- Repository round-trip tests for kind and average weight.
+- Cross-organization isolation remains covered.
+- SQLite migration smoke check.
 - PostgreSQL tests run when `TEST_DATABASE_URL` answers; otherwise skip and
   record the skip.
 
 ## Remaining steps
 
-1. Re-read the requirements and the branch slice.
-2. Decide the exact T2 boundary versus T3 and write it in this file before coding.
-3. Implement the domain concepts and tests.
-4. Add persistence in both engines if the acceptance criteria require it.
-5. Wire repositories through `Repositories`.
-6. Run the verification commands and the SQLite migration.
-7. Update `IMPLEMENTATION_PROGRESS.md`, the roadmap, this file, `SESSION_LOG.md`
-   and the domain/model documentation.
-8. Choose M1-T3 or the next roadmap task.
+1. Re-read the requirements, product rules, TD-009 and the M1-T2 slice.
+2. Decide and document the weight optionality rule before coding.
+3. Implement the domain changes and tests.
+4. Update both schemas, generate both migrations, and implement the repository
+   changes for both engines.
+5. Run the verification commands and the SQLite migration.
+6. Update `IMPLEMENTATION_PROGRESS.md`, the roadmap, this file, `SESSION_LOG.md`,
+   `KNOWN_ISSUES.md` and the domain/model/measurement documents.
+7. Choose M1-T4 (stock movement and balance concepts) or the next roadmap task.
 
 ## Out of scope for this task
 
 - Product CRUD UI or API routes.
-- Prices, price history, purchases or suppliers.
-- Stock movements, production, sales checkpoints or closing.
+- Prices or price history.
+- Estimated/measured weight records, sales snapshots and production snapshots.
+- Stock movements, purchases, production, sales checkpoints or closing.
 - Unit conversion arithmetic.
 - Seeding product data with invented business values.

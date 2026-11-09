@@ -1,14 +1,14 @@
 # Domain
 
 > This file documents the domain **currently implemented in `packages/domain`**.
-> The proposed business domain (products, units, stock, production, sales
-> checkpoints) is documented in
+> The proposed remainder of the business domain (measurement configuration,
+> prices, stock, production, sales checkpoints) is documented in
 > [BUSINESS_DOMAIN_MODEL.md](./project/BUSINESS_DOMAIN_MODEL.md). Do not read a
 > proposed entity from that document as implemented code.
 
 `packages/domain` is framework-independent TypeScript. It contains the
-organization, identity, session and branch foundation. Product, stock and
-transactional entities arrive in later milestones.
+organization, identity, session, branch and product-catalog foundation. Stock
+and transactional entities arrive in later milestones.
 
 ## Branch
 
@@ -28,6 +28,24 @@ interface Branch {
 `createBranch` trims and validates the name (1–120 characters) and defaults
 `isActive` to `true`. A branch belongs to exactly one organization; operational
 records will belong to one branch.
+
+## Product catalog
+
+The catalog is organization-wide master data, not branch data. A branch owns its
+stock; it does not own a private copy of the catalog.
+
+- `MeasurementUnit` has a code, a display name and an active flag. Units are
+  organization-owned rows, not a closed enum, so BR-014's "other configurable
+  units" can be added. No conversion factor is stored (BQ-10 is open).
+- `ProductCategory` groups products with a name and an active flag.
+- `Product` belongs to one organization and one category. It references an
+  inventory unit and a sales unit; purchase and production units are optional
+  because not every product is bought or prepared.
+- `ProductPresentation` belongs to one product and one organization. It records
+  the packaging/presentation identity. Average weight per tray is deliberately
+  not present yet; M1-T3 adds it.
+- Prices, the raw/processed distinction and average weight are not modelled yet.
+  Those are M1-T3/M2 work, not hidden properties of these entities.
 
 ## Organization
 
@@ -80,6 +98,10 @@ Repositories are declared in `packages/domain/src/ports`:
 
 - `OrganizationRepository`
 - `BranchRepository`
+- `MeasurementUnitRepository`
+- `ProductCategoryRepository`
+- `ProductRepository`
+- `ProductPresentationRepository`
 - `UserRepository`
 - `SessionRepository`
 - `UnitOfWork`
@@ -89,7 +111,7 @@ implementations (ADR 0025).
 
 ## Not yet modeled
 
-- Product categories, products, units and presentations
+- Raw vs processed product distinction, average weight per tray and prices
 - Suppliers, employees and purchases
 - Stock levels, movements, adjustments and transfers
 - Production batches

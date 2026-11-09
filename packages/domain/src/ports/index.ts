@@ -6,11 +6,25 @@
  * what it needs, never how it is stored or transported.
  */
 
-import type { BranchId, IsoDateTime, OrganizationId, SessionId, UserId } from '@inventory-u3/types';
+import type {
+  BranchId,
+  IsoDateTime,
+  MeasurementUnitId,
+  OrganizationId,
+  ProductCategoryId,
+  ProductId,
+  ProductPresentationId,
+  SessionId,
+  UserId,
+} from '@inventory-u3/types';
 
 import type { Branch } from '../branch/branch.js';
 import type { AuthenticatedUser, Session, UserWithCredentials } from '../organization/auth.js';
 import type { Organization, OrganizationSettingsUpdate } from '../organization/organization.js';
+import type { MeasurementUnit } from '../product/measurement-unit.js';
+import type { ProductCategory } from '../product/product-category.js';
+import type { ProductPresentation } from '../product/product-presentation.js';
+import type { Product } from '../product/product.js';
 
 export interface UnitOfWork {
   transaction<T>(work: (repositories: Repositories) => Promise<T>): Promise<T>;
@@ -25,6 +39,10 @@ export interface UnitOfWork {
 export interface Repositories {
   readonly organizations: OrganizationRepository;
   readonly branches: BranchRepository;
+  readonly measurementUnits: MeasurementUnitRepository;
+  readonly productCategories: ProductCategoryRepository;
+  readonly products: ProductRepository;
+  readonly productPresentations: ProductPresentationRepository;
   readonly users: UserRepository;
   readonly sessions: SessionRepository;
 }
@@ -42,6 +60,42 @@ export interface BranchRepository {
   findById(organizationId: OrganizationId, branchId: BranchId): Promise<Branch | undefined>;
   listByOrganization(organizationId: OrganizationId): Promise<readonly Branch[]>;
   create(branch: Branch): Promise<Branch>;
+}
+
+export interface MeasurementUnitRepository {
+  findById(
+    organizationId: OrganizationId,
+    measurementUnitId: MeasurementUnitId,
+  ): Promise<MeasurementUnit | undefined>;
+  listByOrganization(organizationId: OrganizationId): Promise<readonly MeasurementUnit[]>;
+  create(measurementUnit: MeasurementUnit): Promise<MeasurementUnit>;
+}
+
+export interface ProductCategoryRepository {
+  findById(
+    organizationId: OrganizationId,
+    productCategoryId: ProductCategoryId,
+  ): Promise<ProductCategory | undefined>;
+  listByOrganization(organizationId: OrganizationId): Promise<readonly ProductCategory[]>;
+  create(productCategory: ProductCategory): Promise<ProductCategory>;
+}
+
+export interface ProductRepository {
+  findById(organizationId: OrganizationId, productId: ProductId): Promise<Product | undefined>;
+  listByOrganization(organizationId: OrganizationId): Promise<readonly Product[]>;
+  create(product: Product): Promise<Product>;
+}
+
+export interface ProductPresentationRepository {
+  findById(
+    organizationId: OrganizationId,
+    productPresentationId: ProductPresentationId,
+  ): Promise<ProductPresentation | undefined>;
+  listByProduct(
+    organizationId: OrganizationId,
+    productId: ProductId,
+  ): Promise<readonly ProductPresentation[]>;
+  create(productPresentation: ProductPresentation): Promise<ProductPresentation>;
 }
 
 export interface UserRepository {

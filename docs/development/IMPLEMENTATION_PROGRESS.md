@@ -5,24 +5,25 @@
 
 ## Summary
 
-| Field                  | Value                                                                      |
-| ---------------------- | -------------------------------------------------------------------------- |
-| Current milestone      | M1 — Business Domain Foundation                                            |
-| Current task           | M1-T1 complete; next task is M1-T2 (product foundation)                    |
-| Overall project status | Foundation and branch foundation complete; other business work not started |
-| Completed milestones   | None of M1–M9 (the foundation prerequisite is complete)                    |
-| In-progress milestones | M1                                                                         |
-| Blocked milestones     | M6 finalization is blocked on BR-013 (WhatsApp reporting format)           |
-| Pending milestones     | M2, M3, M4, M5, M6, M7, M8, M9                                             |
-| Last verified commit   | `23701fb` (documentation baseline) plus uncommitted M1-T1 changes          |
-| Last update date       | 2026-11-09                                                                 |
-| Next recommended task  | M1-T2 — Product, category, unit and presentation model                     |
+| Field                  | Value                                                                             |
+| ---------------------- | --------------------------------------------------------------------------------- |
+| Current milestone      | M1 — Business Domain Foundation                                                   |
+| Current task           | M1-T2 complete; next task is M1-T3 (raw/processed and average weight)             |
+| Overall project status | Foundation, branch and catalog identity complete; other business work not started |
+| Completed milestones   | None of M1–M9 (the foundation prerequisite is complete)                           |
+| In-progress milestones | M1                                                                                |
+| Blocked milestones     | M6 finalization is blocked on BR-013 (WhatsApp reporting format)                  |
+| Pending milestones     | M2, M3, M4, M5, M6, M7, M8, M9                                                    |
+| Last verified commit   | `d6b62d5` (branch foundation) plus uncommitted M1-T2 changes                      |
+| Last update date       | 2026-11-09                                                                        |
+| Next recommended task  | M1-T3 — Raw/processed distinction and average-weight configuration                |
 
 ### Working tree at the time of this update
 
-M1-T1 added the branch entity, port, both schemas, both migrations, both
-repository implementations, repository wiring and tests. These changes are in
-the working tree and were not committed at the time of this update.
+M1-T2 added the catalog domain entities, ports, both schemas, both migrations,
+eight repository implementations, repository wiring and tests. These changes are
+in the working tree and were not committed at the time of this update. M1-T1 is
+committed as `d6b62d5`.
 
 ## Verification for this update
 
@@ -30,19 +31,19 @@ the working tree and were not committed at the time of this update.
 | ---------------------------------- | -------------------------------------------------------------- |
 | `pnpm run typecheck`               | PASS — 12/12 tasks                                             |
 | `pnpm run lint`                    | PASS — 12/12 tasks, `BOUNDARY GUARD OK`                        |
-| `pnpm exec turbo run test --force` | PASS — 12/12 tasks, 134 passed, 2 skipped                      |
-| `pnpm run test:integration`        | PASS with `TEST_DATABASE_URL=` — 3 files, 18 passed, 2 skipped |
-| `pnpm run db:migrate`              | PASS — SQLite branch migration applied                         |
+| `pnpm exec turbo run test --force` | PASS — 12/12 tasks, 147 passed, 3 skipped                      |
+| `pnpm run test:integration`        | PASS with `TEST_DATABASE_URL=` — 4 files, 22 passed, 3 skipped |
+| `pnpm run db:migrate`              | PASS — SQLite catalog migration applied                        |
 | `pnpm run db:seed`                 | PASS — existing development data reseeded                      |
 | `pnpm run test:e2e`                | NOT RUN; last recorded result was 18/18 on the foundation      |
 | `pnpm run format:check`            | PASS — all files use Prettier style                            |
 | Local Markdown link check          | PASS — all local links resolve                                 |
 | `pnpm run build`                   | PASS — 5/5 tasks                                               |
 
-Test counts from the forced run: API 44 passed + 2 skipped, desktop 4, database
-6, api-client 15, app 48, domain 17. Total 134 passed and 2 skipped. The two
-skipped tests are the PostgreSQL branch-repository tests, which require
-`TEST_DATABASE_URL`.
+Test counts from the forced run: API 48 passed + 3 skipped, desktop 4, database
+6, api-client 15, app 48, domain 26. Total 147 passed and 3 skipped. The skipped
+tests are the PostgreSQL branch and catalog repository tests, which require a
+reachable `TEST_DATABASE_URL`.
 
 PostgreSQL integration tests were not executed because no PostgreSQL server is
 available on this machine. This is a known environment limitation, not a pass.
@@ -70,62 +71,85 @@ integration files without the PostgreSQL half. See SI-06.
 - [x] Documentation/continuity system established.
 - [x] M1-T1: Branch domain entity, repository port and dual-engine schema,
       migrations and repository implementations with isolation tests.
+- [x] M1-T2: Product/category/unit/presentation domain model, dual-engine
+      schema/migrations and repository implementations with isolation tests.
 
 ### In Progress
 
-- [ ] M1-T2: Product/category/unit/presentation domain model.
-- [ ] M1-T3: Average-weight and raw/processed model.
+- [ ] M1-T3: Raw/processed distinction and average-weight configuration.
 - [ ] M1-T4: Stock movement and balance concepts.
 - [ ] M1-T5: Access model for central operator and future branch users.
+- [ ] M1-T6: Update technical docs and boundary guard for the remaining domain.
 
 ### Pending
 
-- [ ] Remaining M1 product/measurement/stock work.
+- [ ] Remaining M1 raw/processed, measurement and stock work.
 - [ ] Branch API route and management UI (M2).
+- [ ] Catalog API routes and management UI (M2).
 - [ ] Seed the three branches once their names and codes are confirmed.
-- [ ] Update the remaining technical references after M1-T2.
+- [ ] Product prices and price history (M2).
 
 ### Validation
 
 - Tests executed: `typecheck`, `lint`, unit/component/API tests (see summary).
-- Passed: typecheck 12/12, lint 12/12, tests 134 passed + 2 skipped.
-- SQLite migration and seed applied successfully.
+- Passed: typecheck 12/12, lint 12/12 with `BOUNDARY GUARD OK`, tests 147
+  passed + 3 skipped.
+- SQLite catalog migration and seed applied successfully.
 - Failed: default `test:integration` without clearing `TEST_DATABASE_URL`
   (SI-06); the SQLite path passes with the override.
 - Not executed: PostgreSQL integration tests, Playwright E2E.
 - Build passed 5/5.
-- New business-domain tests: 4 for `createBranch`, 3 SQLite repository tests
-  (create/read, organization listing, cross-organization denial).
-- PostgreSQL repository tests exist but were skipped without `TEST_DATABASE_URL`.
+- New M1-T2 tests: 9 domain catalog tests and 4 SQLite catalog repository tests
+  (create/read, organization listing, cross-organization denial, unit
+  references and presentations); 1 PostgreSQL catalog test skipped.
+- The full API suite now has 48 passed + 3 skipped; the domain suite has 26
+  passed.
+- PostgreSQL repository tests exist but were skipped without a reachable
+  `TEST_DATABASE_URL`.
 
 ### Relevant files and modules
 
 - `packages/domain/src/branch/*` — branch entity, validation and tests.
-- `packages/domain/src/ports/index.ts` — `BranchRepository` and `Repositories`.
-- `database/schema/branch.ts`, `database/schema/sqlite/branch.ts`.
-- `database/migrations/0001_*` and `database/migrations-sqlite/0001_*`.
-- `apps/api/src/infrastructure/persistence/repositories/branch-repository.ts`.
-- `apps/api/src/infrastructure/persistence/sqlite/repositories/branch-repository.ts`.
-- `apps/api/test/branch-repository.integration.test.ts`.
+- `packages/domain/src/product/*` — units, categories, products, presentations
+  and catalog tests.
+- `packages/domain/src/ports/index.ts` — catalog repository ports and
+  `Repositories`.
+- `packages/types/src/identifiers.ts` — catalog branded ids.
+- `database/schema/branch.ts`, `database/schema/catalog.ts` and the SQLite
+  equivalents.
+- `database/migrations/0001_*`, `0002_*` and the SQLite equivalents.
+- `apps/api/src/infrastructure/persistence/repositories/*` — PostgreSQL branch
+  and catalog repositories.
+- `apps/api/src/infrastructure/persistence/sqlite/repositories/*` — SQLite
+  branch and catalog repositories.
+- `apps/api/test/branch-repository.integration.test.ts` and
+  `product-catalog-repository.integration.test.ts`.
 - `packages/app/src/features/inventory/components/inventory-page.tsx` — placeholder.
 
 ### Important implementation decisions
 
 - Branch is the inventory boundary (TD-001).
-- The branch entity is minimal: organization, name, active flag and timestamps.
-  A branch code, address and settings are deferred until required.
-- Branch names are unique per organization as a data-integrity constraint.
-- All branch reads take `organizationId` explicitly, even when the branch id is
-  already known.
-- The existing organization/user/session foundation is retained.
+- Catalog master data is organization-wide; branches own stock, not the catalog
+  (TD-009).
+- Units are explicit organization-owned rows and products reference them by id.
+  No conversion factor is stored while BQ-10 is open.
+- A product has one category, a required inventory unit, a required sales unit,
+  and optional purchase/production units.
+- Presentations are product-owned identities; average weight is deferred to
+  M1-T3.
+- Prices and the raw/processed distinction are deferred; M1-T2 does not guess
+  them.
+- Branch and catalog reads take `organizationId` explicitly.
 - The old generic roadmap is superseded (TD-008).
 - Branch-scoped persistence is recorded in
   [ADR 0039](../decisions/0039-branch-scoped-persistence.md).
 
 ### Known limitations
 
-- `Branch` has no API route or UI yet; it is a domain/persistence slice.
-- No product, supplier, stock, purchase, production, sales or closing entity exists.
+- `Branch` and the catalog have no API routes or UI yet; they are
+  domain/persistence slices.
+- Products do not yet have a raw/processed flag, average weight or prices.
+- No supplier, stock, purchase, production, sales or closing entity exists.
 - The only business-looking UI is a static inventory placeholder.
 - The three development branches are not seeded because their names are not confirmed.
 - The existing roles are foundation roles, not the owner/operator/branch model.
@@ -133,8 +157,9 @@ integration files without the PostgreSQL half. See SI-06.
 
 ### Next action
 
-Implement **M1-T2**: the product, category, measurement-unit and presentation
-domain model on both engines. See [CURRENT_TASK.md](./CURRENT_TASK.md).
+Implement **M1-T3**: classify products as raw or processed and add
+average-weight configuration to the appropriate presentation model. See
+[CURRENT_TASK.md](./CURRENT_TASK.md).
 
 ---
 

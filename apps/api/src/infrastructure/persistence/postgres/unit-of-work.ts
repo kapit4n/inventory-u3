@@ -2,7 +2,11 @@ import type { Repositories, UnitOfWork } from '@inventory-u3/domain';
 
 import type { InventoryDatabase } from './connection.js';
 import { DrizzleBranchRepository } from '../repositories/branch-repository.js';
+import { DrizzleMeasurementUnitRepository } from '../repositories/measurement-unit-repository.js';
 import { DrizzleOrganizationRepository } from '../repositories/organization-repository.js';
+import { DrizzleProductCategoryRepository } from '../repositories/product-category-repository.js';
+import { DrizzleProductPresentationRepository } from '../repositories/product-presentation-repository.js';
+import { DrizzleProductRepository } from '../repositories/product-repository.js';
 import { DrizzleSessionRepository } from '../repositories/session-repository.js';
 import { DrizzleUserRepository } from '../repositories/user-repository.js';
 
@@ -10,6 +14,10 @@ export function repositoriesFor(db: InventoryDatabase): Repositories {
   return {
     organizations: new DrizzleOrganizationRepository(db),
     branches: new DrizzleBranchRepository(db),
+    measurementUnits: new DrizzleMeasurementUnitRepository(db),
+    productCategories: new DrizzleProductCategoryRepository(db),
+    products: new DrizzleProductRepository(db),
+    productPresentations: new DrizzleProductPresentationRepository(db),
     users: new DrizzleUserRepository(db),
     sessions: new DrizzleSessionRepository(db),
   };

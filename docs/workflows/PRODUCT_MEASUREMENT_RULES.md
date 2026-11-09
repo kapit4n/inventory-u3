@@ -1,7 +1,9 @@
 # Product Measurement Rules
 
-> Implementation status: **NOT_IMPLEMENTED.** This document specifies the rules
-> the future product must satisfy. It does not claim that any of it exists.
+> Implementation status: **PARTIALLY_IMPLEMENTED.** Measurement units, product
+> categories, product unit references and presentation identities exist in the
+> domain and both databases. Raw/processed classification, average weight per
+> tray, estimated/measured weights, snapshots and prices do **not** exist yet.
 > Sources: BR-014 to BR-021 in
 > [BUSINESS_REQUIREMENTS.md](../project/BUSINESS_REQUIREMENTS.md).
 

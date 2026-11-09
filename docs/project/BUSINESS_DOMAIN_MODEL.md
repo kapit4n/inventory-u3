@@ -2,9 +2,10 @@
 
 > Status: **PROPOSED business model** unless an entity is explicitly marked
 > **IMPLEMENTED** below. The current repository implements the
-> organization/user/session foundation plus the `Branch` entity. Everything from
-> products onward is a design target for the remaining milestones, not a
-> description of working software.
+> organization/user/session foundation, the `Branch` entity and the product
+> catalog identity (units, categories, products and presentations). Raw/processed
+> products, average weight, prices, stock and transactional records remain a
+> design target, not a description of working software.
 
 ## 1. Structure of the model
 
@@ -32,15 +33,19 @@ proposed.
 
 ### Implemented today
 
-| Entity                | Purpose                                       | Evidence                                           |
-| --------------------- | --------------------------------------------- | -------------------------------------------------- |
-| Organization          | Tenant boundary: name, timezone, currency     | `packages/domain/src/organization/organization.ts` |
-| Branch                | Organization-owned physical business location | `packages/domain/src/branch/branch.ts`             |
-| User                  | Organization-scoped login account             | `packages/domain/src/organization/auth.ts`         |
-| Role                  | `ADMINISTRATOR`, `MANAGER`, `STAFF`           | `packages/domain/src/organization/roles.ts`        |
-| Permission            | Domain permission values checked by the API   | `packages/domain/src/organization/roles.ts`        |
-| Session               | Opaque bearer session, stored as a token hash | `packages/domain/src/organization/auth.ts`         |
-| Organization settings | Name, timezone, currency update rules         | `packages/domain/src/organization/organization.ts` |
+| Entity                | Purpose                                       | Evidence                                              |
+| --------------------- | --------------------------------------------- | ----------------------------------------------------- |
+| Organization          | Tenant boundary: name, timezone, currency     | `packages/domain/src/organization/organization.ts`    |
+| Branch                | Organization-owned physical business location | `packages/domain/src/branch/branch.ts`                |
+| MeasurementUnit       | Organization-owned code/name for a unit       | `packages/domain/src/product/measurement-unit.ts`     |
+| ProductCategory       | Organization-owned product grouping           | `packages/domain/src/product/product-category.ts`     |
+| Product               | Organization-owned item with explicit units   | `packages/domain/src/product/product.ts`              |
+| ProductPresentation   | Product packaging identity                    | `packages/domain/src/product/product-presentation.ts` |
+| User                  | Organization-scoped login account             | `packages/domain/src/organization/auth.ts`            |
+| Role                  | `ADMINISTRATOR`, `MANAGER`, `STAFF`           | `packages/domain/src/organization/roles.ts`           |
+| Permission            | Domain permission values checked by the API   | `packages/domain/src/organization/roles.ts`           |
+| Session               | Opaque bearer session, stored as a token hash | `packages/domain/src/organization/auth.ts`            |
+| Organization settings | Name, timezone, currency update rules         | `packages/domain/src/organization/organization.ts`    |
 
 ### Proposed for the business milestones
 
@@ -48,10 +53,6 @@ proposed.
 | -------------------- | -------------------------------------------------------------------- | --------- | ---------------------------------------------------------- |
 | Employee             | Person who prepares products; may not be an application user         | M2        | belongs to Branch                                          |
 | Supplier             | Provider of fruit and vegetables                                     | M2/M3     | delivers purchases to branches                             |
-| ProductCategory      | Grouping for products (e.g. fruit, vegetable, prepared)              | M2        | has many Products                                          |
-| MeasurementUnit      | Unit of measure: kilogram, unit, tray, or another configured unit    | M1/M2     | referenced by products, purchase lines, production         |
-| Product              | Sellable or usable item, raw or processed                            | M1/M2     | belongs to a category; uses sale/inventory units           |
-| ProductPresentation  | Packaging/presentation of a product, e.g. covered tray               | M2        | belongs to Product; carries average weight per tray        |
 | ProductPriceHistory  | Effective-dated selling price, per product and context               | M2        | belongs to Product; referenced by sales checkpoints        |
 | Purchase             | Supplier delivery assigned to one branch                             | M3        | belongs to Branch and Supplier; has PurchaseItems          |
 | PurchaseItem         | Product, quantity, unit and purchase price in a purchase             | M3        | belongs to Purchase; references Product                    |
@@ -105,8 +106,11 @@ production data requirements are confirmed.
 
 ## 4. Product measurement configuration
 
-A product carries the configuration needed for its own workflow. The exact
-column set is a design decision for M2; the following concepts are required:
+The catalog identity is implemented; the configuration that depends on the
+raw/processed distinction is not. A product currently references an inventory
+unit and a sales unit, with optional purchase and production units. The following
+table mixes what exists with what M1-T3/M2 must add; do not read an unimplemented
+row as a column.
 
 | Concept             | Applies to     | Meaning                                                          |
 | ------------------- | -------------- | ---------------------------------------------------------------- |
