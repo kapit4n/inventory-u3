@@ -3,8 +3,8 @@
 > Last updated: 2026-11-09.
 >
 > **M1-T6 is complete. M1 is complete.** The next task is the first M2 slice
-> (branch CRUD and selector foundation), not started. The M1-T5/M1-T6 changes are
-> uncommitted pending authorization.
+> (branch CRUD and selector foundation), not started. The M1 closeout is committed
+> as `bfdc9cb`.
 
 ## Task identity
 
@@ -52,4 +52,4 @@ Start M2 with branch CRUD and the branch selector foundation. Do not seed the
 three branches until their names and codes are confirmed (BQ-19). Do not start
 purchases, stock or production in M2.
 
-The M1-T5 and M1-T6 changes must be committed before M2 work begins.
+The M1-T5 and M1-T6 changes are committed as `bfdc9cb`; M2 may begin.

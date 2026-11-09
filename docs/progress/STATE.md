@@ -29,8 +29,7 @@
   migration-journal parity.
 - **Next task:** start M2 with branch CRUD and the branch selector foundation;
   branch seeding waits for BQ-19.
-- **Pending commit:** the M1-T5/M1-T6 changes are uncommitted pending
-  authorization.
+- **M1 closeout commit:** `bfdc9cb`.
 
 The previous foundation verification record is preserved in
 [SESSION_LOG.md](../development/SESSION_LOG.md) (Sessions 0–8).

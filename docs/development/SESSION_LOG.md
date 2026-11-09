@@ -760,6 +760,8 @@ boundary guard for the finished domain.
 
 ### Files changed
 
+Committed as `bfdc9cb`.
+
 Created: none beyond the previous session's `docs/project/ACCESS_MODEL.md`.
 
 Modified:
@@ -813,11 +815,11 @@ Modified:
 
 - The guard cannot prove column-level schema parity or migration-content parity;
   recorded as TD-09 rather than claiming full parity.
-- The M1-T5/M1-T6 changes are still uncommitted.
+- The M1-T5/M1-T6 changes were uncommitted during the session; they are committed
+  as `bfdc9cb`.
 
 ### Pending work
 
-- Commit the M1-T5/M1-T6 changes when authorized.
 - Start M2 with branch CRUD and the branch selector foundation.
 - Seed the three branches only after BQ-19 is answered.
 

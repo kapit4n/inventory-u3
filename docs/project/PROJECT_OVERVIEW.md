@@ -1,7 +1,7 @@
 # Inventory U3 — Project Overview
 
-> Last verified: 2026-11-09 against commit `366c5d9` plus the M1-T5/M1-T6
-> documentation. See [IMPLEMENTATION_PROGRESS](../development/IMPLEMENTATION_PROGRESS.md).
+> Last verified: 2026-11-09 against commit `bfdc9cb` (M1 closeout). See
+> [IMPLEMENTATION_PROGRESS](../development/IMPLEMENTATION_PROGRESS.md).
 
 ## Purpose
 

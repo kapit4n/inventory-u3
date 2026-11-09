@@ -14,7 +14,7 @@
 | In-progress milestones | None                                                                      |
 | Blocked milestones     | M6 finalization is blocked on BR-013 (WhatsApp reporting format)          |
 | Pending milestones     | M2, M3, M4, M5, M6, M7, M8, M9                                            |
-| Last verified commit   | `366c5d9` (M1-T4 docs) plus uncommitted M1-T5/M1-T6 changes               |
+| Last verified commit   | `bfdc9cb` (M1 closeout)                                                   |
 | Last update date       | 2026-11-09                                                                |
 | Next recommended task  | Start M2 with branch CRUD and the branch selector foundation              |
 
@@ -22,8 +22,8 @@
 
 M1-T5 adds `docs/project/ACCESS_MODEL.md`; M1-T6 reconciles the technical
 reference documents and extends `scripts/check-boundaries.mjs`. Both are
-uncommitted. No domain, schema, migration, API or UI behavior changed. M1-T1 is
-committed as `d6b62d5`; M1-T2 as `10f882d`; M1-T3 as `4168462`; M1-T4 as
+committed as `bfdc9cb`. No domain, schema, migration, API or UI behavior changed.
+M1-T1 is committed as `d6b62d5`; M1-T2 as `10f882d`; M1-T3 as `4168462`; M1-T4 as
 `afc1cee`, with its docs at `366c5d9`.
 
 ## Verification for this update
@@ -202,7 +202,7 @@ None. M1 is complete.
 
 ### Next action
 
-M1 is complete. The M1-T5/M1-T6 changes are uncommitted pending authorization.
+M1 is complete and committed as `bfdc9cb`.
 After they are committed, start M2 with branch CRUD and the branch selector
 foundation. See [CURRENT_TASK.md](./CURRENT_TASK.md).
 

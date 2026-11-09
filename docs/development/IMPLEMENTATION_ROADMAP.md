@@ -2,7 +2,7 @@
 
 > Canonical business roadmap. It supersedes the generic item/stock sequence in
 > the old [`docs/roadmap.md`](../roadmap.md), which now points here.
-> Last reviewed: 2026-11-09 against commit `366c5d9` plus uncommitted M1-T5/M1-T6 changes.
+> Last reviewed: 2026-11-09 against commit `bfdc9cb` (M1 closeout).
 
 Status values are used exactly as follows:
 
