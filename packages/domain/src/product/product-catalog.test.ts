@@ -123,6 +123,7 @@ describe('createProduct', () => {
         organizationId: ORGANIZATION_ID,
         categoryId: CATEGORY_ID,
         name: '  Watermelon  ',
+        kind: 'PROCESSED',
         inventoryUnitId: KILOGRAM_ID,
         salesUnitId: KILOGRAM_ID,
         purchaseUnitId: KILOGRAM_ID,
@@ -136,6 +137,7 @@ describe('createProduct', () => {
       organizationId: ORGANIZATION_ID,
       categoryId: CATEGORY_ID,
       name: 'Watermelon',
+      kind: 'PROCESSED',
       inventoryUnitId: KILOGRAM_ID,
       salesUnitId: KILOGRAM_ID,
       purchaseUnitId: KILOGRAM_ID,
@@ -153,6 +155,7 @@ describe('createProduct', () => {
         organizationId: ORGANIZATION_ID,
         categoryId: CATEGORY_ID,
         name: 'Bananas',
+        kind: 'RAW',
         inventoryUnitId: KILOGRAM_ID,
         salesUnitId: KILOGRAM_ID,
       },
@@ -171,6 +174,7 @@ describe('createProduct', () => {
           organizationId: ORGANIZATION_ID,
           categoryId: CATEGORY_ID,
           name: ' ',
+          kind: 'RAW',
           inventoryUnitId: KILOGRAM_ID,
           salesUnitId: KILOGRAM_ID,
         },
@@ -185,12 +189,30 @@ describe('createProduct', () => {
           organizationId: ORGANIZATION_ID,
           categoryId: CATEGORY_ID,
           name: 'p'.repeat(PRODUCT_NAME_MAX_LENGTH + 1),
+          kind: 'RAW',
           inventoryUnitId: KILOGRAM_ID,
           salesUnitId: KILOGRAM_ID,
         },
         NOW,
       ),
     ).toThrowError('Product name must be between 1 and 160 characters');
+  });
+
+  it('rejects an unknown product kind', () => {
+    expect(() =>
+      createProduct(
+        {
+          id: PRODUCT_ID,
+          organizationId: ORGANIZATION_ID,
+          categoryId: CATEGORY_ID,
+          name: 'Watermelon',
+          kind: 'FROZEN' as never,
+          inventoryUnitId: KILOGRAM_ID,
+          salesUnitId: KILOGRAM_ID,
+        },
+        NOW,
+      ),
+    ).toThrowError('Product kind must be RAW or PROCESSED');
   });
 });
 
@@ -202,6 +224,7 @@ describe('createProductPresentation', () => {
         organizationId: ORGANIZATION_ID,
         productId: PRODUCT_ID,
         name: '  Covered tray  ',
+        averageWeightGrams: 500,
       },
       NOW,
     );
@@ -211,6 +234,7 @@ describe('createProductPresentation', () => {
       organizationId: ORGANIZATION_ID,
       productId: PRODUCT_ID,
       name: 'Covered tray',
+      averageWeightGrams: 500,
       isActive: true,
       createdAt: NOW,
       updatedAt: NOW,
@@ -225,6 +249,7 @@ describe('createProductPresentation', () => {
           organizationId: ORGANIZATION_ID,
           productId: PRODUCT_ID,
           name: ' ',
+          averageWeightGrams: 500,
         },
         NOW,
       ),
@@ -237,9 +262,29 @@ describe('createProductPresentation', () => {
           organizationId: ORGANIZATION_ID,
           productId: PRODUCT_ID,
           name: 'p'.repeat(PRODUCT_PRESENTATION_NAME_MAX_LENGTH + 1),
+          averageWeightGrams: 500,
         },
         NOW,
       ),
     ).toThrowError('Product presentation name must be between 1 and 120 characters');
+  });
+
+  it('rejects a missing, non-positive or fractional average weight', () => {
+    for (const averageWeightGrams of [0, -1, 1.5, Number.NaN]) {
+      expect(() =>
+        createProductPresentation(
+          {
+            id: PRESENTATION_ID,
+            organizationId: ORGANIZATION_ID,
+            productId: PRODUCT_ID,
+            name: 'Covered tray',
+            averageWeightGrams,
+          },
+          NOW,
+        ),
+      ).toThrowError(
+        'Product presentation average weight must be a positive whole number of grams',
+      );
+    }
   });
 });

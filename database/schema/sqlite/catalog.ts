@@ -6,11 +6,15 @@
  *  - `uuid` is `text`; ids come from the application's `IdGenerator`.
  *  - timestamps are epoch milliseconds, UTC.
  *  - booleans are integers with boolean mode.
+ *  - product kinds are text plus a CHECK built from the domain's value list.
  */
 
 import { index, integer, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
 
+import { PRODUCT_KINDS } from '@inventory-u3/domain';
+
 import { nowDefault, uuidDefault } from './defaults.js';
+import { enumCheck } from './enum-check.js';
 import { organizations } from './organization.js';
 
 export const measurementUnits = sqliteTable(
@@ -61,6 +65,7 @@ export const products = sqliteTable(
       .notNull()
       .references(() => productCategories.id, { onDelete: 'restrict' }),
     name: text('name').notNull(),
+    kind: text('kind', { enum: PRODUCT_KINDS }).notNull(),
     inventoryUnitId: text('inventory_unit_id')
       .notNull()
       .references(() => measurementUnits.id, { onDelete: 'restrict' }),
@@ -80,6 +85,7 @@ export const products = sqliteTable(
   (table) => [
     index('products_organization_active_idx').on(table.organizationId, table.isActive),
     index('products_organization_category_idx').on(table.organizationId, table.categoryId),
+    enumCheck('products_kind_in_values', 'kind', PRODUCT_KINDS),
   ],
 );
 
@@ -94,6 +100,7 @@ export const productPresentations = sqliteTable(
       .notNull()
       .references(() => products.id, { onDelete: 'cascade' }),
     name: text('name').notNull(),
+    averageWeightGrams: integer('average_weight_grams').notNull(),
     isActive: integer('is_active', { mode: 'boolean' }).notNull().default(true),
     createdAt: integer('created_at', { mode: 'timestamp_ms' }).notNull().default(nowDefault),
     updatedAt: integer('updated_at', { mode: 'timestamp_ms' }).notNull().default(nowDefault),

@@ -1,11 +1,9 @@
 /**
  * A product the organization buys, prepares, stocks or sells.
  *
- * M1-T2 records the master-data identity and the units attached to it. The
- * raw/processed distinction, average weight and prices arrive in later tasks;
- * this entity deliberately leaves room for them without pretending to know
- * their rules yet. Units are stored as explicit references, never as converted
- * numbers (BQ-10).
+ * M1-T3 makes the raw/processed distinction explicit. Prices and weight
+ * snapshots arrive in later tasks. Units are stored as explicit references,
+ * never as converted numbers (BQ-10).
  */
 
 import type {
@@ -17,12 +15,15 @@ import type {
 } from '@inventory-u3/types';
 
 import { DomainError } from '../shared/errors.js';
+import { isProductKind, type ProductKind } from './product-kind.js';
 
 export interface Product {
   readonly id: ProductId;
   readonly organizationId: OrganizationId;
   readonly categoryId: ProductCategoryId;
   readonly name: string;
+  /** Raw products are sold as received; processed products are prepared trays. */
+  readonly kind: ProductKind;
   /** Unit stock is counted in. */
   readonly inventoryUnitId: MeasurementUnitId;
   /** Unit used in a sales checkpoint: kilogram, unit or tray. */
@@ -41,6 +42,8 @@ export interface NewProduct {
   readonly organizationId: OrganizationId;
   readonly categoryId: ProductCategoryId;
   readonly name: string;
+  /** Raw products are sold as received; processed products are prepared trays. */
+  readonly kind: ProductKind;
   readonly inventoryUnitId: MeasurementUnitId;
   readonly salesUnitId: MeasurementUnitId;
   readonly purchaseUnitId?: MeasurementUnitId;
@@ -52,6 +55,10 @@ export const PRODUCT_NAME_MAX_LENGTH = 160;
 
 export function createProduct(input: NewProduct, now: IsoDateTime): Product {
   const name = input.name.trim();
+
+  if (!isProductKind(input.kind)) {
+    throw new DomainError('INVALID_INPUT', 'Product kind must be RAW or PROCESSED');
+  }
 
   if (name.length === 0 || name.length > PRODUCT_NAME_MAX_LENGTH) {
     throw new DomainError(
@@ -65,6 +72,7 @@ export function createProduct(input: NewProduct, now: IsoDateTime): Product {
     organizationId: input.organizationId,
     categoryId: input.categoryId,
     name,
+    kind: input.kind,
     inventoryUnitId: input.inventoryUnitId,
     salesUnitId: input.salesUnitId,
     purchaseUnitId: input.purchaseUnitId,

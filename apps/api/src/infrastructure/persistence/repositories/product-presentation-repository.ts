@@ -1,8 +1,8 @@
 /**
  * Product-presentation persistence, on PostgreSQL.
  *
- * A presentation belongs to one product and one organization. Average weight
- * arrives with M1-T3, not here.
+ * A presentation belongs to one product and one organization and carries its
+ * configured average weight per tray as integer grams.
  */
 
 import { and, asc, eq } from 'drizzle-orm';
@@ -70,6 +70,7 @@ export class DrizzleProductPresentationRepository implements ProductPresentation
         organizationId: productPresentation.organizationId,
         productId: productPresentation.productId,
         name: productPresentation.name,
+        averageWeightGrams: productPresentation.averageWeightGrams,
         isActive: productPresentation.isActive,
         createdAt: new Date(productPresentation.createdAt),
         updatedAt: new Date(productPresentation.updatedAt),
@@ -90,6 +91,7 @@ function toProductPresentation(row: ProductPresentationRow): ProductPresentation
     organizationId: asOrganizationId(row.organizationId),
     productId: asProductId(row.productId),
     name: row.name,
+    averageWeightGrams: row.averageWeightGrams,
     isActive: row.isActive,
     createdAt: row.createdAt.toISOString() as IsoDateTime,
     updatedAt: row.updatedAt.toISOString() as IsoDateTime,

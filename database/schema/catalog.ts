@@ -6,12 +6,23 @@
  * Every table still carries `organization_id` so a read cannot lose the tenant
  * boundary behind a join.
  *
- * Average weight, prices and the raw/processed distinction are intentionally
- * absent here; M1-T3 and M2 add them once their rules are implemented.
+ * Products carry the raw/processed kind. Presentations carry the configured
+ * average weight per tray as integer grams. Prices and historical snapshots
+ * remain for later milestones.
  */
 
-import { boolean, index, pgTable, text, timestamp, uniqueIndex, uuid } from 'drizzle-orm/pg-core';
+import {
+  boolean,
+  index,
+  integer,
+  pgTable,
+  text,
+  timestamp,
+  uniqueIndex,
+  uuid,
+} from 'drizzle-orm/pg-core';
 
+import { productKindEnum } from './enums.js';
 import { organizations } from './organization.js';
 
 export const measurementUnits = pgTable(
@@ -62,6 +73,7 @@ export const products = pgTable(
       .notNull()
       .references(() => productCategories.id, { onDelete: 'restrict' }),
     name: text('name').notNull(),
+    kind: productKindEnum('kind').notNull(),
     inventoryUnitId: uuid('inventory_unit_id')
       .notNull()
       .references(() => measurementUnits.id, { onDelete: 'restrict' }),
@@ -95,6 +107,7 @@ export const productPresentations = pgTable(
       .notNull()
       .references(() => products.id, { onDelete: 'cascade' }),
     name: text('name').notNull(),
+    averageWeightGrams: integer('average_weight_grams').notNull(),
     isActive: boolean('is_active').notNull().default(true),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),

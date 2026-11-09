@@ -1,9 +1,10 @@
 /**
  * A packaging or presentation of a product, for example a covered tray.
  *
- * The presentation is where processed-product configuration will live. M1-T2
- * only records its identity; average weight per tray is added by M1-T3 so it is
- * not hardcoded or invented here.
+ * The presentation carries the configured average weight per tray for a
+ * processed product. The documented 0.001 kg precision is one gram, so the
+ * weight is stored as an exact integer rather than a floating-point kilogram
+ * value.
  */
 
 import type {
@@ -20,6 +21,8 @@ export interface ProductPresentation {
   readonly organizationId: OrganizationId;
   readonly productId: ProductId;
   readonly name: string;
+  /** Configured grams per tray; positive and exact. */
+  readonly averageWeightGrams: number;
   readonly isActive: boolean;
   readonly createdAt: IsoDateTime;
   readonly updatedAt: IsoDateTime;
@@ -30,6 +33,7 @@ export interface NewProductPresentation {
   readonly organizationId: OrganizationId;
   readonly productId: ProductId;
   readonly name: string;
+  readonly averageWeightGrams: number;
   readonly isActive?: boolean;
 }
 
@@ -48,11 +52,19 @@ export function createProductPresentation(
     );
   }
 
+  if (!Number.isSafeInteger(input.averageWeightGrams) || input.averageWeightGrams <= 0) {
+    throw new DomainError(
+      'INVALID_INPUT',
+      'Product presentation average weight must be a positive whole number of grams',
+    );
+  }
+
   return {
     id: input.id,
     organizationId: input.organizationId,
     productId: input.productId,
     name,
+    averageWeightGrams: input.averageWeightGrams,
     isActive: input.isActive ?? true,
     createdAt: now,
     updatedAt: now,
