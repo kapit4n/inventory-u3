@@ -46,21 +46,21 @@ rules. The dependency direction is inward only.
 
 ## 3. Packages
 
-| Package               | Responsibility                                                      | Status                                        |
-| --------------------- | ------------------------------------------------------------------- | --------------------------------------------- |
-| `packages/domain`     | Organization, auth/session rules, roles, errors, time, ports        | Implemented                                   |
-| `packages/validation` | Zod schemas for auth, organization, env and common primitives       | Implemented                                   |
-| `packages/types`      | Branded IDs, ISO time, money minor units                            | Implemented                                   |
-| `packages/api-client` | Typed REST client: headers, query strings, problem mapping, schemas | Implemented                                   |
-| `packages/app`        | THE shared React application: routes, providers, features, i18n     | Implemented foundation; placeholder inventory |
-| `packages/ui`         | Design tokens and reusable UI primitives                            | Implemented                                   |
-| `packages/config`     | Shared ESLint, Vitest, Tailwind and TypeScript configuration        | Implemented                                   |
-| `packages/tsconfig`   | Base TypeScript configurations                                      | Implemented                                   |
-| `apps/api`            | Fastify REST API and persistence                                    | Implemented foundation                        |
-| `apps/web`            | Browser shell: mounts `packages/app`                                | Implemented                                   |
-| `apps/desktop`        | Tauri 2 shell: mounts `packages/app`                                | Implemented                                   |
-| `database`            | Dual-engine schema, migrations, seed and URL resolution             | Implemented foundation                        |
-| `e2e`                 | Playwright browser tests                                            | Implemented foundation                        |
+| Package               | Responsibility                                                       | Status                                        |
+| --------------------- | -------------------------------------------------------------------- | --------------------------------------------- |
+| `packages/domain`     | Organization, branch, auth/session rules, roles, errors, time, ports | Implemented                                   |
+| `packages/validation` | Zod schemas for auth, organization, env and common primitives        | Implemented                                   |
+| `packages/types`      | Branded IDs, ISO time, money minor units                             | Implemented                                   |
+| `packages/api-client` | Typed REST client: headers, query strings, problem mapping, schemas  | Implemented                                   |
+| `packages/app`        | THE shared React application: routes, providers, features, i18n      | Implemented foundation; placeholder inventory |
+| `packages/ui`         | Design tokens and reusable UI primitives                             | Implemented                                   |
+| `packages/config`     | Shared ESLint, Vitest, Tailwind and TypeScript configuration         | Implemented                                   |
+| `packages/tsconfig`   | Base TypeScript configurations                                       | Implemented                                   |
+| `apps/api`            | Fastify REST API and persistence                                     | Implemented foundation                        |
+| `apps/web`            | Browser shell: mounts `packages/app`                                 | Implemented                                   |
+| `apps/desktop`        | Tauri 2 shell: mounts `packages/app`                                 | Implemented                                   |
+| `database`            | Dual-engine schema, migrations, seed and URL resolution              | Implemented foundation                        |
+| `e2e`                 | Playwright browser tests                                             | Implemented foundation                        |
 
 ## 4. Runtime flow
 
@@ -113,10 +113,11 @@ engine (ADR 0025).
 - Repository methods are written twice, once per engine.
 - `database/db-url.ts` chooses the engine from `DATABASE_URL` and resolves
   SQLite paths against the repository root.
-- Current tables: `organizations`, `users`, `sessions`.
+- Current tables: `organizations`, `branches`, `users`, `sessions`.
 
-Branch, product, stock, production and sales tables do not exist yet. When they
-are added, every operational row must carry organization and branch ownership.
+The `branches` table is organization-owned and implemented on both engines.
+Product, stock, production and sales tables do not exist yet. When they are
+added, every operational row must carry organization and branch ownership.
 
 ## 7. Frontend architecture
 
@@ -164,9 +165,10 @@ machine because no PostgreSQL server is available.
 
 ## 11. Architecture gaps for the business milestones
 
-The existing foundation is reusable, but the following are not designed or built:
+The existing foundation is reusable. The branch entity and its dual-engine
+persistence now exist; the following are not designed or built:
 
-1. Branch entity and branch-scoped persistence.
+1. Branch API routes and management UI (the entity and repositories exist).
 2. Product/category/unit/presentation/price-history schema on both engines.
 3. Stock ledger and balance strategy.
 4. Purchase receiving and auditable correction model.

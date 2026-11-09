@@ -225,3 +225,112 @@ Read `AGENTS.md`, `PROJECT_OVERVIEW.md`,
 `IMPLEMENTATION_PROGRESS.md`, `CURRENT_TASK.md` and the relevant business/
 technical documents, then implement M1-T1. Update this log and the progress
 documents before finishing.
+
+---
+
+## Session 3 — 2026-11-09 — M1-T1 branch foundation
+
+### Objective
+
+Commit the documentation baseline, then implement the first business entity:
+`Branch`, with organization ownership, dual-engine persistence and tests.
+
+### Work completed
+
+- Committed the one-command start script as `742547d`.
+- Committed the documentation and roadmap baseline as `23701fb`.
+- Added the `BranchId` branded identifier.
+- Added the `Branch` entity and `createBranch` validation in the domain.
+- Added `BranchRepository` to the domain ports and `Repositories`.
+- Added the PostgreSQL and SQLite `branches` tables and generated both
+  migrations.
+- Implemented PostgreSQL and SQLite branch repositories and wired them into both
+  repository builders.
+- Added domain tests and repository integration tests, including
+  cross-organization isolation.
+- Applied the SQLite migration and reseeded the development database.
+- Updated the project, domain, architecture, progress, roadmap, issue and task
+  documents.
+
+### Files changed
+
+Created:
+
+- `packages/domain/src/branch/branch.ts`
+- `packages/domain/src/branch/branch.test.ts`
+- `packages/domain/src/branch/index.ts`
+- `database/schema/branch.ts`
+- `database/schema/sqlite/branch.ts`
+- `database/migrations/0001_friendly_ken_ellis.sql`
+- `database/migrations-sqlite/0001_large_fantastic_four.sql`
+- `apps/api/src/infrastructure/persistence/repositories/branch-repository.ts`
+- `apps/api/src/infrastructure/persistence/sqlite/repositories/branch-repository.ts`
+- `apps/api/test/branch-repository.integration.test.ts`
+
+Updated:
+
+- `packages/types/src/identifiers.ts` — `BranchId`.
+- `packages/domain/src/index.ts`, `packages/domain/package.json`.
+- `packages/domain/src/ports/index.ts`.
+- `database/schema/index.ts`, `database/schema/sqlite/index.ts`.
+- Both migration journals.
+- `apps/api/src/infrastructure/persistence/sqlite/repositories.ts`.
+- `apps/api/src/infrastructure/persistence/postgres/unit-of-work.ts`.
+- `docs/domain.md`, `docs/open-questions.md`.
+- `docs/project/BUSINESS_DOMAIN_MODEL.md`, `PROJECT_OVERVIEW.md`,
+  `TECHNICAL_ARCHITECTURE.md`.
+- `docs/development/IMPLEMENTATION_PROGRESS.md`,
+  `IMPLEMENTATION_ROADMAP.md`, `CURRENT_TASK.md`, `KNOWN_ISSUES.md` and this log.
+- `docs/decisions/0039-branch-scoped-persistence.md`, `README.md`.
+- `docs/progress/STATE.md`, `docs/workflows/INVENTORY_WORKFLOW.md`, `AGENTS.md`.
+
+### Technical decisions
+
+- The branch entity is minimal: organization, name, active flag and timestamps.
+- Branch names are unique within an organization.
+- Reads always take both `organizationId` and `branchId`; a branch id is never
+  trusted alone.
+- Branch seed data is deferred until the real branch names are confirmed (BQ-19).
+- No API route or UI was added in this slice.
+- Branch-scoped persistence is recorded as ADR 0039.
+
+### Tests and validation
+
+- `pnpm run typecheck` — PASS, 12/12 tasks.
+- `pnpm run lint` — PASS, 12/12 tasks, `BOUNDARY GUARD OK`.
+- `pnpm exec turbo run test --force` — PASS, 12/12 tasks, 134 passed + 2 skipped.
+- `TEST_DATABASE_URL= pnpm --filter @inventory-u3/api test:integration` — PASS,
+  3 files, 18 passed + 2 skipped.
+- `pnpm run db:migrate` — PASS on SQLite.
+- `pnpm run db:seed` — PASS on SQLite.
+- `pnpm run build` — PASS, 5/5 tasks.
+- `pnpm run format:check` — PASS.
+- Local Markdown link check — PASS.
+- PostgreSQL branch repository tests — SKIPPED, no reachable server.
+- Default `pnpm run test:integration` — FAILS with `ECONNREFUSED` because `.env`
+  defines `TEST_DATABASE_URL`; use the empty override (SI-06).
+- E2E — NOT RUN.
+
+### Problems found
+
+- The exact branch names are not confirmed, so the three development branches
+  remain unseeded.
+- No PostgreSQL server is available for the parity test on this machine.
+- The default `test:integration` command fails because `.env` defines
+  `TEST_DATABASE_URL`; it passes with the empty override (SI-06).
+- Drizzle-generated `meta/*.json` files needed a Prettier pass after generation
+  to keep `format:check` green.
+- The branch is intentionally not reachable through the API or UI yet.
+
+### Pending work
+
+- Implement M1-T2: product, category, unit and presentation model.
+- Confirm BQ-19 and the other product questions.
+- Commit the M1-T1 working-tree changes when requested.
+
+### Next session
+
+Read `AGENTS.md`, `PROJECT_OVERVIEW.md`,
+`IMPLEMENTATION_PROGRESS.md`, `CURRENT_TASK.md`, the product requirements and
+the branch slice, then implement M1-T2. Update this log and the progress
+documents before finishing.

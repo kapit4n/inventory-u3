@@ -40,6 +40,7 @@ the ADR)" rather than inventing one.
 | 0030 | Development login-as is gated by route existence                   | ACCEPTED |
 | 0032 | UI language is a typed catalogue, Spanish by default               | ACCEPTED |
 | 0038 | Inventory U3 starts from a generic organization/session foundation | ACCEPTED |
+| 0039 | Branch-scoped persistence                                          | ACCEPTED |
 
 ## 2. Product and technical decisions
 
@@ -61,8 +62,10 @@ the ADR)" rather than inventing one.
 - **Consequences:** Every future operational table needs `branchId`; repository
   methods and API routes must accept and validate a branch. A user-branch
   permission model can be added later without changing the data boundary.
-- **ADR:** A foundation ADR for branch-scoped persistence should be written with
-  M1 implementation.
+- **Implementation:** M1-T1 added the entity, both schemas, both migrations and
+  both repository implementations. Branch code, address and settings are
+  deferred until required. Branch names are unique per organization.
+- **ADR:** [0039 — Branch-scoped persistence](../decisions/0039-branch-scoped-persistence.md).
 
 ### TD-002 — Sales are aggregate checkpoints, not itemized transactions
 

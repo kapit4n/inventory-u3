@@ -1,14 +1,33 @@
 # Domain
 
 > This file documents the domain **currently implemented in `packages/domain`**.
-> The proposed business domain (branches, products, units, stock, production,
-> sales checkpoints) is documented in
+> The proposed business domain (products, units, stock, production, sales
+> checkpoints) is documented in
 > [BUSINESS_DOMAIN_MODEL.md](./project/BUSINESS_DOMAIN_MODEL.md). Do not read a
 > proposed entity from that document as implemented code.
 
-`packages/domain` is framework-independent TypeScript. It currently contains the
-organization, identity and session foundation. Inventory entities arrive in
-later milestones.
+`packages/domain` is framework-independent TypeScript. It contains the
+organization, identity, session and branch foundation. Product, stock and
+transactional entities arrive in later milestones.
+
+## Branch
+
+`Branch` is the inventory boundary inside an organization:
+
+```ts
+interface Branch {
+  id: BranchId;
+  organizationId: OrganizationId;
+  name: string;
+  isActive: boolean;
+  createdAt: IsoDateTime;
+  updatedAt: IsoDateTime;
+}
+```
+
+`createBranch` trims and validates the name (1–120 characters) and defaults
+`isActive` to `true`. A branch belongs to exactly one organization; operational
+records will belong to one branch.
 
 ## Organization
 
@@ -60,6 +79,7 @@ The HTTP layer maps these to status codes and wire error codes.
 Repositories are declared in `packages/domain/src/ports`:
 
 - `OrganizationRepository`
+- `BranchRepository`
 - `UserRepository`
 - `SessionRepository`
 - `UnitOfWork`
@@ -69,9 +89,11 @@ implementations (ADR 0025).
 
 ## Not yet modeled
 
-- Inventory items, categories, units and suppliers
+- Product categories, products, units and presentations
+- Suppliers, employees and purchases
 - Stock levels, movements, adjustments and transfers
-- Purchasing and receiving
+- Production batches
+- Sales checkpoints and daily closing
 - Reports and exports
 
 These are product decisions for later milestones, not placeholders to guess at.

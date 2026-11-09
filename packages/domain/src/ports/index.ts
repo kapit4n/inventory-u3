@@ -6,8 +6,9 @@
  * what it needs, never how it is stored or transported.
  */
 
-import type { IsoDateTime, OrganizationId, SessionId, UserId } from '@inventory-u3/types';
+import type { BranchId, IsoDateTime, OrganizationId, SessionId, UserId } from '@inventory-u3/types';
 
+import type { Branch } from '../branch/branch.js';
 import type { AuthenticatedUser, Session, UserWithCredentials } from '../organization/auth.js';
 import type { Organization, OrganizationSettingsUpdate } from '../organization/organization.js';
 
@@ -23,6 +24,7 @@ export interface UnitOfWork {
  */
 export interface Repositories {
   readonly organizations: OrganizationRepository;
+  readonly branches: BranchRepository;
   readonly users: UserRepository;
   readonly sessions: SessionRepository;
 }
@@ -34,6 +36,12 @@ export interface OrganizationRepository {
     settings: OrganizationSettingsUpdate,
   ): Promise<Organization | undefined>;
   getDefault(): Promise<Organization | undefined>;
+}
+
+export interface BranchRepository {
+  findById(organizationId: OrganizationId, branchId: BranchId): Promise<Branch | undefined>;
+  listByOrganization(organizationId: OrganizationId): Promise<readonly Branch[]>;
+  create(branch: Branch): Promise<Branch>;
 }
 
 export interface UserRepository {

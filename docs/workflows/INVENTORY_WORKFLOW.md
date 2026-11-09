@@ -1,7 +1,8 @@
 # Inventory Workflow
 
-> Implementation status: **NOT_IMPLEMENTED.** There is no branch, product, stock
-> or adjustment table in the repository today. This is the design target for M4.
+> Implementation status: **NOT_IMPLEMENTED.** The branch table exists, but there
+> is no product, stock or adjustment table in the repository today. This is the
+> design target for M4.
 
 ## 1. Scope
 

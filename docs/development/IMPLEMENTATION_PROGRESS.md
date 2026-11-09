@@ -5,47 +5,51 @@
 
 ## Summary
 
-| Field                  | Value                                                                   |
-| ---------------------- | ----------------------------------------------------------------------- |
-| Current milestone      | M1 — Business Domain Foundation                                         |
-| Current task           | Documentation baseline complete; next task is M1-T1 (branch foundation) |
-| Overall project status | Foundation complete; business implementation not started                |
-| Completed milestones   | None of M1–M9 (the foundation prerequisite is complete)                 |
-| In-progress milestones | M1                                                                      |
-| Blocked milestones     | M6 finalization is blocked on BR-013 (WhatsApp reporting format)        |
-| Pending milestones     | M2, M3, M4, M5, M6, M7, M8, M9                                          |
-| Last verified commit   | `0808074` (2026-11-06) plus uncommitted working-tree changes            |
-| Last update date       | 2026-11-09                                                              |
-| Next recommended task  | M1-T1 — Branch domain entity, persistence and tests                     |
+| Field                  | Value                                                                      |
+| ---------------------- | -------------------------------------------------------------------------- |
+| Current milestone      | M1 — Business Domain Foundation                                            |
+| Current task           | M1-T1 complete; next task is M1-T2 (product foundation)                    |
+| Overall project status | Foundation and branch foundation complete; other business work not started |
+| Completed milestones   | None of M1–M9 (the foundation prerequisite is complete)                    |
+| In-progress milestones | M1                                                                         |
+| Blocked milestones     | M6 finalization is blocked on BR-013 (WhatsApp reporting format)           |
+| Pending milestones     | M2, M3, M4, M5, M6, M7, M8, M9                                             |
+| Last verified commit   | `23701fb` (documentation baseline) plus uncommitted M1-T1 changes          |
+| Last update date       | 2026-11-09                                                                 |
+| Next recommended task  | M1-T2 — Product, category, unit and presentation model                     |
 
 ### Working tree at the time of this update
 
-The documentation baseline changed documentation files only. The working tree
-also contains changes made before this documentation task:
-
-- `package.json` — added a `start` script.
-- `scripts/start.sh` — new install-and-start helper.
-
-No application behaviour was changed by the documentation baseline itself.
+M1-T1 added the branch entity, port, both schemas, both migrations, both
+repository implementations, repository wiring and tests. These changes are in
+the working tree and were not committed at the time of this update.
 
 ## Verification for this update
 
-| Command                            | Result                                                                 |
-| ---------------------------------- | ---------------------------------------------------------------------- |
-| `pnpm run typecheck`               | PASS — 12/12 tasks                                                     |
-| `pnpm run lint`                    | PASS — 12/12 tasks, `BOUNDARY GUARD OK`                                |
-| `pnpm exec turbo run test --force` | PASS — 12/12 tasks, 127 tests passed                                   |
-| `pnpm run test:e2e`                | NOT RUN this session; last recorded result was 18/18 on the foundation |
-| `pnpm run format:check`            | PASS — all files use Prettier style                                    |
-| Local Markdown link check          | PASS — all local links resolve                                         |
-| `pnpm run build`                   | NOT RUN this session; last recorded result was 5/5 on the foundation   |
+| Command                            | Result                                                         |
+| ---------------------------------- | -------------------------------------------------------------- |
+| `pnpm run typecheck`               | PASS — 12/12 tasks                                             |
+| `pnpm run lint`                    | PASS — 12/12 tasks, `BOUNDARY GUARD OK`                        |
+| `pnpm exec turbo run test --force` | PASS — 12/12 tasks, 134 passed, 2 skipped                      |
+| `pnpm run test:integration`        | PASS with `TEST_DATABASE_URL=` — 3 files, 18 passed, 2 skipped |
+| `pnpm run db:migrate`              | PASS — SQLite branch migration applied                         |
+| `pnpm run db:seed`                 | PASS — existing development data reseeded                      |
+| `pnpm run test:e2e`                | NOT RUN; last recorded result was 18/18 on the foundation      |
+| `pnpm run format:check`            | PASS — all files use Prettier style                            |
+| Local Markdown link check          | PASS — all local links resolve                                 |
+| `pnpm run build`                   | PASS — 5/5 tasks                                               |
 
-Test counts by package from the forced run: API 41, desktop 4, database 6,
-api-client 15, app 48, domain 13. Total 127. `web`, `config`, `types`, `ui` and
-`validation` have no test files and use `--passWithNoTests`/no test task.
+Test counts from the forced run: API 44 passed + 2 skipped, desktop 4, database
+6, api-client 15, app 48, domain 17. Total 134 passed and 2 skipped. The two
+skipped tests are the PostgreSQL branch-repository tests, which require
+`TEST_DATABASE_URL`.
 
 PostgreSQL integration tests were not executed because no PostgreSQL server is
 available on this machine. This is a known environment limitation, not a pass.
+The default `pnpm run test:integration` fails here because `.env` supplies a
+`TEST_DATABASE_URL` pointing at the absent server; run it as
+`TEST_DATABASE_URL= pnpm run test:integration` to exercise the SQLite
+integration files without the PostgreSQL half. See SI-06.
 
 ---
 
@@ -58,16 +62,17 @@ available on this machine. This is a known environment limitation, not a pass.
 - [x] Repository architecture, packages, persistence and guardrails inspected.
 - [x] Existing implemented domain documented: organization, user, session, role,
       permission, organization settings.
-- [x] Actual database tables documented: organizations, users, sessions.
+- [x] Actual database tables documented: organizations, branches, users, sessions.
 - [x] Confirmed business requirements separated from proposed design.
 - [x] Proposed business domain model documented, including branch ownership,
       raw/processed products, measurement and snapshot rules.
 - [x] Previous roadmap identified as superseded.
 - [x] Documentation/continuity system established.
+- [x] M1-T1: Branch domain entity, repository port and dual-engine schema,
+      migrations and repository implementations with isolation tests.
 
 ### In Progress
 
-- [ ] M1-T1: Branch domain entity, repository port and dual-engine schema.
 - [ ] M1-T2: Product/category/unit/presentation domain model.
 - [ ] M1-T3: Average-weight and raw/processed model.
 - [ ] M1-T4: Stock movement and balance concepts.
@@ -75,49 +80,61 @@ available on this machine. This is a known environment limitation, not a pass.
 
 ### Pending
 
-- [ ] All M1 code, schema, migrations, repository implementations and tests.
-- [ ] Update `docs/domain.md` and `docs/architecture.md` with the implemented
-      business entities once they exist.
-- [ ] Seed the three branches (only after the branch schema exists).
+- [ ] Remaining M1 product/measurement/stock work.
+- [ ] Branch API route and management UI (M2).
+- [ ] Seed the three branches once their names and codes are confirmed.
+- [ ] Update the remaining technical references after M1-T2.
 
 ### Validation
 
 - Tests executed: `typecheck`, `lint`, unit/component/API tests (see summary).
-- Passed: typecheck 12/12, lint 12/12, tests 127.
-- Failed: none.
-- Not executed: PostgreSQL integration tests, Playwright E2E, build.
-- Business-domain tests: none, because no business domain exists yet.
+- Passed: typecheck 12/12, lint 12/12, tests 134 passed + 2 skipped.
+- SQLite migration and seed applied successfully.
+- Failed: default `test:integration` without clearing `TEST_DATABASE_URL`
+  (SI-06); the SQLite path passes with the override.
+- Not executed: PostgreSQL integration tests, Playwright E2E.
+- Build passed 5/5.
+- New business-domain tests: 4 for `createBranch`, 3 SQLite repository tests
+  (create/read, organization listing, cross-organization denial).
+- PostgreSQL repository tests exist but were skipped without `TEST_DATABASE_URL`.
 
 ### Relevant files and modules
 
-- `packages/domain/src/organization/*` — implemented foundation.
-- `packages/domain/src/ports/index.ts` — current ports (organization, user, session).
-- `database/schema/organization.ts`, `database/schema/sqlite/organization.ts`.
-- `database/migrations/*` and `database/migrations-sqlite/*`.
-- `apps/api/src/http/routes/*` — only auth, dev-auth, health, organization.
+- `packages/domain/src/branch/*` — branch entity, validation and tests.
+- `packages/domain/src/ports/index.ts` — `BranchRepository` and `Repositories`.
+- `database/schema/branch.ts`, `database/schema/sqlite/branch.ts`.
+- `database/migrations/0001_*` and `database/migrations-sqlite/0001_*`.
+- `apps/api/src/infrastructure/persistence/repositories/branch-repository.ts`.
+- `apps/api/src/infrastructure/persistence/sqlite/repositories/branch-repository.ts`.
+- `apps/api/test/branch-repository.integration.test.ts`.
 - `packages/app/src/features/inventory/components/inventory-page.tsx` — placeholder.
-- `docs/project/BUSINESS_DOMAIN_MODEL.md` — proposed target.
 
 ### Important implementation decisions
 
 - Branch is the inventory boundary (TD-001).
-- The business domain is designed from confirmed requirements only; no tables
-  invented ahead of a milestone.
+- The branch entity is minimal: organization, name, active flag and timestamps.
+  A branch code, address and settings are deferred until required.
+- Branch names are unique per organization as a data-integrity constraint.
+- All branch reads take `organizationId` explicitly, even when the branch id is
+  already known.
 - The existing organization/user/session foundation is retained.
 - The old generic roadmap is superseded (TD-008).
+- Branch-scoped persistence is recorded in
+  [ADR 0039](../decisions/0039-branch-scoped-persistence.md).
 
 ### Known limitations
 
-- No branch, product, stock, purchase, production, sales or closing entity exists.
+- `Branch` has no API route or UI yet; it is a domain/persistence slice.
+- No product, supplier, stock, purchase, production, sales or closing entity exists.
 - The only business-looking UI is a static inventory placeholder.
+- The three development branches are not seeded because their names are not confirmed.
 - The existing roles are foundation roles, not the owner/operator/branch model.
 - `data/` is git-ignored; a fresh clone must run migrations and seed.
 
 ### Next action
 
-Implement **M1-T1**: add the `Branch` domain entity and organization-owned
-persistence on both engines, with repository tests and branch-isolation coverage.
-See [CURRENT_TASK.md](./CURRENT_TASK.md).
+Implement **M1-T2**: the product, category, measurement-unit and presentation
+domain model on both engines. See [CURRENT_TASK.md](./CURRENT_TASK.md).
 
 ---
 

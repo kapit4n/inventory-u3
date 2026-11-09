@@ -8,6 +8,13 @@
       "when": 1794000295399,
       "tag": "0000_slimy_hercules",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1794238907601,
+      "tag": "0001_friendly_ken_ellis",
+      "breakpoints": true
     }
   ]
 }

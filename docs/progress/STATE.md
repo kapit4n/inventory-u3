@@ -11,10 +11,10 @@
 
 - **Foundation prerequisite:** complete.
 - **Business roadmap:** M1 is IN_PROGRESS; M2–M9 are NOT_STARTED.
-- **No business feature is implemented.** The only persisted entities are the
-  organization/user/session foundation; `/inventory` is a placeholder.
-- **Next task:** M1-T1 — branch domain entity, dual-engine persistence and tests.
+- **Branch foundation:** entity, dual-engine schema, migrations and repositories
+  are implemented. No branch API route or UI exists yet.
+- **Next task:** M1-T2 — product, category, unit and presentation model.
 
 The previous foundation verification record is preserved in
-[SESSION_LOG.md](../development/SESSION_LOG.md) (Session 0 and Session 2).
+[SESSION_LOG.md](../development/SESSION_LOG.md) (Sessions 0–3).
 [LOG.md](./LOG.md) remains as a pointer to that history.

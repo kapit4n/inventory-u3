@@ -61,14 +61,16 @@ product.** As of this document:
 
 - The monorepo, API, web shell, desktop shell, authentication, organization
   settings, SQLite/PostgreSQL persistence and test harness are implemented.
-- The only persisted business data is `organizations`, `users` and `sessions`.
+- Persisted tables are `organizations`, `branches`, `users` and `sessions`.
+- The `Branch` domain entity and its SQLite/PostgreSQL repositories are
+  implemented. There is no branch API route or UI yet.
 - The `/inventory` screen is a placeholder.
-- No branch, employee, supplier, product, purchase, stock, production, sales
-  checkpoint, daily closing or report feature exists.
+- No employee, supplier, product, purchase, stock, production, sales checkpoint,
+  daily closing or report feature exists.
 - The nine business milestones are defined in
   [IMPLEMENTATION_ROADMAP.md](../development/IMPLEMENTATION_ROADMAP.md). None of
-  them is complete. M1 is the current milestone, but so far only its
-  documentation/design work exists; no branch or product entity is implemented.
+  them is complete. M1 is the current milestone; its first task (branch
+  foundation) is complete and the remaining product/measurement tasks are next.
 
 The inventory business model in this documentation is **proposed**. It separates
 confirmed product requirements from proposed design and from open questions. Do

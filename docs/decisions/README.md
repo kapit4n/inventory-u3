@@ -26,6 +26,7 @@ ADRs retained for the Inventory U3 foundation:
 | 0030 | Development login-as is gated by route existence                   |
 | 0032 | UI language is a typed catalogue, Spanish by default               |
 | 0038 | Inventory U3 starts from a generic organization/session foundation |
+| 0039 | Branch-scoped persistence                                          |
 
 Numbering gaps are intentional: dental-specific decisions were removed with the
 business domain rather than rewritten as if they had been made for this product.

@@ -196,11 +196,15 @@ At the **end** of a session:
   `npm i -g pnpm@10 --prefix "$HOME/.local"`. Run
   `export PATH="$HOME/.local/bin:$PATH"` first (already added to `~/.bashrc`).
 - **Docker is NOT available here any more** (no `docker`/`podman` binary, no
-  `/var/run/docker.sock`), so local PostgreSQL cannot be started and the
-  PostgreSQL integration tests report as skipped unless `TEST_DATABASE_URL`
-  already answers. The default engine is SQLite: `.env` sets
-  `DATABASE_URL=sqlite:./data/inventory-u3.db`, and `pnpm run db:migrate` +
-  `pnpm run db:seed` create the file and its directory (`/data/` is gitignored).
+  `/var/run/docker.sock`), so local PostgreSQL cannot be started. The default
+  engine is SQLite: `.env` sets `DATABASE_URL=sqlite:./data/inventory-u3.db`,
+  and `pnpm run db:migrate` + `pnpm run db:seed` create the file and its
+  directory (`/data/` is gitignored).
+- `.env` also sets `TEST_DATABASE_URL` for PostgreSQL, so the default
+  `pnpm run test:integration` tries to connect and fails with `ECONNREFUSED`
+  when no server exists. Run `TEST_DATABASE_URL= pnpm run test:integration` to
+  exercise the SQLite integration files; the PostgreSQL tests then skip
+  themselves. See SI-06 in `docs/development/KNOWN_ISSUES.md`.
 - Rust toolchain installed via rustup (stable 1.99.0, `~/.cargo`, `--no-modify-path`,
   PATH export appended to `~/.bashrc`). System Tauri deps installed via apt:
   `build-essential libwebkit2gtk-4.1-dev libgtk-3-dev libssl-dev

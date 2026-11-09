@@ -15,9 +15,11 @@ export type Brand<TValue, TBrand extends string> = TValue & {
 export type OrganizationId = Brand<string, 'OrganizationId'>;
 export type UserId = Brand<string, 'UserId'>;
 export type SessionId = Brand<string, 'SessionId'>;
+export type BranchId = Brand<string, 'BranchId'>;
 
-export type OrganizationIdentifier = OrganizationId | UserId | SessionId;
+export type OrganizationIdentifier = OrganizationId | UserId | SessionId | BranchId;
 
 export const asOrganizationId = (value: string): OrganizationId => value as OrganizationId;
 export const asUserId = (value: string): UserId => value as UserId;
 export const asSessionId = (value: string): SessionId => value as SessionId;
+export const asBranchId = (value: string): BranchId => value as BranchId;

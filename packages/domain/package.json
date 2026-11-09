@@ -7,6 +7,7 @@
   "description": "The Inventory U3 domain: entities, value objects, business rules and ports. Framework-independent.",
   "exports": {
     ".": "./src/index.ts",
+    "./branch": "./src/branch/index.ts",
     "./organization": "./src/organization/index.ts",
     "./ports": "./src/ports/index.ts"
   },

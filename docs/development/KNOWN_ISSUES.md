@@ -13,19 +13,19 @@ reproduced and confirmed in this review. Add an item here only with evidence
 
 ## 2. Suspected issues needing verification
 
-| ID    | Issue                                                                                                                | Evidence                                                                                                         | Next step                                                                          |
-| ----- | -------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| SI-01 | An inactive **organization** is not rejected at login or session resolution; only the user's active flag is checked. | `packages/domain/src/organization/authenticate.ts`, `auth.ts`; no organization `isActive` check in the auth path | Decide whether organization deactivation must block access; add a test either way. |
-| SI-02 | Session rows are never purged after expiry/revocation. The table grows indefinitely.                                 | No cleanup job or query; `sessions` table only inserts/revokes                                                   | Decide retention policy; add cleanup before production.                            |
-| SI-03 | `docs/progress/REPORT.md` describes only the foundation and may be read as current product status.                   | File content vs business roadmap                                                                                 | Keep as historical report; `PROJECT_OVERVIEW` and progress are canonical.          |
-| SI-04 | There is no CI pipeline, so the green verification results depend on a developer running commands locally.           | No `.github/` workflow                                                                                           | Add CI in M9 or earlier if desired.                                                |
-| SI-05 | An uncommitted `start` script and `package.json` change are present in the working tree.                             | `git status`: `M package.json`, `?? scripts/start.sh`                                                            | Commit them deliberately or revert if not wanted.                                  |
+| ID    | Issue                                                                                                                            | Evidence                                                                                                         | Next step                                                                                       |
+| ----- | -------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| SI-01 | An inactive **organization** is not rejected at login or session resolution; only the user's active flag is checked.             | `packages/domain/src/organization/authenticate.ts`, `auth.ts`; no organization `isActive` check in the auth path | Decide whether organization deactivation must block access; add a test either way.              |
+| SI-02 | Session rows are never purged after expiry/revocation. The table grows indefinitely.                                             | No cleanup job or query; `sessions` table only inserts/revokes                                                   | Decide retention policy; add cleanup before production.                                         |
+| SI-03 | `docs/progress/REPORT.md` describes only the foundation and may be read as current product status.                               | File content vs business roadmap                                                                                 | Keep as historical report; `PROJECT_OVERVIEW` and progress are canonical.                       |
+| SI-04 | There is no CI pipeline, so the green verification results depend on a developer running commands locally.                       | No `.github/` workflow                                                                                           | Add CI in M9 or earlier if desired.                                                             |
+| SI-06 | `pnpm run test:integration` fails on this machine because `.env` supplies a `TEST_DATABASE_URL` for an absent PostgreSQL server. | `ECONNREFUSED 127.0.0.1:5433` from the integration global setup; passes with `TEST_DATABASE_URL=`                | Keep the SQLite half runnable with the override; later make the PG probe skip when unreachable. |
 
 ## 3. Incomplete features (expected at this stage)
 
 | Area                             | State                                                                    |
 | -------------------------------- | ------------------------------------------------------------------------ |
-| Branch master data               | Not implemented. No branch table or route.                               |
+| Branch master data               | Entity and dual-engine persistence implemented. No API route or UI.      |
 | Products, categories, units      | Not implemented.                                                         |
 | Presentations and average weight | Not implemented; only documented.                                        |
 | Suppliers and purchases          | Not implemented.                                                         |
@@ -62,7 +62,9 @@ These are roadmap work, not defects. See
 - PostgreSQL parity on this machine (skipped, not passed).
 - Browser E2E for the current working tree (last recorded run is from the
   foundation session).
-- Any business-domain tests, because no business domain exists yet.
+- Branch API/UI tests, because no route or screen exists yet.
+- Product, stock, purchase, production, sales and closing tests, because those
+  domains do not exist yet.
 - Backup/restore drill.
 - Performance/load tests for movement and report queries.
 
@@ -85,6 +87,7 @@ These are copied from the source of truth in
 | BQ-10 | Are unit conversions between purchase, inventory, production and sales units required?           | M2        |
 | BQ-11 | Is there a recipe/bill of materials, or are production inputs free-form per batch?               | M5        |
 | BQ-12 | Are transfers between branches in scope?                                                         | Future    |
+| BQ-19 | What are the names/codes of the three real branches?                                             | M2        |
 
 ## 7. Architecture risks
 

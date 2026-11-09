@@ -37,7 +37,7 @@ Evidence: source tree, `database/migrations*`, `packages/domain`, `apps/api`,
 
 ## M1 — Business Domain Foundation
 
-**Status: IN_PROGRESS (documentation/design only; no M1 entity is implemented)**
+**Status: IN_PROGRESS (branch foundation complete; product foundation pending)**
 
 ### Objective
 
@@ -63,7 +63,7 @@ foundation without building user-facing inventory features yet.
 
 | ID    | Task                                                                                     | Status      |
 | ----- | ---------------------------------------------------------------------------------------- | ----------- |
-| M1-T1 | Branch entity, branch ownership fields, repository port and dual-engine schema/migration | NOT_STARTED |
+| M1-T1 | Branch entity, branch ownership fields, repository port and dual-engine schema/migration | COMPLETED   |
 | M1-T2 | Product, category, measurement unit and presentation domain model                        | NOT_STARTED |
 | M1-T3 | Raw/processed product distinction and average-weight configuration model                 | NOT_STARTED |
 | M1-T4 | Stock movement and balance concepts, including audit-safe correction principles          | NOT_STARTED |
@@ -72,7 +72,7 @@ foundation without building user-facing inventory features yet.
 
 ### Acceptance criteria
 
-- [ ] `Branch` exists in the framework-independent domain with organization
+- [x] `Branch` exists in the framework-independent domain with organization
       ownership and validation.
 - [ ] Every future operational entity has a documented branch ownership rule.
 - [ ] Product/category/unit/presentation concepts exist in the domain without
@@ -80,11 +80,12 @@ foundation without building user-facing inventory features yet.
 - [ ] Raw vs processed products are distinguishable in the model.
 - [ ] Average weight per tray is configurable on the appropriate presentation
       model; it is not hardcoded.
-- [ ] Branch and product foundation tables exist in **both** schema trees and
-      both migration journals, or a documented decision explains why a concept is
-      domain-only at this stage.
-- [ ] Repository ports for implemented entities are implemented for SQLite and
-      PostgreSQL.
+- [x] Branch foundation table exists in **both** schema trees and both migration
+      journals.
+- [ ] Product foundation tables exist in both trees, or a documented decision
+      explains why a concept is domain-only at this stage.
+- [x] Branch repository port is implemented for SQLite and PostgreSQL.
+- [ ] Product repository ports are implemented when the entities exist.
 - [ ] `pnpm run guard:boundaries`, `typecheck`, `lint` and `test` pass.
 - [ ] Documentation reflects the actual implementation, not the proposal.
 
@@ -112,8 +113,10 @@ screens in this milestone.
 
 ### Notes
 
-The organization/user/session foundation is real; the branch/product business
-domain is not. Do not mark M1 complete because the model is documented.
+The organization/user/session foundation and the branch entity are real; the
+product/measurement domain is not. Do not mark M1 complete because the model is
+documented or because the branch slice exists. The three development branches
+are intentionally not seeded until their names are confirmed.
 
 ---
 
@@ -659,7 +662,7 @@ been executed." A passing unit suite is not a backup/restore drill.
 | Milestone               | Status      | Evidence                                                     |
 | ----------------------- | ----------- | ------------------------------------------------------------ |
 | Foundation prerequisite | COMPLETED   | Foundation code, migrations, tests and recorded verification |
-| M1                      | IN_PROGRESS | Model documented; no branch/product persistence yet          |
+| M1                      | IN_PROGRESS | Branch domain and persistence done; product model pending    |
 | M2                      | NOT_STARTED | No master-data tables or screens                             |
 | M3                      | NOT_STARTED | No purchase/receiving tables or screens                      |
 | M4                      | NOT_STARTED | No stock tables or screens; inventory route is a placeholder |

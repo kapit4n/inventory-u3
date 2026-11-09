@@ -1,9 +1,10 @@
 # Inventory U3 — Business Domain Model
 
 > Status: **PROPOSED business model** unless an entity is explicitly marked
-> **IMPLEMENTED** below. The current repository only implements the
-> organization/user/session foundation. This document is a design target for
-> milestones M1 onward, not a description of working software.
+> **IMPLEMENTED** below. The current repository implements the
+> organization/user/session foundation plus the `Branch` entity. Everything from
+> products onward is a design target for the remaining milestones, not a
+> description of working software.
 
 ## 1. Structure of the model
 
@@ -24,7 +25,7 @@ Organization
   └── Employee (person whose work is recorded; may not log in)
 ```
 
-`Organization` is already implemented. `Branch` and everything below it is
+`Organization` and `Branch` are implemented. Everything below the branch is
 proposed.
 
 ## 2. Entity inventory
@@ -34,6 +35,7 @@ proposed.
 | Entity                | Purpose                                       | Evidence                                           |
 | --------------------- | --------------------------------------------- | -------------------------------------------------- |
 | Organization          | Tenant boundary: name, timezone, currency     | `packages/domain/src/organization/organization.ts` |
+| Branch                | Organization-owned physical business location | `packages/domain/src/branch/branch.ts`             |
 | User                  | Organization-scoped login account             | `packages/domain/src/organization/auth.ts`         |
 | Role                  | `ADMINISTRATOR`, `MANAGER`, `STAFF`           | `packages/domain/src/organization/roles.ts`        |
 | Permission            | Domain permission values checked by the API   | `packages/domain/src/organization/roles.ts`        |
@@ -44,7 +46,6 @@ proposed.
 
 | Entity               | Purpose                                                              | Milestone | Key relationships                                          |
 | -------------------- | -------------------------------------------------------------------- | --------- | ---------------------------------------------------------- |
-| Branch               | One physical business location with independent inventory            | M1/M2     | belongs to Organization; has many operational records      |
 | Employee             | Person who prepares products; may not be an application user         | M2        | belongs to Branch                                          |
 | Supplier             | Provider of fruit and vegetables                                     | M2/M3     | delivers purchases to branches                             |
 | ProductCategory      | Grouping for products (e.g. fruit, vegetable, prepared)              | M2        | has many Products                                          |
