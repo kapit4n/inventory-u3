@@ -23,23 +23,23 @@ reproduced and confirmed in this review. Add an item here only with evidence
 
 ## 3. Incomplete features (expected at this stage)
 
-| Area                         | State                                                                                                               |
-| ---------------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| Branch master data           | Entity and dual-engine persistence implemented. No API route or UI.                                                 |
-| Catalog identity             | Units, categories, products and presentations have domain + dual-engine persistence. No API route, UI or seed data. |
-| Raw/processed products       | Product kind implemented; production/sales workflows that use it are not.                                           |
-| Average weight per tray      | Configured weight implemented on presentations; estimation, measurement and snapshots are not.                      |
-| Product prices and history   | Not implemented; only documented.                                                                                   |
-| Suppliers and purchases      | Not implemented.                                                                                                    |
-| Stock movements and balances | Not implemented.                                                                                                    |
-| Production batches           | Not implemented.                                                                                                    |
-| Sales checkpoints            | Not implemented.                                                                                                    |
-| Daily closing                | Not implemented.                                                                                                    |
-| Consolidated reports         | Not implemented. `/dashboard` shows static foundation content.                                                      |
-| User administration          | Not implemented, although `users:read`/`users:manage` permissions exist.                                            |
-| Branch-specific access       | Not implemented. All current authenticated users can reach all routes.                                              |
-| Audit log                    | Not implemented.                                                                                                    |
-| Inventory UI                 | `/inventory` is a placeholder card; it does not list or edit stock.                                                 |
+| Area                         | State                                                                                                                  |
+| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| Branch master data           | Entity and dual-engine persistence implemented. No API route or UI.                                                    |
+| Catalog identity             | Units, categories, products and presentations have domain + dual-engine persistence. No API route, UI or seed data.    |
+| Raw/processed products       | Product kind implemented; production/sales workflows that use it are not.                                              |
+| Average weight per tray      | Configured weight implemented on presentations; estimation, measurement and snapshots are not.                         |
+| Product prices and history   | Not implemented; only documented.                                                                                      |
+| Suppliers and purchases      | Not implemented.                                                                                                       |
+| Stock movements and balances | Movement, reason, source, correction and balance concepts exist in the domain; no table, port, API, calculation or UI. |
+| Production batches           | Not implemented.                                                                                                       |
+| Sales checkpoints            | Not implemented.                                                                                                       |
+| Daily closing                | Not implemented.                                                                                                       |
+| Consolidated reports         | Not implemented. `/dashboard` shows static foundation content.                                                         |
+| User administration          | Not implemented, although `users:read`/`users:manage` permissions exist.                                               |
+| Branch-specific access       | Not implemented. All current authenticated users can reach all routes.                                                 |
+| Audit log                    | Not implemented.                                                                                                       |
+| Inventory UI                 | `/inventory` is a placeholder card; it does not list or edit stock.                                                    |
 
 These are roadmap work, not defects. See
 [IMPLEMENTATION_ROADMAP.md](./IMPLEMENTATION_ROADMAP.md).
@@ -64,11 +64,11 @@ These are roadmap work, not defects. See
 - PostgreSQL parity on this machine (skipped, not passed).
 - Browser E2E for the current working tree (last recorded run is from the
   foundation session).
-- Branch and catalog API/UI tests, because no routes or screens exist yet.
+- Branch, catalog and stock API/UI tests, because no routes or screens exist yet.
 - Estimated/measured weight, snapshot and price-history tests, because those
   fields do not exist yet.
-- Stock, purchase, production, sales and closing tests, because those domains do
-  not exist yet.
+- Stock domain tests exist; stock repository, balance, correction and UI tests
+  await M4. Purchase, production, sales and closing domains do not exist yet.
 - Backup/restore drill.
 - Performance/load tests for movement and report queries.
 

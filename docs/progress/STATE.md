@@ -17,9 +17,12 @@
   domain + dual-engine persistence. Products carry a raw/processed kind and
   presentations carry an average weight per tray. No API route, UI, prices or
   weight snapshots exist yet.
-- **Next task:** M1-T4 — stock movement, balance and audit-safe correction
-  concepts.
+- **Stock concepts:** append-only movement, reason, source, correction and
+  balance shapes exist in the domain only. No stock table, repository, API or
+  balance calculation exists yet.
+- **Next task:** M1-T5 — access model note for the central operator now and
+  future branch users later.
 
 The previous foundation verification record is preserved in
-[SESSION_LOG.md](../development/SESSION_LOG.md) (Sessions 0–5).
+[SESSION_LOG.md](../development/SESSION_LOG.md) (Sessions 0–6).
 [LOG.md](./LOG.md) remains as a pointer to that history.

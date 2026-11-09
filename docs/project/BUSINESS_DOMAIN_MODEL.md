@@ -2,11 +2,11 @@
 
 > Status: **PROPOSED business model** unless an entity is explicitly marked
 > **IMPLEMENTED** below. The current repository implements the
-> organization/user/session foundation, the `Branch` entity and the product
+> organization/user/session foundation, the `Branch` entity, the product
 > catalog (units, categories, products, presentations, raw/processed kind and
-> average-weight configuration). Prices, estimated/measured weights, stock and
-> transactional records remain a design target, not a description of working
-> software.
+> average-weight configuration) and the stock movement vocabulary. Prices,
+> estimated/measured weights, persisted stock and transactional records remain a
+> design target, not a description of working software.
 
 ## 1. Structure of the model
 
@@ -34,19 +34,24 @@ proposed.
 
 ### Implemented today
 
-| Entity                | Purpose                                       | Evidence                                              |
-| --------------------- | --------------------------------------------- | ----------------------------------------------------- |
-| Organization          | Tenant boundary: name, timezone, currency     | `packages/domain/src/organization/organization.ts`    |
-| Branch                | Organization-owned physical business location | `packages/domain/src/branch/branch.ts`                |
-| MeasurementUnit       | Organization-owned code/name for a unit       | `packages/domain/src/product/measurement-unit.ts`     |
-| ProductCategory       | Organization-owned product grouping           | `packages/domain/src/product/product-category.ts`     |
-| Product               | Organization-owned item with explicit units   | `packages/domain/src/product/product.ts`              |
-| ProductPresentation   | Product packaging with average weight         | `packages/domain/src/product/product-presentation.ts` |
-| User                  | Organization-scoped login account             | `packages/domain/src/organization/auth.ts`            |
-| Role                  | `ADMINISTRATOR`, `MANAGER`, `STAFF`           | `packages/domain/src/organization/roles.ts`           |
-| Permission            | Domain permission values checked by the API   | `packages/domain/src/organization/roles.ts`           |
-| Session               | Opaque bearer session, stored as a token hash | `packages/domain/src/organization/auth.ts`            |
-| Organization settings | Name, timezone, currency update rules         | `packages/domain/src/organization/organization.ts`    |
+| Entity                | Purpose                                         | Evidence                                              |
+| --------------------- | ----------------------------------------------- | ----------------------------------------------------- |
+| Organization          | Tenant boundary: name, timezone, currency       | `packages/domain/src/organization/organization.ts`    |
+| Branch                | Organization-owned physical business location   | `packages/domain/src/branch/branch.ts`                |
+| MeasurementUnit       | Organization-owned code/name for a unit         | `packages/domain/src/product/measurement-unit.ts`     |
+| ProductCategory       | Organization-owned product grouping             | `packages/domain/src/product/product-category.ts`     |
+| Product               | Organization-owned item with explicit units     | `packages/domain/src/product/product.ts`              |
+| ProductPresentation   | Product packaging with average weight           | `packages/domain/src/product/product-presentation.ts` |
+| User                  | Organization-scoped login account               | `packages/domain/src/organization/auth.ts`            |
+| Role                  | `ADMINISTRATOR`, `MANAGER`, `STAFF`             | `packages/domain/src/organization/roles.ts`           |
+| Permission            | Domain permission values checked by the API     | `packages/domain/src/organization/roles.ts`           |
+| Session               | Opaque bearer session, stored as a token hash   | `packages/domain/src/organization/auth.ts`            |
+| Organization settings | Name, timezone, currency update rules           | `packages/domain/src/organization/organization.ts`    |
+| StockMovement         | Append-only stock change concept, not persisted | `packages/domain/src/stock/stock-movement.ts`         |
+| StockBalance          | On-hand read-model shape; strategy is open      | `packages/domain/src/stock/stock-balance.ts`          |
+
+`StockMovement` and `StockBalance` are domain concepts only. There is no stock
+table, repository port or API; M4 owns persistence and balance strategy.
 
 ### Proposed for the business milestones
 
@@ -171,8 +176,9 @@ transaction rather than joining to current configuration.
 1. Snapshot values are written once, at confirmation, and are not recomputed.
 2. Editing a product's average weight or price creates/updates the master record
    only; it does not rewrite history.
-3. Corrections create an auditable change. Whether that is a reversal plus a new
-   record or an amended record with a version history is **PENDING**.
+3. Stock corrections are new movements that reference the original (ADR 0040).
+   For sales and production snapshot records, whether a correction is a reversal
+   plus a new record or a versioned amendment is **PENDING** (BQ-03).
 4. Estimated weight and measured weight are separate concepts and must not be
    stored in the same field without a discriminator.
 

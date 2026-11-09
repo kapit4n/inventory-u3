@@ -8,7 +8,8 @@
 
 `packages/domain` is framework-independent TypeScript. It contains the
 organization, identity, session, branch and product-catalog foundation,
-including the raw/processed kind and average-weight configuration. Stock and
+including the raw/processed kind and average-weight configuration. It also
+contains the stock movement vocabulary and balance shape; stock persistence and
 transactional entities arrive in later milestones.
 
 ## Branch
@@ -49,6 +50,27 @@ stock; it does not own a private copy of the catalog.
   because the documented 0.001 kg precision is exactly one gram.
 - Prices, estimated/measured weights and historical snapshots are not modelled
   yet. Those are M2/M5/M6 work.
+
+## Stock concepts
+
+The vocabulary exists without a stock table or repository port:
+
+- `StockMovementReason` is `RECEIVING`, `PRODUCTION_INPUT`,
+  `PRODUCTION_OUTPUT`, `SALES_CHECKPOINT`, `ADJUSTMENT`, `WASTE` or
+  `CORRECTION`.
+- `StockMovement` belongs to one organization, one branch and one product. Its
+  signed `quantityDelta` is non-zero and expressed in the product's inventory
+  unit.
+- A movement carries an optional source reference, business time (`occurredAt`),
+  recording time (`recordedAt`), actor and note.
+- A correction is another movement with reason `CORRECTION` and a
+  `correctsMovementId` pointing at a different movement. It never edits or
+  deletes the original (ADR 0040).
+- Created movements and nested source references are frozen at runtime.
+- `StockBalance` is an exported read-model interface only. Whether it is derived
+  or cached remains open (BQ-07); no factory, port or table exists.
+- Negative-stock enforcement, opening balances, approval and reversal arithmetic
+  are intentionally absent (BQ-08 and BQ-03 remain open).
 
 ## Organization
 
@@ -115,7 +137,7 @@ implementations (ADR 0025).
 ## Not yet modeled
 
 - Prices, estimated/measured weights and historical snapshots
-- Stock movements, balances and adjustments
+- Persisted stock movements, balance strategy, reconciliation and adjustments
 - Suppliers, employees and purchases
 - Production batches
 - Sales checkpoints and daily closing

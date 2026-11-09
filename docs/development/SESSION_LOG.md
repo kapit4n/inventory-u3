@@ -553,3 +553,106 @@ Read `AGENTS.md`, `PROJECT_OVERVIEW.md`,
 `IMPLEMENTATION_PROGRESS.md`, `CURRENT_TASK.md`, the inventory workflow and the
 M1-T3 slice, then implement M1-T4 as a domain-only stock vocabulary. Update this
 log and the progress documents before finishing.
+
+## Session 6 — 2026-11-09 — M1-T4 stock movement concepts
+
+### Objective
+
+Define the stock movement vocabulary and audit-safe correction invariants in the
+domain, with a balance shape but no stock table, repository or UI.
+
+### Work completed
+
+- Added a branded `StockMovementId` and `asStockMovementId` shared by all
+  runtimes.
+- Added `STOCK_MOVEMENT_REASONS`: receiving, production input/output, sales
+  checkpoint, adjustment, waste and correction.
+- Added controlled source types and an optional `StockMovementSource` reference.
+- Added `StockMovement` and `createStockMovement` with signed quantity, business
+  and recording time, actor, note and correction reference.
+- Enforced correction invariants: a correction must reference a different
+  movement, and a non-correction must not carry a correction reference.
+- Froze created movements and nested source references at runtime.
+- Added `StockBalance` as an exported read-model interface only.
+- Added 17 domain tests for creation, quantity, reason, source, correction and
+  immutability.
+- Added [ADR 0040](../decisions/0040-stock-movements-are-append-only.md) and
+  linked it from the decision index.
+- Updated the domain, model, inventory workflow, architecture, overview,
+  progress, roadmap, task, issue and state documents.
+
+### Files changed
+
+Created:
+
+- `packages/domain/src/stock/stock-movement-reason.ts`
+- `packages/domain/src/stock/stock-movement-source.ts`
+- `packages/domain/src/stock/stock-movement.ts`
+- `packages/domain/src/stock/stock-balance.ts`
+- `packages/domain/src/stock/index.ts`
+- `packages/domain/src/stock/stock-movement.test.ts`
+- `docs/decisions/0040-stock-movements-are-append-only.md`
+
+Modified:
+
+- `packages/types/src/identifiers.ts`
+- `packages/domain/src/index.ts`
+- `packages/domain/package.json`
+- `docs/decisions/README.md`
+- `docs/domain.md`
+- `docs/open-questions.md`
+- `docs/progress/STATE.md`
+- `docs/project/BUSINESS_DOMAIN_MODEL.md`
+- `docs/project/PROJECT_OVERVIEW.md`
+- `docs/project/TECHNICAL_ARCHITECTURE.md`
+- `docs/development/IMPLEMENTATION_PROGRESS.md`
+- `docs/development/IMPLEMENTATION_ROADMAP.md`
+- `docs/development/CURRENT_TASK.md`
+- `docs/development/KNOWN_ISSUES.md` and this log.
+- `docs/workflows/INVENTORY_WORKFLOW.md`
+
+### Technical decisions
+
+- A movement is append-only; a correction is another movement that references
+  the original (ADR 0040).
+- Quantity is a signed finite non-zero number in the product's inventory unit.
+  No conversion is applied while BQ-10 is open.
+- A correction must point at a different movement; no reversal arithmetic is
+  implemented without the original row.
+- Movement objects are frozen so runtime mutation is rejected too, not only by
+  TypeScript's readonly types.
+- `StockBalance` remains a type only because BQ-07 (derived versus cached) and
+  BQ-08 (negative stock) are open.
+- No stock table, repository port, migration, API route, seed or UI was added.
+
+### Tests and validation
+
+- `pnpm run typecheck` — PASS, 12/12 tasks.
+- `pnpm run lint` — PASS, 12/12 tasks, `BOUNDARY GUARD OK`.
+- `pnpm run guard:boundaries` — PASS, `BOUNDARY GUARD OK`.
+- `pnpm exec turbo run test --force` — PASS, 12/12 tasks, 166 passed + 3 skipped.
+- Domain suite — PASS, 45 tests including 17 stock tests.
+- `TEST_DATABASE_URL= pnpm --filter @inventory-u3/api test:integration` — PASS,
+  4 files, 22 passed + 3 skipped.
+- `pnpm run build` — PASS, 5/5 tasks.
+- PostgreSQL repository tests — SKIPPED, no reachable server.
+- E2E — NOT RUN.
+- No migration or seed was needed because no schema changed.
+
+### Problems found
+
+- None in the new code. The pre-existing PostgreSQL environment limitation and
+  SI-06 remain.
+
+### Pending work
+
+- Commit the M1-T4 documentation.
+- Implement M1-T5: document the access model for the central operator now and
+  future branch users later, without building branch authorization or resolving
+  BQ-09.
+
+### Next session
+
+Read `AGENTS.md`, `PROJECT_OVERVIEW.md`, `IMPLEMENTATION_PROGRESS.md`,
+`CURRENT_TASK.md`, `docs/security.md` and the role matrix, then write the M1-T5
+access note. Update this log and the progress documents before finishing.

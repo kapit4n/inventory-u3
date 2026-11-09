@@ -1,8 +1,9 @@
 # Inventory Workflow
 
-> Implementation status: **NOT_IMPLEMENTED.** The branch table exists, but there
-> is no product, stock or adjustment table in the repository today. This is the
-> design target for M4.
+> Implementation status: **DOMAIN CONCEPTS ONLY.** The branch and product catalog
+> tables exist. M1-T4 defines the stock movement vocabulary, invariants and
+> balance shape; there is still no stock table, repository or inventory screen.
+> This is the design target for M4.
 
 ## 1. Scope
 
@@ -22,10 +23,13 @@ inventory only through aggregate sales checkpoints (M6).
 
 1. Inventory is independent per branch (BR-022).
 2. Every stock-affecting record identifies its branch (BR-023).
-3. A movement is append-only: correcting a movement does not erase history.
+3. A movement is append-only: correcting a movement does not erase history
+   (ADR 0040).
 4. Stock quantity is expressed in the product's configured inventory unit.
-5. A stock change must name its source: purchase receiving, production output,
-   sales checkpoint, adjustment, waste or transfer (transfer is future).
+5. A stock movement reason names its source category: purchase receiving,
+   production output, sales checkpoint, adjustment, waste or correction
+   (transfer is future). A source-record reference is optional until that record
+   type exists.
 6. The system must not let stock go negative by default. Whether an override is
    ever allowed is an open question.
 7. Raw and finished products are distinct products; one does not silently consume
@@ -34,7 +38,7 @@ inventory only through aggregate sales checkpoints (M6).
 ## 3. Proposed record model
 
 ```text
-StockMovement
+StockMovement (domain concept implemented; not persisted)
   id
   organizationId
   branchId
@@ -42,12 +46,15 @@ StockMovement
   quantityDelta        (signed, in inventory unit)
   reason               (RECEIVING | PRODUCTION_OUTPUT | PRODUCTION_INPUT |
                         SALES_CHECKPOINT | ADJUSTMENT | WASTE | CORRECTION)
-  sourceType / sourceId
+  sourceType / sourceId   (optional)
+  correctsMovementId      (only on CORRECTION)
   occurredAt
+  recordedAt
   recordedByUserId
   note
 
-StockBalance
+StockBalance (type only in M1-T4; no factory or table)
+  organizationId
   branchId
   productId
   quantityOnHand
@@ -57,6 +64,12 @@ StockBalance
 Whether `StockBalance` is a maintained cache or a derived view is **PENDING**.
 The movement ledger is the source of truth either way. A cached balance may only
 be updated inside the same transaction as the movement that changes it.
+
+The implemented domain enforces a signed, finite, non-zero quantity, a known
+reason and a known source type. A correction must reference a different
+movement; a non-correction must not carry a correction reference. Created
+movements and source references are frozen at runtime. No reversal arithmetic,
+negative-stock policy or approval rule is implemented.
 
 ## 4. Proposed flows
 
@@ -108,6 +121,8 @@ be updated inside the same transaction as the movement that changes it.
 - Negative resulting stock is refused unless an explicit override is authorized
   (open question).
 - A correction must reference the record it corrects and preserve the original.
+- A non-correction movement must not carry a correction reference.
+- A movement cannot correct itself.
 
 ## 6. UI expectations (M4)
 

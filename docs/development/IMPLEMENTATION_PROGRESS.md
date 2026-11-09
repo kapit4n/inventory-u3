@@ -5,25 +5,25 @@
 
 ## Summary
 
-| Field                  | Value                                                                                 |
-| ---------------------- | ------------------------------------------------------------------------------------- |
-| Current milestone      | M1 — Business Domain Foundation                                                       |
-| Current task           | M1-T3 complete; next task is M1-T4 (stock movement and balance concepts)              |
-| Overall project status | Foundation, branch, catalog and measurement configuration complete; stock not started |
-| Completed milestones   | None of M1–M9 (the foundation prerequisite is complete)                               |
-| In-progress milestones | M1                                                                                    |
-| Blocked milestones     | M6 finalization is blocked on BR-013 (WhatsApp reporting format)                      |
-| Pending milestones     | M2, M3, M4, M5, M6, M7, M8, M9                                                        |
-| Last verified commit   | `4168462` (M1-T3 product kind and tray weight)                                        |
-| Last update date       | 2026-11-09                                                                            |
-| Next recommended task  | M1-T4 — Stock movement and balance concepts with audit-safe corrections               |
+| Field                  | Value                                                                             |
+| ---------------------- | --------------------------------------------------------------------------------- |
+| Current milestone      | M1 — Business Domain Foundation                                                   |
+| Current task           | M1-T4 complete; next task is M1-T5 (access model note)                            |
+| Overall project status | Foundation, branch, catalog, measurement and stock concepts complete; no stock UI |
+| Completed milestones   | None of M1–M9 (the foundation prerequisite is complete)                           |
+| In-progress milestones | M1                                                                                |
+| Blocked milestones     | M6 finalization is blocked on BR-013 (WhatsApp reporting format)                  |
+| Pending milestones     | M2, M3, M4, M5, M6, M7, M8, M9                                                    |
+| Last verified commit   | `afc1cee` (M1-T4 stock movement concepts)                                         |
+| Last update date       | 2026-11-09                                                                        |
+| Next recommended task  | M1-T5 — Access model note: central operator now, branch users later               |
 
 ### Working tree at the time of this update
 
-M1-T3 added the required raw/processed product kind and the average weight per
-tray, extended both schemas and generated both migrations, updated all four
-catalog repositories and strengthened their tests. These changes are committed as
-`4168462`. M1-T1 is committed as `d6b62d5`; M1-T2 is committed as `10f882d`.
+M1-T4 added the append-only stock movement vocabulary, correction invariants and
+a balance read-model type without adding a table, port or API. These changes are
+committed as `afc1cee`. M1-T1 is committed as `d6b62d5`; M1-T2 as `10f882d`;
+M1-T3 as `4168462`.
 
 ## Verification for this update
 
@@ -31,19 +31,21 @@ catalog repositories and strengthened their tests. These changes are committed a
 | ---------------------------------- | -------------------------------------------------------------- |
 | `pnpm run typecheck`               | PASS — 12/12 tasks                                             |
 | `pnpm run lint`                    | PASS — 12/12 tasks, `BOUNDARY GUARD OK`                        |
-| `pnpm exec turbo run test --force` | PASS — 12/12 tasks, 149 passed, 3 skipped                      |
+| `pnpm run guard:boundaries`        | PASS — `BOUNDARY GUARD OK`                                     |
+| `pnpm exec turbo run test --force` | PASS — 12/12 tasks, 166 passed, 3 skipped                      |
 | `pnpm run test:integration`        | PASS with `TEST_DATABASE_URL=` — 4 files, 22 passed, 3 skipped |
-| `pnpm run db:migrate`              | PASS — SQLite measurement migration applied                    |
-| `pnpm run db:seed`                 | PASS — existing development data reseeded                      |
+| `pnpm run db:migrate`              | NOT NEEDED — M1-T4 adds no schema change                       |
+| `pnpm run db:seed`                 | NOT NEEDED — M1-T4 adds no persisted data                      |
 | `pnpm run test:e2e`                | NOT RUN; last recorded result was 18/18 on the foundation      |
 | `pnpm run format:check`            | PASS — all files use Prettier style                            |
 | Local Markdown link check          | PASS — all local links resolve                                 |
 | `pnpm run build`                   | PASS — 5/5 tasks                                               |
 
 Test counts from the forced run: API 48 passed + 3 skipped, desktop 4, database
-6, api-client 15, app 48, domain 28. Total 149 passed and 3 skipped. The skipped
-tests are the PostgreSQL branch and catalog repository tests, which require a
-reachable `TEST_DATABASE_URL`.
+6, api-client 15, app 48, domain 45. Total 166 passed and 3 skipped. The domain
+suite includes 17 stock-movement tests. The skipped tests are the PostgreSQL
+branch and catalog repository tests, which require a reachable
+`TEST_DATABASE_URL`.
 
 PostgreSQL integration tests were not executed because no PostgreSQL server is
 available on this machine. This is a known environment limitation, not a pass.
@@ -62,7 +64,8 @@ integration files without the PostgreSQL half. See SI-06.
 
 - [x] Repository architecture, packages, persistence and guardrails inspected.
 - [x] Existing implemented domain documented: organization, user, session, role,
-      permission, organization settings, branch and product catalog.
+      permission, organization settings, branch, product catalog and stock
+      concepts.
 - [x] Actual database tables documented: organizations, branches, catalog,
       users and sessions.
 - [x] Confirmed business requirements separated from proposed design.
@@ -76,16 +79,17 @@ integration files without the PostgreSQL half. See SI-06.
       schema/migrations and repository implementations with isolation tests.
 - [x] M1-T3: Required raw/processed product kind and average-weight
       configuration on presentations, both engines and repositories.
+- [x] M1-T4: Stock movement, reason, source, balance and audit-safe correction
+      concepts, with no stock table, port or API.
 
 ### In Progress
 
-- [ ] M1-T4: Stock movement, balance and audit-safe correction concepts.
-- [ ] M1-T5: Access model for central operator and future branch users.
-- [ ] M1-T6: Update technical docs and boundary guard for the remaining domain.
+None. M1-T4 is complete; M1-T5 is not started.
 
 ### Pending
 
-- [ ] Remaining M1 stock and access-foundation work.
+- [ ] M1-T5: Access model note for the central operator and future branch users.
+- [ ] M1-T6: Update technical docs and boundary guard for the remaining domain.
 - [ ] Branch API route and management UI (M2).
 - [ ] Catalog API routes and management UI (M2).
 - [ ] Seed the three branches once their names and codes are confirmed.
@@ -94,17 +98,17 @@ integration files without the PostgreSQL half. See SI-06.
 ### Validation
 
 - Tests executed: `typecheck`, `lint`, unit/component/API tests (see summary).
-- Passed: typecheck 12/12, lint 12/12 with `BOUNDARY GUARD OK`, tests 149
-  passed + 3 skipped.
-- SQLite measurement migration and seed applied successfully.
+- Passed: typecheck 12/12, lint 12/12 with `BOUNDARY GUARD OK`, guard
+  `BOUNDARY GUARD OK`, tests 166 passed + 3 skipped, build 5/5.
+- Integration suite passed with the SQLite override: 22 passed + 3 skipped.
 - Failed: default `test:integration` without clearing `TEST_DATABASE_URL`
   (SI-06); the SQLite path passes with the override.
 - Not executed: PostgreSQL integration tests, Playwright E2E.
-- Build passed 5/5.
-- New M1-T3 tests: 2 domain tests (unknown product kind; non-positive or
-  fractional average weight). Existing catalog domain and repository tests now
-  assert kind and weight round-trips.
-- The full API suite has 48 passed + 3 skipped; the domain suite has 28 passed.
+- No schema change, migration, seed or database test was required for M1-T4.
+- New M1-T4 tests: 17 stock tests covering valid creation, signed/finite/non-zero
+  quantity, known reason, source reference, correction reference and runtime
+  immutability.
+- The full API suite has 48 passed + 3 skipped; the domain suite has 45 passed.
 - PostgreSQL repository tests exist but were skipped without a reachable
   `TEST_DATABASE_URL`.
 
@@ -113,9 +117,11 @@ integration files without the PostgreSQL half. See SI-06.
 - `packages/domain/src/branch/*` — branch entity, validation and tests.
 - `packages/domain/src/product/*` — units, categories, product kinds, products,
   presentations and catalog tests.
+- `packages/domain/src/stock/*` — movement reasons, source types, movement
+  factory, balance type and stock tests.
 - `packages/domain/src/ports/index.ts` — catalog repository ports and
   `Repositories`.
-- `packages/types/src/identifiers.ts` — catalog branded ids.
+- `packages/types/src/identifiers.ts` — catalog and stock movement branded ids.
 - `database/schema/branch.ts`, `database/schema/catalog.ts`,
   `database/schema/enums.ts` and the SQLite equivalents.
 - `database/migrations/0001_*` to `0003_*` and the SQLite equivalents.
@@ -142,6 +148,12 @@ integration files without the PostgreSQL half. See SI-06.
 - Prices, estimated/measured weights and historical snapshots are deferred.
 - Branch and catalog reads take `organizationId` explicitly.
 - The old generic roadmap is superseded (TD-008).
+- Stock movements are append-only and corrections are new movements that
+  reference the original (ADR 0040).
+- A movement has a signed non-zero quantity, a controlled reason, an optional
+  source reference and required organization, branch, product and actor.
+- `StockBalance` is a type only; derived-versus-cached and negative-stock
+  policies remain open (BQ-07, BQ-08).
 - Branch-scoped persistence is recorded in
   [ADR 0039](../decisions/0039-branch-scoped-persistence.md).
 
@@ -151,7 +163,9 @@ integration files without the PostgreSQL half. See SI-06.
   domain/persistence slices.
 - Products have a kind and presentations have a configured average weight, but
   prices, estimated/measured weights and snapshots do not exist.
-- No supplier, stock, purchase, production, sales or closing entity exists.
+- Stock exists as a domain vocabulary only; there is no stock table, repository,
+  API, balance calculation or inventory screen.
+- No supplier, purchase, production, sales or closing entity exists.
 - The only business-looking UI is a static inventory placeholder.
 - The three development branches are not seeded because their names are not confirmed.
 - The existing roles are foundation roles, not the owner/operator/branch model.
@@ -159,8 +173,8 @@ integration files without the PostgreSQL half. See SI-06.
 
 ### Next action
 
-Implement **M1-T4**: define stock movement, balance and audit-safe correction
-concepts in the domain without building the M4 stock ledger. See
+Implement **M1-T5**: document the access model for the central operator now and
+future branch users later, without building branch authorization. See
 [CURRENT_TASK.md](./CURRENT_TASK.md).
 
 ---

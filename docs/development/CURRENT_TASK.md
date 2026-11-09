@@ -2,8 +2,8 @@
 
 > Last updated: 2026-11-09.
 >
-> **No feature task is currently in progress.** M1-T3 (raw/processed and
-> average-weight configuration) is complete. The next task is M1-T4.
+> **M1-T4 is complete.** The next task is M1-T5 (access model note), which is not
+> started. See [IMPLEMENTATION_PROGRESS.md](./IMPLEMENTATION_PROGRESS.md).
 
 ## Task identity
 
@@ -12,7 +12,7 @@
 | Milestone    | M1 — Business Domain Foundation                            |
 | Task ID      | M1-T4                                                      |
 | Task         | Stock movement, balance and audit-safe correction concepts |
-| Status       | NOT_STARTED (ready)                                        |
+| Status       | COMPLETED                                                  |
 | Dependencies | M1-T3 complete; TD-001, TD-009 and TD-010 accepted         |
 | Blocks       | M1-T5, M1-T6, M4, M5, M6, M7                               |
 
@@ -24,6 +24,23 @@ correction is another movement, never an edit that erases what happened.
 
 This task is conceptual and framework-independent. It must not build the stock
 ledger, balances, reconciliation screen or any API.
+
+### M1-T4 boundary decision (recorded before coding)
+
+The domain slice will contain:
+
+- a controlled `StockMovementReason` vocabulary;
+- a controlled source-type vocabulary and optional source reference;
+- `StockMovement` plus `createStockMovement`, with a signed non-zero quantity and
+  immutable/frozen runtime objects;
+- `StockBalance` as an exported read-model type only, with no factory or table;
+- no repository port, database table, migration, API route or screen.
+
+Corrections are movements with reason `CORRECTION`; they are valid only when
+`correctsMovementId` points to a different movement. Non-correction movements
+must not carry that reference. The original is never mutated or deleted.
+Negative-stock enforcement, opening balances, approval and reversal arithmetic
+remain outside this slice.
 
 ## Context
 
@@ -79,20 +96,21 @@ Keep the first version explicit and small:
 
 ## Acceptance criteria
 
-- [ ] Stock concepts are pure TypeScript and import only `@inventory-u3/types`
+- [x] Stock concepts are pure TypeScript and import only `@inventory-u3/types`
       and domain shared modules.
-- [ ] A stock movement carries organization, branch, product, a non-zero signed
+- [x] A stock movement carries organization, branch, product, a non-zero signed
       quantity, a controlled reason and its audit fields.
-- [ ] A movement is immutable in the type; no update/delete API is introduced.
-- [ ] A correction references the corrected movement id rather than replacing it.
-- [ ] Balance remains a concept only; no stock table or migration is added.
-- [ ] Open questions BQ-03, BQ-07 and BQ-08 are not silently answered.
-- [ ] Domain tests cover quantity, reason, correction and required-reference
+- [x] A movement is immutable in the type; no update/delete API is introduced.
+- [x] A correction references the corrected movement id rather than replacing it.
+- [x] Balance remains a concept only; no stock table or migration is added.
+- [x] Open questions BQ-03, BQ-07 and BQ-08 are not silently answered.
+- [x] Domain tests cover quantity, reason, correction and required-reference
       invariants.
-- [ ] If the append-only rule is recorded as an ADR, the ADR is linked from the
-      implementation notes and decision index.
-- [ ] `pnpm run guard:boundaries`, `typecheck`, `lint` and `test` pass.
-- [ ] Documentation states what is conceptual versus persisted.
+- [x] The append-only rule is recorded in
+      [ADR 0040](../decisions/0040-stock-movements-are-append-only.md) and linked
+      from the decision index.
+- [x] `pnpm run guard:boundaries`, `typecheck`, `lint` and `test` pass.
+- [x] Documentation states what is conceptual versus persisted.
 
 ## Tests required
 
@@ -108,14 +126,9 @@ added; if it is, both engines must change together.
 
 ## Remaining steps
 
-1. Re-read the requirements, inventory workflow and open questions.
-2. Decide the exact M1-T4 domain boundary and record it here before coding.
-3. Implement the stock concepts and tests without adding stock tables.
-4. Record the append-only correction principle in an ADR if it is architectural.
-5. Run the verification commands.
-6. Update `IMPLEMENTATION_PROGRESS.md`, the roadmap, this file, `SESSION_LOG.md`,
-   `KNOWN_ISSUES.md`, `docs/domain.md` and the model/workflow documents.
-7. Choose M1-T5 (access-model note) or the next roadmap task.
+None for M1-T4. The next task is **M1-T5: access model note** (documentation
+only): central operator access now, future branch users later, without building
+branch authorization or resolving BQ-09.
 
 ## Out of scope for this task
 
