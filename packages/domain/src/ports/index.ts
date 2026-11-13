@@ -16,11 +16,13 @@ import type {
   ProductId,
   ProductPresentationId,
   SessionId,
+  SupplierId,
   UserId,
 } from '@inventory-u3/types';
 
 import type { Branch } from '../branch/branch.js';
 import type { Employee } from '../employee/employee.js';
+import type { Supplier } from '../supplier/supplier.js';
 import type { AuthenticatedUser, Session, UserWithCredentials } from '../organization/auth.js';
 import type { Organization, OrganizationSettingsUpdate } from '../organization/organization.js';
 import type { MeasurementUnit } from '../product/measurement-unit.js';
@@ -42,6 +44,7 @@ export interface Repositories {
   readonly organizations: OrganizationRepository;
   readonly branches: BranchRepository;
   readonly employees: EmployeeRepository;
+  readonly suppliers: SupplierRepository;
   readonly measurementUnits: MeasurementUnitRepository;
   readonly productCategories: ProductCategoryRepository;
   readonly products: ProductRepository;
@@ -74,6 +77,14 @@ export interface EmployeeRepository {
   create(employee: Employee): Promise<Employee>;
   /** Returns `undefined` when the employee does not belong to the organization. */
   update(employee: Employee): Promise<Employee | undefined>;
+}
+
+export interface SupplierRepository {
+  findById(organizationId: OrganizationId, supplierId: SupplierId): Promise<Supplier | undefined>;
+  listByOrganization(organizationId: OrganizationId): Promise<readonly Supplier[]>;
+  create(supplier: Supplier): Promise<Supplier>;
+  /** Returns `undefined` when the supplier does not belong to the organization. */
+  update(supplier: Supplier): Promise<Supplier | undefined>;
 }
 
 export interface MeasurementUnitRepository {

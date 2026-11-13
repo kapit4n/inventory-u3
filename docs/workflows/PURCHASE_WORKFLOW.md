@@ -1,7 +1,8 @@
 # Purchase and Receiving Workflow
 
-> Implementation status: **NOT_IMPLEMENTED.** No supplier, purchase or receiving
-> table exists. This is the design target for M3.
+> Implementation status: **NOT_IMPLEMENTED.** Suppliers exist as name-only master
+> data (TD-013), but no purchase or receiving table exists. This is the design
+> target for M3; supplier detail fields remain open (BQ-21).
 
 ## 1. Scope
 

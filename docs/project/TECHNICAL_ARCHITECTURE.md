@@ -48,7 +48,7 @@ rules. The dependency direction is inward only.
 
 | Package               | Responsibility                                                      | Status                                        |
 | --------------------- | ------------------------------------------------------------------- | --------------------------------------------- |
-| `packages/domain`     | Organization, branch, employee, catalog, stock concepts, ports      | Implemented                                   |
+| `packages/domain`     | Organization, branch, employee, supplier, catalog, stock, ports     | Implemented                                   |
 | `packages/validation` | Zod schemas for auth, organization, env and common primitives       | Implemented                                   |
 | `packages/types`      | Branded IDs, ISO time, money minor units                            | Implemented                                   |
 | `packages/api-client` | Typed REST client: headers, query strings, problem mapping, schemas | Implemented                                   |
@@ -117,19 +117,22 @@ engine (ADR 0025).
 - Repository methods are written twice, once per engine.
 - `database/db-url.ts` chooses the engine from `DATABASE_URL` and resolves
   SQLite paths against the repository root.
-- Current tables: `organizations`, `branches`, `employees`, `measurement_units`,
-  `product_categories`, `products`, `product_presentations`, `users`, `sessions`.
+- Current tables: `organizations`, `branches`, `employees`, `suppliers`,
+  `measurement_units`, `product_categories`, `products`,
+  `product_presentations`, `users`, `sessions`.
 
-The `branches` and `employees` tables and the four catalog tables are implemented
-on both engines. Catalog master data is organization-wide; branches own stock, not
-a separate catalog (TD-009). An employee carries both organization and branch
-references and is deactivated rather than deleted (TD-012). `products.kind` distinguishes raw
-from processed products, and `product_presentations.average_weight_grams` stores
-the configured weight exactly (TD-010). Prices, estimated/measured weight
-snapshots, stock, production and sales tables do not exist yet. The domain
-contains the append-only stock movement vocabulary and a balance shape, but no
-stock port or table (ADR 0040). Every future operational row must carry
-organization and branch ownership.
+The `branches`, `employees` and `suppliers` tables and the four catalog tables are
+implemented on both engines. Catalog and supplier master data are
+organization-wide; branches own stock and purchases, not a separate catalog or
+supplier list (TD-009, TD-013). An employee carries both organization and branch
+references and is deactivated rather than deleted (TD-012). Suppliers carry
+organization ownership only and are also deactivated (TD-013). `products.kind`
+distinguishes raw from processed products, and
+`product_presentations.average_weight_grams` stores the configured weight exactly
+(TD-010). Prices, estimated/measured weight snapshots, stock, production and sales
+tables do not exist yet. The domain contains the append-only stock movement
+vocabulary and a balance shape, but no stock port or table (ADR 0040). Every
+future operational row must carry organization and branch ownership.
 
 ## 7. Frontend architecture
 
@@ -163,10 +166,10 @@ desktop shell does not open a database; it talks to the API over HTTP.
 
 PostgreSQL integration tests require `TEST_DATABASE_URL` and are skipped on this
 machine because no PostgreSQL server is available. The current integration files
-cover authentication, organization, branch, employee and catalog repository
-round-trips, branch and employee route permissions and validation,
-cross-organization isolation, repository constraints and a migration smoke path.
-No stock or workflow API exists yet.
+cover authentication, organization, branch, employee, supplier and catalog
+repository round-trips, branch, employee and supplier route permissions and
+validation, cross-organization isolation, repository constraints and a migration
+smoke path. No stock or workflow API exists yet.
 
 ## 10. Guardrails and quality gates
 
@@ -182,9 +185,9 @@ No stock or workflow API exists yet.
 
 ## 11. Architecture gaps for the business milestones
 
-The existing foundation is reusable. The branch and employee entities, their
-dual-engine persistence, API routes and Settings UI now exist; the following are
-not designed or built:
+The existing foundation is reusable. The branch, employee and supplier entities,
+their dual-engine persistence, API routes and Settings UI now exist; the following
+are not designed or built:
 
 1. Catalog API routes and management UI (entities and repositories exist).
 2. Product price history and estimated/measured weight snapshots.

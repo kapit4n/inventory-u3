@@ -9,6 +9,7 @@ import { SQLiteProductCategoryRepository } from './repositories/product-category
 import { SQLiteProductPresentationRepository } from './repositories/product-presentation-repository.js';
 import { SQLiteProductRepository } from './repositories/product-repository.js';
 import { SQLiteSessionRepository } from './repositories/session-repository.js';
+import { SQLiteSupplierRepository } from './repositories/supplier-repository.js';
 import { SQLiteUserRepository } from './repositories/user-repository.js';
 
 export function sqliteRepositoriesFor(db: SqliteDatabase): Repositories {
@@ -16,6 +17,7 @@ export function sqliteRepositoriesFor(db: SqliteDatabase): Repositories {
     organizations: new SQLiteOrganizationRepository(db),
     branches: new SQLiteBranchRepository(db),
     employees: new SQLiteEmployeeRepository(db),
+    suppliers: new SQLiteSupplierRepository(db),
     measurementUnits: new SQLiteMeasurementUnitRepository(db),
     productCategories: new SQLiteProductCategoryRepository(db),
     products: new SQLiteProductRepository(db),

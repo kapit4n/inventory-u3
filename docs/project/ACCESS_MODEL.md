@@ -1,6 +1,6 @@
 # Access Model
 
-> Status: **Access note through M2-T2.** This document defines the confirmed
+> Status: **Access note through M2-T3.** This document defines the confirmed
 > access boundary, the implemented foundation and the future branch-access
 > constraint. It does not implement branch authorization or settle BQ-09.
 
@@ -70,6 +70,17 @@ Employee master data follows the same organization-wide administration boundary:
 - Employees are deactivated, not deleted, so later production rows can keep their
   preparer reference. An employee has no application account.
 
+Supplier master data uses the same organization-wide administration boundary:
+
+- `GET /api/v1/suppliers` requires `organization:read`; every current role can
+  read the supplier list.
+- `POST /api/v1/suppliers` and `PUT /api/v1/suppliers/:supplierId` require
+  `organization:manage`, which only `ADMINISTRATOR` carries today.
+- Suppliers are organization-wide and have no branch assignment; M3 purchases
+  carry the branch that receives the goods.
+- Suppliers are deactivated, not deleted, so later purchases keep their supplier
+  reference. Contact, tax and payment details are not modeled yet (BQ-21).
+
 ## 3. Business actors and the initial version
 
 | Actor              | Initial application access                         | Notes                                                                                           |
@@ -120,6 +131,7 @@ ownership, which makes branch-scoped filtering possible later.
 | ----- | --------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
 | BQ-09 | When do branch users need access, and what may they see?                                      | PENDING; nothing is implemented.                          |
 | BQ-03 | Who may correct confirmed records, and what approval/audit evidence is required?              | PENDING; the stock correction shape exists in the domain. |
+| BQ-21 | Which supplier contact, tax and payment details are required?                                 | PENDING; suppliers are name-only for now (TD-013).        |
 | —     | Does the owner need an application account, or receive reports outside the app?               | PENDING.                                                  |
 | —     | May one user belong to more than one branch, and may they also have organization-wide access? | PENDING.                                                  |
 | —     | Who administers users and passwords beyond the initial operator?                              | PENDING.                                                  |

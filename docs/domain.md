@@ -7,7 +7,7 @@
 > proposed entity from that document as implemented code.
 
 `packages/domain` is framework-independent TypeScript. It contains the
-organization, identity, session, branch, employee and product-catalog
+organization, identity, session, branch, employee, supplier and product-catalog
 foundation, including the raw/processed kind and average-weight configuration. It
 also contains the stock movement vocabulary and balance shape; stock persistence
 and transactional entities arrive in later milestones.
@@ -58,6 +58,29 @@ can change the branch or active state while preserving identity, ownership and
 are deactivated rather than deleted so later production rows keep their preparer
 reference. Each employee belongs to one branch today; whether employees can be
 shared across branches remains open (BQ-20).
+
+## Supplier
+
+`Supplier` identifies a provider from whom purchases are made:
+
+```ts
+interface Supplier {
+  id: SupplierId;
+  organizationId: OrganizationId;
+  name: string;
+  isActive: boolean;
+  createdAt: IsoDateTime;
+  updatedAt: IsoDateTime;
+}
+```
+
+`createSupplier` trims and validates the name (1–160 characters) and defaults
+`isActive` to `true`. `updateSupplier` applies the same name rule and can change
+the active state while preserving identity, ownership and `createdAt`.
+Suppliers are organization-wide, have no branch, and names are not unique.
+They are deactivated rather than deleted so later purchases keep their supplier
+reference. Contact, address, tax and payment details are not modeled yet (BQ-21,
+TD-013).
 
 ## Product catalog
 

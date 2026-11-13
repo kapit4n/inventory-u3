@@ -18,3 +18,4 @@ export {
 } from './http.js';
 export { createBranch, listBranches, updateBranch } from './branches.js';
 export { createEmployee, listEmployees, updateEmployee } from './employees.js';
+export { createSupplier, listSuppliers, updateSupplier } from './suppliers.js';

@@ -17,6 +17,7 @@ export type UserId = Brand<string, 'UserId'>;
 export type SessionId = Brand<string, 'SessionId'>;
 export type BranchId = Brand<string, 'BranchId'>;
 export type EmployeeId = Brand<string, 'EmployeeId'>;
+export type SupplierId = Brand<string, 'SupplierId'>;
 export type MeasurementUnitId = Brand<string, 'MeasurementUnitId'>;
 export type ProductCategoryId = Brand<string, 'ProductCategoryId'>;
 export type ProductId = Brand<string, 'ProductId'>;
@@ -29,6 +30,7 @@ export type OrganizationIdentifier =
   | SessionId
   | BranchId
   | EmployeeId
+  | SupplierId
   | MeasurementUnitId
   | ProductCategoryId
   | ProductId
@@ -40,6 +42,7 @@ export const asUserId = (value: string): UserId => value as UserId;
 export const asSessionId = (value: string): SessionId => value as SessionId;
 export const asBranchId = (value: string): BranchId => value as BranchId;
 export const asEmployeeId = (value: string): EmployeeId => value as EmployeeId;
+export const asSupplierId = (value: string): SupplierId => value as SupplierId;
 export const asMeasurementUnitId = (value: string): MeasurementUnitId => value as MeasurementUnitId;
 export const asProductCategoryId = (value: string): ProductCategoryId => value as ProductCategoryId;
 export const asProductId = (value: string): ProductId => value as ProductId;

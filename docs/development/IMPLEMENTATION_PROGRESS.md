@@ -5,53 +5,53 @@
 
 ## Summary
 
-| Field                  | Value                                                                   |
-| ---------------------- | ----------------------------------------------------------------------- |
-| Current milestone      | M2 — Master Data (in progress); M1 is complete                          |
-| Current task           | M2-T2 complete; next task is supplier master data (M2-T3)               |
-| Overall project status | Branch and employee master data delivered on the M1 business foundation |
-| Completed milestones   | M1; the foundation prerequisite is also complete                        |
-| In-progress milestones | M2                                                                      |
-| Blocked milestones     | M6 finalization is blocked on BR-013 (WhatsApp reporting format)        |
-| Pending milestones     | M3, M4, M5, M6, M7, M8, M9                                              |
-| Last verified commit   | `6b50606` (M2-T2); M2-T1 `814f397`                                      |
-| Last update date       | 2026-11-09                                                              |
-| Next recommended task  | Continue M2 with supplier master data                                   |
+| Field                  | Value                                                                    |
+| ---------------------- | ------------------------------------------------------------------------ |
+| Current milestone      | M2 — Master Data (in progress); M1 is complete                           |
+| Current task           | M2-T3 complete; next task is catalog master data (M2-T4)                 |
+| Overall project status | Branch, employee and supplier master data delivered on the M1 foundation |
+| Completed milestones   | M1; the foundation prerequisite is also complete                         |
+| In-progress milestones | M2                                                                       |
+| Blocked milestones     | M6 finalization is blocked on BR-013 (WhatsApp reporting format)         |
+| Pending milestones     | M3, M4, M5, M6, M7, M8, M9                                               |
+| Last verified commit   | `6b50606` (M2-T2); M2-T1 `814f397`. M2-T3 is uncommitted.                |
+| Last update date       | 2026-11-09                                                               |
+| Next recommended task  | Continue M2 with catalog master data (M2-T4)                             |
 
 ### Working tree at the time of this update
 
-M2-T2 adds the employee domain entity, `EmployeeId`, `EmployeeRepository` on both
-engines, dual-engine schema and migrations, employee validation, typed REST-client
-functions, `GET/POST/PUT /api/v1/employees`, the Settings employee-management
-section and tests. Employees carry organization and branch references, are
-validated against a branch in the same organization, and are deactivated rather
-than deleted. No employee seed was added because real names are unavailable.
-Branch-local employee ownership is an assumption pending BQ-20 (TD-012). The
-changes are committed as `6b50606`.
+M2-T3 adds the supplier domain entity, `SupplierId`, `SupplierRepository` on both
+engines, dual-engine schema and migrations, supplier validation, typed REST-client
+functions, `GET/POST/PUT /api/v1/suppliers`, the Settings supplier-management
+section and tests. Suppliers are organization-wide, have a trimmed name and an
+active flag, allow duplicate names, and are deactivated rather than deleted. No
+supplier seed was added because real supplier data is unavailable. Extra supplier
+contact, tax and payment fields remain open (BQ-21, TD-013). M2-T2 employee
+management is committed as `6b50606`; M2-T3 changes are uncommitted.
 
 ## Verification for this update
 
-M2-T2 changes the domain, both repository implementations, schema and
+M2-T3 changes the domain, both repository implementations, schema and
 migrations, API routes, REST client, React UI, tests and documentation.
 
-| Command                                                                   | Result                                                       |
-| ------------------------------------------------------------------------- | ------------------------------------------------------------ |
-| `pnpm run typecheck`                                                      | PASS — 12/12 tasks                                           |
-| `pnpm run lint`                                                           | PASS — 12/12 tasks, `BOUNDARY GUARD OK`                      |
-| `pnpm run guard:boundaries`                                               | PASS via lint — `BOUNDARY GUARD OK`                          |
-| `pnpm run test`                                                           | PASS — 12/12 tasks, 209 passed, 6 skipped                    |
-| `TEST_DATABASE_URL= pnpm --filter @inventory-u3/api run test:integration` | PASS — 7 files, 42 passed, 6 skipped                         |
-| `pnpm run build`                                                          | PASS — 5/5 tasks; Vite chunk-size warnings only              |
-| `pnpm run db:migrate`                                                     | PASS — SQLite migrations applied through `0004`              |
-| `pnpm run db:seed`                                                        | PASS — organization and development users only; no employees |
-| `pnpm run format:check`                                                   | PASS — all files use Prettier style                          |
-| `pnpm run test:e2e`                                                       | NOT RUN; branch and employee management have RTL coverage    |
+| Command                                                                   | Result                                                    |
+| ------------------------------------------------------------------------- | --------------------------------------------------------- |
+| `pnpm run typecheck`                                                      | PASS — 12/12 tasks                                        |
+| `pnpm run lint`                                                           | PASS — 12/12 tasks, `BOUNDARY GUARD OK`                   |
+| `pnpm run guard:boundaries`                                               | PASS via lint — `BOUNDARY GUARD OK`                       |
+| `pnpm run test`                                                           | PASS — 12/12 tasks, 234 passed, 8 skipped                 |
+| `TEST_DATABASE_URL= pnpm --filter @inventory-u3/api run test:integration` | PASS — 9 files, 53 passed, 8 skipped                      |
+| `pnpm run build`                                                          | PASS — 5/5 tasks; Vite chunk-size warnings only           |
+| `pnpm run db:migrate`                                                     | PASS — SQLite migrations applied through `0005`           |
+| `pnpm run db:seed`                                                        | PASS — organization/users only; no employees or suppliers |
+| `pnpm run format:check`                                                   | PASS — all files use Prettier style                       |
+| `pnpm run test:e2e`                                                       | NOT RUN; master data has RTL component coverage           |
 
-Current test counts: domain 55, api-client 23, app 53, API 68 passed + 6 skipped,
-database 6 and desktop 4 — 209 passed and 6 skipped in total. The skipped tests
-are the PostgreSQL branch, employee and catalog repository cases, which require a
-reachable `TEST_DATABASE_URL`. The full typecheck, lint, test, build and SQLite
-integration suite were re-run after the final Prettier pass.
+Current test counts: domain 62, api-client 27, app 56, API 79 passed + 8 skipped,
+database 6 and desktop 4 — 234 passed and 8 skipped in total. The skipped tests
+are the PostgreSQL repository cases, which require a reachable
+`TEST_DATABASE_URL`. The full typecheck, lint, test, build and SQLite integration
+suite were re-run after the final Prettier pass.
 
 PostgreSQL integration tests were not executed because no PostgreSQL server is
 available on this machine. This is a known environment limitation, not a pass.
@@ -192,7 +192,8 @@ None. M1 is complete.
   prices, estimated/measured weights and snapshots do not exist.
 - Stock exists as a domain vocabulary only; there is no stock table, repository,
   API, balance calculation or inventory screen.
-- No supplier, purchase, production, sales or closing entity exists.
+- At M1 closeout, no supplier, purchase, production, sales or closing entity
+  existed; supplier master data was added in M2-T3.
 - The only business-looking UI is a static inventory placeholder.
 - The three development branches are not seeded because their names are not confirmed.
 - The existing roles are foundation roles, not the owner/operator/branch model.
@@ -208,7 +209,7 @@ complete. See [CURRENT_TASK.md](./CURRENT_TASK.md).
 
 ## M2 — Master Data
 
-**Status: IN_PROGRESS (M2-T1 and M2-T2 complete)**
+**Status: IN_PROGRESS (M2-T1, M2-T2 and M2-T3 complete)**
 
 ### Completed
 
@@ -239,10 +240,23 @@ complete. See [CURRENT_TASK.md](./CURRENT_TASK.md).
 - [x] M2-T2 domain, REST-client, dual-engine repository, route and component
       tests.
 - [x] M2-T2 documentation and TD-012 employee decision.
+- [x] M2-T3 supplier entity, trimmed name validation, `SupplierId` and
+      `SupplierRepository` port.
+- [x] M2-T3 organization-wide supplier ownership on both engines, with
+      migrations and a non-unique name.
+- [x] M2-T3 supplier create/list/update repository methods on SQLite and
+      PostgreSQL, including cross-organization isolation.
+- [x] M2-T3 authenticated `GET/POST/PUT /api/v1/suppliers` routes with
+      `organization:read`/`organization:manage` permissions.
+- [x] M2-T3 typed REST-client supplier functions and response validation.
+- [x] M2-T3 Settings supplier list/create/edit/deactivate UI, read-only for
+      non-administrators and duplicate-name support.
+- [x] M2-T3 domain, REST-client, dual-engine repository, route and component
+      tests.
+- [x] M2-T3 documentation and TD-013 supplier decision.
 
 ### Pending
 
-- [ ] Supplier master data.
 - [ ] Product categories.
 - [ ] Products (raw and processed).
 - [ ] Measurement units.
@@ -253,30 +267,33 @@ complete. See [CURRENT_TASK.md](./CURRENT_TASK.md).
 
 ### Validation
 
-- Domain: 5 files, 55 passed.
-- API client: 3 files, 23 passed.
-- App: 10 files, 53 passed.
-- API: 11 files, 68 passed + 6 skipped.
-- SQLite integration command: 7 files, 42 passed + 6 skipped.
+- Domain: 6 files, 62 passed.
+- API client: 4 files, 27 passed.
+- App: 11 files, 56 passed.
+- API: 13 files, 79 passed + 8 skipped.
+- SQLite integration command: 9 files, 53 passed + 8 skipped.
 - Full typecheck, lint with boundary guard, build and formatting pass.
-- SQLite migrations applied through `0004`; seed contains no employees.
+- SQLite migrations applied through `0005`; seed contains no employees or
+  suppliers.
 - PostgreSQL cases skip without a reachable `TEST_DATABASE_URL`.
-- No browser E2E spec was added for branch or employee management.
+- No browser E2E spec was added for branch, employee or supplier management.
 
 ### Notes
 
-Branch and employee writes are administrator-only through
-`organization:manage` (TD-011, TD-012). Both are deactivated, never hard-deleted.
-Employees belong to one branch and are validated against the caller's
-organization; branch sharing remains open (BQ-20). The selector lists active
-branches by default, includes inactive branches when editing an employee, and is
-covered indirectly through employee component tests. Branch and employee seeding
-wait on BQ-19 and real employee names respectively.
+Branch, employee and supplier writes are administrator-only through
+`organization:manage` (TD-011, TD-012, TD-013). All three are deactivated, never
+hard-deleted. Employees belong to one branch and are validated against the
+caller's organization; branch sharing remains open (BQ-20). Suppliers are
+organization-wide with non-unique names; contact, tax and payment fields remain
+open (BQ-21). The selector lists active branches by default, includes inactive
+branches when editing an employee, and is covered indirectly through employee
+component tests. Branch, employee and supplier seeding wait on BQ-19 and real
+master data.
 
 ### Next action
 
-Continue M2 with supplier master data (M2-T3). See
-[CURRENT_TASK.md](./CURRENT_TASK.md).
+Continue M2 with category, measurement-unit and presentation master data (M2-T4).
+See [CURRENT_TASK.md](./CURRENT_TASK.md).
 
 ---
 

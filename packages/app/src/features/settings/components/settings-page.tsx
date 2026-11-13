@@ -23,6 +23,7 @@ import { BranchManagement } from '../../branches/components/branch-management.js
 import { EmployeeManagement } from '../../employees/components/employee-management.js';
 import { useOrganizationSettings } from '../../organization/queries/organization-settings-query.js';
 import { useUpdateOrganizationSettings } from '../../organization/mutations/use-update-organization-settings.js';
+import { SupplierManagement } from '../../suppliers/components/supplier-management.js';
 
 function defaultValues(organization?: Organization): UpdateOrganizationSettingsBody {
   return {
@@ -62,6 +63,7 @@ export function SettingsPage() {
       <OrganizationSettingsForm organization={organizationQuery.data} />
       <BranchManagement />
       <EmployeeManagement />
+      <SupplierManagement />
     </div>
   );
 }

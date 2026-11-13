@@ -100,6 +100,7 @@ These are copied from the source of truth in
 | BQ-12 | Are transfers between branches in scope?                                                         | Future    |
 | BQ-19 | What are the names/codes of the three real branches?                                             | M2        |
 | BQ-20 | Are employees shared across branches, or does each employee belong to one branch?                | M2/M5     |
+| BQ-21 | Which supplier contact, tax and payment details are required beyond the name?                    | M3        |
 
 ## 7. Architecture risks
 

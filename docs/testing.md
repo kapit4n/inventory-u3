@@ -22,16 +22,17 @@ pnpm run format:check
 pnpm run build
 ```
 
-Domain tests cover branch and employee creation and editing, catalog invariants
-(including raw/processed kind and average weight), stock-movement corrections and
-shared time rules. API integration tests exercise the branch, employee and catalog
-repositories on a real SQLite database; the same files run against PostgreSQL
-when a server is configured. Branch and employee route tests build the real
-Fastify server and cover listing, permissions, create, duplicate branch
-conflict, rename/deactivate, reassignment, branch membership, not-found and
-validation. The branch and employee management component tests cover the
-administrator create/edit flows and the read-only view for other roles. The
-API-client tests cover the branch and employee collection envelopes,
+Domain tests cover branch, employee and supplier creation and editing, catalog
+invariants (including raw/processed kind and average weight), stock-movement
+corrections and shared time rules. API integration tests exercise the branch,
+employee, supplier and catalog repositories on a real SQLite database; the same
+files run against PostgreSQL when a server is configured. Branch, employee and
+supplier route tests build the real Fastify server and cover listing,
+permissions, create, duplicate branch conflict, rename/deactivate,
+reassignment, branch membership, supplier duplicate names, not-found and
+validation. The branch, employee and supplier management component tests cover
+the administrator create/edit flows and the read-only view for other roles. The
+API-client tests cover the branch, employee and supplier collection envelopes,
 create/update contracts and response validation.
 
 For SQLite integration tests on this machine, override the `.env` PostgreSQL test
@@ -75,7 +76,7 @@ have the same entry count.
 - No stock, purchase, production, sales-checkpoint or closing tests exist because
   those features do not exist.
 - No branch-scoped authorization tests exist until branch users are implemented.
-- E2E covers the foundation shell and settings only; branch and employee
-  management have component coverage but no browser spec yet, and no inventory
-  workflow screen exists.
+- E2E covers the foundation shell and settings only; branch, employee and
+  supplier management have component coverage but no browser spec yet, and no
+  inventory workflow screen exists.
 - There is no CI workflow; the commands above are run locally.

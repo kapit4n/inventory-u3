@@ -22,6 +22,7 @@ import { registerEmployeeRoutes } from './http/routes/employees.js';
 import { registerDevAuthRoutes } from './http/routes/dev-auth.js';
 import { registerHealthRoutes } from './http/routes/health.js';
 import { registerOrganizationRoutes } from './http/routes/organization.js';
+import { registerSupplierRoutes } from './http/routes/suppliers.js';
 import { systemClock } from './infrastructure/clock/system-clock.js';
 import { uuidGenerator } from './infrastructure/id/uuid-generator.js';
 import { LoginRateLimiter } from './infrastructure/security/login-rate-limiter.js';
@@ -99,6 +100,12 @@ export async function buildServer(env: EnvSource = process.env): Promise<Invento
   await registerEmployeeRoutes(app, {
     employees: connection.repositories.employees,
     branches: connection.repositories.branches,
+    clock: systemClock,
+    ids: uuidGenerator,
+  });
+
+  await registerSupplierRoutes(app, {
+    suppliers: connection.repositories.suppliers,
     clock: systemClock,
     ids: uuidGenerator,
   });

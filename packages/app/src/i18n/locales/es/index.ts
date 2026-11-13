@@ -5,6 +5,7 @@ import { dashboard } from './dashboard.js';
 import { employees } from './employees.js';
 import { inventory } from './inventory.js';
 import { settings } from './settings.js';
+import { suppliers } from './suppliers.js';
 
 export const es = {
   ...common,
@@ -14,4 +15,5 @@ export const es = {
   ...employees,
   ...inventory,
   ...settings,
+  ...suppliers,
 } as const;

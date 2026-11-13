@@ -28,8 +28,8 @@
 The technical foundation is **complete** (monorepo, tooling, auth/session,
 dual-engine database, shared React app, web/desktop shells, tests, boundary
 guard). The current phase builds the business domain milestone by milestone: M1
-is complete and M2 master data is in progress, with branch and employee
-management complete.
+is complete and M2 master data is in progress, with branch, employee and
+supplier management complete.
 
 - Canonical roadmap: `docs/development/IMPLEMENTATION_ROADMAP.md`.
 - Current task and status: `docs/development/CURRENT_TASK.md` and

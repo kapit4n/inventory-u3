@@ -50,6 +50,7 @@ These replace the earlier generic foundation assumptions:
 | BQ-18 | How should mixed measured and estimated tray weights be represented?                                         | Store both bases; do not overwrite one with the other.                                                                                         | M5/M6     |
 | BQ-19 | What are the names (and optional codes) of the three real branches?                                          | Not invented; the schema exists but development branching data is not seeded.                                                                  | M2        |
 | BQ-20 | Are employees shared across branches, or does each employee belong to one branch?                            | Branch-owned for now, following the proposed domain model (TD-012); a later join table can preserve employee identity if sharing is confirmed. | M2/M5     |
+| BQ-21 | Which contact, address, tax, payment-term or account details must a supplier keep beyond its name?           | Not modeled; supplier master data is name-only for now (TD-013). Add fields only when purchases or payables require them.                      | M3        |
 
 ## Earlier foundation questions still relevant
 

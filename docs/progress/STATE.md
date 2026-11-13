@@ -10,8 +10,8 @@
 ## Current status
 
 - **Foundation prerequisite:** complete.
-- **Business roadmap:** M1 is COMPLETED; M2 is IN_PROGRESS (branch and employee
-  slices complete); M3–M9 are NOT_STARTED.
+- **Business roadmap:** M1 is COMPLETED; M2 is IN_PROGRESS (branch, employee and
+  supplier slices complete); M3–M9 are NOT_STARTED.
 - **Branch master data:** entity, dual-engine schema, migrations and repositories
   are implemented. `GET/POST/PUT /api/v1/branches`, the Settings management
   section and the reusable active-branch selector are implemented. The three
@@ -21,6 +21,11 @@
   typed client, Settings management and tests are implemented. Employees are
   deactivated, not deleted. No accounts or seed data exist; branch sharing remains
   open (BQ-20).
+- **Supplier master data:** organization-wide entity, dual-engine
+  schema/migrations, repositories, `GET/POST/PUT /api/v1/suppliers`, typed client,
+  Settings management and tests are implemented. Suppliers are deactivated, not
+  deleted; names are not unique. No seed data exists and extra contact, tax or
+  payment fields remain open (BQ-21, TD-013).
 - **Catalog identity:** units, categories, products and presentations have
   domain + dual-engine persistence. Products carry a raw/processed kind and
   presentations carry an average weight per tray. No API route, UI, prices or
@@ -32,13 +37,15 @@
   organization-wide central operator initially. Branch users and assignment
   tables remain unimplemented.
 - **Technical docs and guard:** the database, backend, testing and architecture
-  references describe M1, M2-T1 and M2-T2. The boundary guard checks dependency
-  direction, database access, thin shells, domain Node built-ins, schema-table
+  references describe M1 and M2-T1 through M2-T3. The boundary guard checks
+  dependency direction, database access, thin shells, domain Node built-ins, schema-table
   parity and migration-journal parity.
-- **Next task:** continue M2 with supplier master data (M2-T3). Branch seeding
-  waits for BQ-19; employee seed data waits for real names.
-- **Commits:** M1 closeout `bfdc9cb`; M2-T1 `814f397`; M2-T2 `6b50606`.
+- **Next task:** continue M2 with category, unit and presentation master data
+  (M2-T4). Branch seeding waits for BQ-19; employee and supplier seed data waits
+  for real master data.
+- **Commits:** M1 closeout `bfdc9cb`; M2-T1 `814f397`; M2-T2 `6b50606`. M2-T3 is
+  verified and uncommitted.
 
 The previous verification records are preserved in
-[SESSION_LOG.md](../development/SESSION_LOG.md) (Sessions 0–10).
+[SESSION_LOG.md](../development/SESSION_LOG.md) (Sessions 0–11).
 [LOG.md](./LOG.md) remains as a pointer to that history.

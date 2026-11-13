@@ -1062,3 +1062,122 @@ Documentation:
 Read `AGENTS.md`, `PROJECT_OVERVIEW.md`, `IMPLEMENTATION_PROGRESS.md`,
 `CURRENT_TASK.md`, `IMPLEMENTATION_ROADMAP.md` and the M2 section of the roadmap
 before starting supplier master data.
+
+## Session 11 — 2026-11-09 — M2-T3 supplier master data
+
+### Objective
+
+Close M2-T2 documentation and commit employee master data after explicit
+authorization, then implement supplier master data end to end.
+
+### Work completed
+
+- Confirmed and committed M2-T2 as `6b50606`; recorded the commit in
+  `7c8d23b docs: record M2-T2 commit`.
+- Added `SupplierId`, `Supplier`, `NewSupplier`, `SupplierUpdate`,
+  `createSupplier`, `updateSupplier` and trimmed 1–160 character name validation.
+- Added `SupplierRepository` with organization-scoped `findById`,
+  `listByOrganization`, `create` and `update`.
+- Added `suppliers` to both schema trees with organization ownership, an active
+  flag and an organization/active index; names are not unique and there is no
+  branch column. Generated `0005` migrations for both engines.
+- Implemented SQLite and PostgreSQL supplier repositories and wired them into
+  the repository aggregates.
+- Added supplier validation schemas and inferred request/response types.
+- Added authenticated `GET/POST/PUT /api/v1/suppliers` routes. Reads use
+  `organization:read`; writes use `organization:manage`.
+- Added typed REST-client supplier functions with response validation.
+- Added Settings supplier management with create/edit/deactivate dialog,
+  read-only state for non-administrators and English and Spanish copy.
+- Added domain, REST-client, dual-engine repository, route and component tests.
+- Applied SQLite migrations through `0005` and re-ran the seed.
+- Updated domain, backend, database, testing, access, technical-decision,
+  architecture, overview, roadmap, progress, state, known-issues and
+  current-task documentation.
+
+### Files changed
+
+Domain, types and ports:
+
+- `packages/domain/src/supplier/supplier.ts`, `supplier.test.ts`, `index.ts`
+- `packages/domain/src/index.ts`, `packages/domain/src/ports/index.ts`
+- `packages/types/src/identifiers.ts`
+
+Database:
+
+- `database/schema/supplier.ts`, `database/schema/sqlite/supplier.ts`
+- `database/schema/index.ts`, `database/schema/sqlite/index.ts`
+- `database/migrations/0005_clear_moira_mactaggert.sql` and journal/snapshot
+- `database/migrations-sqlite/0005_deep_chamber.sql` and journal/snapshot
+
+API and client:
+
+- `apps/api/src/infrastructure/persistence/repositories/supplier-repository.ts`
+- `apps/api/src/infrastructure/persistence/sqlite/repositories/supplier-repository.ts`
+- `apps/api/src/infrastructure/persistence/sqlite/repositories.ts`,
+  `apps/api/src/infrastructure/persistence/postgres/unit-of-work.ts`
+- `apps/api/src/http/routes/suppliers.ts`, `apps/api/src/app.ts`
+- `apps/api/test/supplier-repository.integration.test.ts`,
+  `apps/api/test/suppliers.integration.test.ts`
+- `packages/validation/src/supplier/index.ts`, validation indexes and package
+  exports
+- `packages/api-client/src/suppliers.ts`, `suppliers.test.ts`, `index.ts`
+
+Application UI and copy:
+
+- `packages/app/src/features/suppliers/**`
+- `packages/app/src/features/settings/components/settings-page.tsx`
+- `packages/app/src/i18n/locales/en/suppliers.ts`, `es/suppliers.ts` and indexes
+
+Documentation:
+
+- `docs/domain.md`, `docs/backend.md`, `docs/database.md`, `docs/testing.md`
+- `docs/project/ACCESS_MODEL.md`, `TECHNICAL_DECISIONS.md` (TD-013),
+  `PROJECT_OVERVIEW.md`, `TECHNICAL_ARCHITECTURE.md`
+- `docs/open-questions.md` (BQ-21), `docs/development/*`,
+  `docs/progress/STATE.md`, `docs/progress/REPORT.md`, `AGENTS.md`
+
+### Technical decisions
+
+- Suppliers are organization-wide because the same provider can deliver to
+  several branches and each M3 purchase already carries its branch (TD-013).
+- Supplier reads use `organization:read`; writes use `organization:manage`, the
+  same administration boundary as branches and employees.
+- Suppliers are deactivated, never deleted, so future purchases keep their
+  supplier reference. Names are not unique; identity is the id.
+- No contact, address, tax, payment-term, accounts-payable or account fields are
+  modeled; the detail scope remains open (BQ-21).
+- Supplier collection responses use `{ "items": [...] }`.
+- No supplier seed was added because real supplier data is unavailable.
+
+### Validation
+
+- `pnpm run typecheck` — PASS, 12/12 tasks.
+- `pnpm run lint` — PASS, 12/12 tasks, `BOUNDARY GUARD OK`.
+- `pnpm run test` — PASS, 12/12 tasks, 234 passed, 8 skipped.
+- `TEST_DATABASE_URL= pnpm --filter @inventory-u3/api run test:integration` —
+  PASS, 9 files, 53 passed, 8 skipped.
+- `pnpm run build` — PASS, 5/5 tasks; only Vite chunk-size warnings.
+- `pnpm run db:migrate` — PASS; SQLite migrations applied through `0005`.
+- `pnpm run db:seed` — PASS; organization and development users only.
+- `pnpm run format:check` — PASS.
+- Not run: Playwright E2E; PostgreSQL integration cases (no server).
+
+### Problems found
+
+- No supplier implementation or test failure required a workaround.
+- The PostgreSQL supplier repository cases skip because no PostgreSQL server is
+  available; this is the same environment limitation recorded as SI-06.
+
+### Pending work
+
+- Commit M2-T3 only after explicit authorization.
+- Continue M2 with category, unit and presentation master data (M2-T4).
+- Seed branches only after BQ-19; seed suppliers and employees only when real
+  master data is available.
+
+### Next session
+
+Read `AGENTS.md`, `PROJECT_OVERVIEW.md`, `IMPLEMENTATION_PROGRESS.md`,
+`CURRENT_TASK.md`, `IMPLEMENTATION_ROADMAP.md` and the M2 section of the roadmap
+before starting M2-T4.

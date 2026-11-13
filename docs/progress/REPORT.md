@@ -1,7 +1,7 @@
 # Inventory U3 — Phase 1 Business Foundation Report
 
 > Last updated: 2026-11-09. M1 is committed at `bfdc9cb`, M2-T1 at `814f397`
-> and M2-T2 at `6b50606`.
+> and M2-T2 at `6b50606`; M2-T3 is verified but uncommitted.
 
 ## 1. Architecture overview
 
@@ -29,9 +29,9 @@ domain-purity, schema-parity and migration-parity checks.
 ## 4. Domain boundaries
 
 Implemented domain areas are organization, user, role, session, permissions,
-organization settings, branch, employee, product catalog, stock movement
-concepts, errors, time and identifiers. Branch and employee master data are
-persisted through both engines. Product catalog identity exists in domain and
+organization settings, branch, employee, supplier, product catalog, stock
+movement concepts, errors, time and identifiers. Branch, employee and supplier
+master data are persisted through both engines. Product catalog identity exists in domain and
 persistence but has no API or UI yet. Stock concepts remain domain-only. No
 inventory balance, purchase, production, sales checkpoint or closing entity is
 implemented.
@@ -47,19 +47,19 @@ unchanged between web and desktop.
 
 Fastify with Zod validation at every boundary, opaque bearer authentication,
 domain use cases, repository ports, standard problem envelopes and structured
-redacted logs. Branch and employee routes are authenticated; writes require the
-administrator-only `organization:manage` permission and reads require
+redacted logs. Branch, employee and supplier routes are authenticated; writes
+require the administrator-only `organization:manage` permission and reads require
 `organization:read`. Employee assignments are validated against a branch in the
-caller's organization.
+caller's organization; suppliers are organization-wide.
 
 ## 7. Database architecture
 
 SQLite is the default engine; PostgreSQL is retained as the second engine. Both
 have schema trees, generated migrations and repository implementations. Current
-tables are organizations, branches, employees, measurement units, product
-categories, products, product presentations, users and sessions. SQLite
-migrations are applied through `0004`; seed data contains only the development
-organization and users because real branch and employee data is not confirmed.
+tables are organizations, branches, employees, suppliers, measurement units,
+product categories, products, product presentations, users and sessions. SQLite
+migrations are applied through `0005`; seed data contains only the development
+organization and users because real master data is not confirmed.
 
 ## 8. State-management strategy
 
@@ -72,9 +72,10 @@ global API-data store and no giant Zustand store.
 Vitest covers domain rules, REST-client behavior, API route integration,
 dual-engine repository behavior and React components with React Testing Library.
 SQLite integration tests run by default; PostgreSQL cases skip without a
-reachable server. Playwright remains the browser strategy but has no branch or
-employee admin flow yet. The default suites report 209 passed and 6 skipped; the
-separately invoked SQLite integration command reports 42 passed and 6 skipped.
+reachable server. Playwright remains the browser strategy but has no branch,
+employee or supplier admin flow yet. The default suites report 234 passed and 8
+skipped; the separately invoked SQLite integration command reports 53 passed and
+8 skipped.
 Typecheck, lint, build and formatting pass.
 
 ## 10. What was actually implemented
@@ -87,12 +88,17 @@ migrations, repositories, REST client, Settings UI and an active-branch selector
 M2-T2 added employee master data with organization and branch ownership,
 create/list/edit, deactivation instead of deletion, dual-engine migrations and
 repositories, authenticated routes, typed client, Settings UI and tests. Employee
-assignment assumes one branch per employee pending BQ-20 (TD-012).
+assignment assumes one branch per employee pending BQ-20 (TD-012). M2-T3 added
+organization-wide supplier master data with create/list/edit, deactivation
+instead of deletion, non-unique names, dual-engine migrations and repositories,
+authenticated routes, typed client, Settings UI and tests (TD-013). Supplier
+contact, tax and payment fields remain open (BQ-21).
 
 ## 11. What was intentionally NOT implemented
 
 Employee login accounts, branch-scoped authorization, payroll, attendance,
-contact or identity data, suppliers, product/catalog API and UI, prices, weight
+contact or identity data, supplier contact/tax/payment fields, product/catalog
+API and UI, prices, weight
 snapshots, purchases, receiving, stock tables and balances, production, sales
 checkpoints, daily closing, reporting, offline mode, desktop-local data,
 synchronization, microservices, GraphQL and Redux.
@@ -100,13 +106,14 @@ synchronization, microservices, GraphQL and Redux.
 ## 12. Open architectural questions
 
 See `docs/open-questions.md`. Key questions include employee sharing across
-branches (BQ-20), real branch seeding (BQ-19), the physical stock model, units
+branches (BQ-20), supplier detail fields (BQ-21), real branch seeding (BQ-19), the
+physical stock model, units
 and conversions, movement-derived versus cached levels, negative stock policy,
 multi-organization membership, reporting valuation and the WhatsApp report format
 that blocks M6 (BR-013).
 
 ## 13. Recommended next milestone
 
-Continue **M2 — Master Data** with M2-T3 supplier master data, following the
-established domain, dual-engine persistence, API, typed-client, UI and test
-pattern.
+Continue **M2 — Master Data** with M2-T4 category, unit and presentation master
+data, following the established domain, dual-engine persistence, API,
+typed-client, UI and test pattern. Then add product management (M2-T5).

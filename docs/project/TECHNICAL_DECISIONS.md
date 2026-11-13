@@ -274,3 +274,29 @@ averageWeightPerTray` and `estimatedValue = estimatedKg × sellingPricePerKg`.
   must be shared across branches later, a join table or an ownership change will
   need an explicit migration rather than a silent reinterpretation of
   `employee.branchId`.
+
+### TD-013 — Suppliers are organization-wide master data, deactivated rather than deleted
+
+- **Date:** 2026-11-09
+- **Status:** ACCEPTED for M2-T3; supplier detail fields remain open (BQ-21).
+- **Context:** M3 purchases must identify the supplier that delivered each
+  branch's goods. A supplier is normally the same legal counterparty regardless
+  of which branch receives the delivery, and the purchase itself already carries
+  the branch. No confirmed requirement exists for supplier contacts, tax
+  identifiers, payment terms or accounts payable.
+- **Decision:** Store a supplier with an organization, a trimmed name and an
+  active flag. Suppliers are organization-wide; they have no `branchId`. Listing
+  uses `organization:read`; create and update use `organization:manage`.
+  Suppliers are deactivated, never hard-deleted. Names are not unique because two
+  suppliers may legitimately share a trade name; identity is the supplier id. No
+  contact, address, tax, payment-term or accounts-payable fields are added.
+- **Alternatives considered:** Make suppliers branch-owned; rejected because the
+  same supplier can deliver to multiple branches and the purchase already records
+  the branch. Make names unique; rejected because it invents a constraint the
+  business has not confirmed. Add contact and payment fields now; deferred until
+  M3 or payables confirms them (BQ-21). Delete suppliers; rejected because later
+  purchases must keep their supplier reference.
+- **Consequences:** M3 can reference a supplier without duplicating it per
+  branch. Extra supplier details require an explicit schema and migration change
+  after BQ-21 is answered. Administrators manage suppliers today; other roles can
+  read them and use supplier selection in later purchase forms.

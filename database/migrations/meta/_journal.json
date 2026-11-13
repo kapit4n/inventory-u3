@@ -36,6 +36,13 @@
       "when": 1794260781519,
       "tag": "0004_fat_sauron",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1794262838600,
+      "tag": "0005_clear_moira_mactaggert",
+      "breakpoints": true
     }
   ]
 }
