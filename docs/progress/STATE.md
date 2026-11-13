@@ -47,7 +47,7 @@
   with history (M2-T6). Branch seeding waits for BQ-19; employee, supplier and
   catalog/product seed data waits for real master data.
 - **Commits:** M1 closeout `bfdc9cb`; M2-T1 `814f397`; M2-T2 `6b50606`; M2-T3
-  `5c96eeb`; M2-T4 `992d6ea`. M2-T5 is verified and uncommitted.
+  `5c96eeb`; M2-T4 `992d6ea`; M2-T5 `c8526d0`.
 
 The previous verification records are preserved in
 [SESSION_LOG.md](../development/SESSION_LOG.md) (Sessions 0–13).

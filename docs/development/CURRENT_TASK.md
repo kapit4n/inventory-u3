@@ -2,11 +2,10 @@
 
 > Last updated: 2026-11-12.
 >
-> **M2-T5 is COMPLETE.** M2-T1 branch, M2-T2 employee, M2-T3 supplier and M2-T4
-> catalog master data are also complete. This slice adds product list/create/edit
-> for raw and processed products, plus the presentation editor inside the product
-> screen. The work is uncommitted pending explicit authorization; M2-T4 is
-> committed as `992d6ea`.
+> **M2-T5 is COMPLETE and committed as `c8526d0`.** M2-T1 branch, M2-T2 employee,
+> M2-T3 supplier and M2-T4 catalog master data are also complete. This slice adds
+> product list/create/edit for raw and processed products, plus the presentation
+> editor inside the product screen. M2-T4 is committed as `992d6ea`.
 
 ## Task identity
 
@@ -86,8 +85,8 @@ the presentations of a selected processed product from the product screen.
 
 ## Completion record
 
-- Implementation and documentation are in the working tree; no M2-T5 commit was
-  made without explicit authorization.
+- M2-T5 is committed as `c8526d0 feat: add product management and presentation
+editor`.
 - M2-T4 is committed as `992d6ea feat: add catalog master data management`; the
   previously committed M2-T4 documentation saying "uncommitted" was corrected.
 - Verified: typecheck 12/12, lint 12/12 with `BOUNDARY GUARD OK`, unit/component

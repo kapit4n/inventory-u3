@@ -1,8 +1,8 @@
 # Inventory U3 — Phase 1 Business Foundation Report
 
 > Last updated: 2026-11-12. M1 is committed at `bfdc9cb`, M2-T1 at `814f397`,
-> M2-T2 at `6b50606`, M2-T3 at `5c96eeb` and M2-T4 at `992d6ea`; M2-T5 is
-> verified but uncommitted.
+> M2-T2 at `6b50606`, M2-T3 at `5c96eeb`, M2-T4 at `992d6ea` and M2-T5 at
+> `c8526d0`.
 
 ## 1. Architecture overview
 

@@ -1429,7 +1429,8 @@ Current test counts: domain 6 files/70 tests, api-client 6/34, app 15/67, API
 
 ### Pending work
 
-- Commit M2-T5 only after explicit authorization.
+- M2-T5 is committed as `c8526d0 feat: add product management and presentation
+editor`.
 - Continue M2 with average-weight and selling-price configuration with history
   (M2-T6).
 - Seed branches only after BQ-19; seed employees, suppliers and catalog/product

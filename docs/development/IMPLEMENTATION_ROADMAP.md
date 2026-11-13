@@ -2,7 +2,7 @@
 
 > Canonical business roadmap. It supersedes the generic item/stock sequence in
 > the old [`docs/roadmap.md`](../roadmap.md), which now points here.
-> Last reviewed: 2026-11-12 after M2-T5 (product management, uncommitted).
+> Last reviewed: 2026-11-12 after M2-T5 (product management, committed).
 
 Status values are used exactly as follows:
 

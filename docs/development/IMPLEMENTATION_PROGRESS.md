@@ -14,7 +14,7 @@
 | In-progress milestones | M2                                                                   |
 | Blocked milestones     | M6 finalization is blocked on BR-013 (WhatsApp reporting format)     |
 | Pending milestones     | M3, M4, M5, M6, M7, M8, M9                                           |
-| Last verified commit   | `992d6ea` (M2-T4); M2-T5 is verified but uncommitted.                |
+| Last verified commit   | `c8526d0` (M2-T5).                                                   |
 | Last update date       | 2026-11-12                                                           |
 | Next recommended task  | Continue M2 with average weight and price history (M2-T6)            |
 
@@ -29,7 +29,7 @@ presentation editor for processed products, including presentation
 create/edit/deactivate. Product names are not unique and a product may change its
 raw/processed kind; category and unit references must belong to the caller's
 organization. No product or catalog seed was added because real master data is
-unavailable. M2-T4 is committed as `992d6ea`; M2-T5 changes are uncommitted.
+unavailable. M2-T4 is committed as `992d6ea`; M2-T5 is committed as `c8526d0`.
 
 ## Verification for this update
 
