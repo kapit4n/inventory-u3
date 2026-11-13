@@ -23,7 +23,7 @@ import {
   createProductPresentation,
   updateProductPresentation,
 } from './product-presentation.js';
-import { PRODUCT_NAME_MAX_LENGTH, createProduct } from './product.js';
+import { PRODUCT_NAME_MAX_LENGTH, createProduct, updateProduct } from './product.js';
 
 const NOW = '2026-11-09T12:00:00.000Z';
 const LATER = '2026-11-09T13:00:00.000Z';
@@ -305,6 +305,95 @@ describe('createProduct', () => {
           salesUnitId: KILOGRAM_ID,
         },
         NOW,
+      ),
+    ).toThrowError('Product kind must be RAW or PROCESSED');
+  });
+});
+
+describe('updateProduct', () => {
+  it('updates the editable fields and leaves identity and creation time intact', () => {
+    const product = createProduct(
+      {
+        id: PRODUCT_ID,
+        organizationId: ORGANIZATION_ID,
+        categoryId: CATEGORY_ID,
+        name: 'Watermelon',
+        kind: 'PROCESSED',
+        inventoryUnitId: KILOGRAM_ID,
+        salesUnitId: KILOGRAM_ID,
+        productionUnitId: TRAY_ID,
+      },
+      NOW,
+    );
+    const otherCategoryId = asProductCategoryId('77777777-7777-4777-8777-777777777777');
+
+    expect(
+      updateProduct(
+        product,
+        {
+          categoryId: otherCategoryId,
+          name: '  Seedless watermelon  ',
+          kind: 'RAW',
+          inventoryUnitId: TRAY_ID,
+          salesUnitId: KILOGRAM_ID,
+          isActive: false,
+        },
+        LATER,
+      ),
+    ).toEqual({
+      ...product,
+      categoryId: otherCategoryId,
+      name: 'Seedless watermelon',
+      kind: 'RAW',
+      inventoryUnitId: TRAY_ID,
+      salesUnitId: KILOGRAM_ID,
+      purchaseUnitId: undefined,
+      productionUnitId: undefined,
+      isActive: false,
+      updatedAt: LATER,
+    });
+  });
+
+  it('rejects invalid edited names and kinds', () => {
+    const product = createProduct(
+      {
+        id: PRODUCT_ID,
+        organizationId: ORGANIZATION_ID,
+        categoryId: CATEGORY_ID,
+        name: 'Watermelon',
+        kind: 'PROCESSED',
+        inventoryUnitId: KILOGRAM_ID,
+        salesUnitId: KILOGRAM_ID,
+      },
+      NOW,
+    );
+
+    expect(() =>
+      updateProduct(
+        product,
+        {
+          categoryId: CATEGORY_ID,
+          name: ' ',
+          kind: 'PROCESSED',
+          inventoryUnitId: KILOGRAM_ID,
+          salesUnitId: KILOGRAM_ID,
+          isActive: true,
+        },
+        LATER,
+      ),
+    ).toThrowError('Product name must be between 1 and 160 characters');
+    expect(() =>
+      updateProduct(
+        product,
+        {
+          categoryId: CATEGORY_ID,
+          name: 'Watermelon',
+          kind: 'FROZEN' as never,
+          inventoryUnitId: KILOGRAM_ID,
+          salesUnitId: KILOGRAM_ID,
+          isActive: true,
+        },
+        LATER,
       ),
     ).toThrowError('Product kind must be RAW or PROCESSED');
   });

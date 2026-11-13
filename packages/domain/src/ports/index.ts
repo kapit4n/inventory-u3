@@ -115,6 +115,8 @@ export interface ProductRepository {
   findById(organizationId: OrganizationId, productId: ProductId): Promise<Product | undefined>;
   listByOrganization(organizationId: OrganizationId): Promise<readonly Product[]>;
   create(product: Product): Promise<Product>;
+  /** Returns `undefined` when the product does not belong to the organization. */
+  update(product: Product): Promise<Product | undefined>;
 }
 
 export interface ProductPresentationRepository {

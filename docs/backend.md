@@ -48,24 +48,30 @@ Secrets are read from the environment and never logged.
 | GET    | `/api/v1/measurement-units`                                 | `organization:read`   |
 | POST   | `/api/v1/measurement-units`                                 | `organization:manage` |
 | PUT    | `/api/v1/measurement-units/:measurementUnitId`              | `organization:manage` |
+| GET    | `/api/v1/products`                                          | `organization:read`   |
+| POST   | `/api/v1/products`                                          | `organization:manage` |
+| PUT    | `/api/v1/products/:productId`                               | `organization:manage` |
 | GET    | `/api/v1/products/:productId/presentations`                 | `organization:read`   |
 | POST   | `/api/v1/products/:productId/presentations`                 | `organization:manage` |
 | PUT    | `/api/v1/products/:productId/presentations/:presentationId` | `organization:manage` |
 
-Branch, employee, supplier, category and unit routes are implemented with create,
-list and edit; there is no delete endpoint because all five are deactivated.
-Employee creation and update validate that the assigned branch belongs to the
-caller's organization. Suppliers, categories and units are organization-wide and
-have no branch assignment. Presentation create/list/update is nested under a
-product, requires the product to belong to the caller's organization, and checks
-that the presentation belongs to that product. Presentation UI is deferred to the
-M2-T5 product screen (TD-014). Inventory endpoints are intentionally absent until
-their milestone.
+Branch, employee, supplier, category, unit and product routes are implemented
+with create, list and edit; there is no delete endpoint because all of them are
+deactivated. Employee creation and update validate that the assigned branch
+belongs to the caller's organization. Suppliers, categories, units and products
+are organization-wide and have no branch assignment. Product create/update
+validate that the category and every referenced unit belong to the caller's
+organization. Presentation create/list/update is nested under a product, requires
+the product to belong to the caller's organization, and checks that the
+presentation belongs to that product. The product screen hosts the presentation
+editor for processed products (TD-015). Inventory endpoints are intentionally
+absent until their milestone.
 
-The branch, employee, supplier, category and unit collections return
+The branch, employee, supplier, category, unit and product collections return
 `{ "items": [...] }`. Duplicate branch names, category names, unit codes and
 per-product presentation names return a `DOMAIN_RULE_VIOLATION` problem rather
-than a database error. Employee full names and supplier names are not unique.
+than a database error. Employee full names, supplier names and product names are
+not unique.
 
 ## Request pipeline
 
@@ -91,18 +97,19 @@ database URL answers.
 
 Implemented repository ports: organization, branch, employee, supplier,
 measurement unit, product category, product, product presentation, user and
-session. The branch, employee, supplier and catalog ports are exercised through
-integration tests on both engines. Stock remains a domain vocabulary only; no
-stock repository exists.
+session. The branch, employee, supplier, catalog and product ports are exercised
+through integration tests on both engines. Stock remains a domain vocabulary
+only; no stock repository exists.
 
 ## Testing
 
 API unit tests cover configuration, problem mapping and authentication.
 Integration tests cover authentication, branch, employee, supplier, category,
-unit and presentation route permissions and validation, the organization plus
-branch, employee, supplier and catalog repository round-trips on SQLite,
-cross-organization isolation, repository constraints and a migration smoke path.
-The same integration files run against PostgreSQL when `TEST_DATABASE_URL`
-answers and skip otherwise. Domain and validation tests cover their invariants.
-Component tests cover branch, employee, supplier, category and unit management;
-browser tests mock the API through Playwright.
+unit, product and presentation route permissions and validation, the organization
+plus branch, employee, supplier, catalog and product repository round-trips on
+SQLite, cross-organization isolation, repository constraints and a migration
+smoke path. The same integration files run against PostgreSQL when
+`TEST_DATABASE_URL` answers and skip otherwise. Domain and validation tests cover
+their invariants. Component tests cover branch, employee, supplier, category,
+unit, product and presentation management; browser tests mock the API through
+Playwright.

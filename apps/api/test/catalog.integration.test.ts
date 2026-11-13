@@ -40,6 +40,8 @@ describe('catalog routes (SQLite)', () => {
   let dir: string;
   let app: InventoryApiServer;
   let productId: string;
+  let categoryId: string;
+  let unitId: string;
 
   beforeAll(async () => {
     dir = mkdtempSync(path.join(tmpdir(), 'inventory-catalog-api-'));
@@ -91,6 +93,8 @@ describe('catalog routes (SQLite)', () => {
       ),
     );
     productId = product.id;
+    categoryId = fruit.id;
+    unitId = kilogram.id;
     client.close();
 
     app = await buildServer({
@@ -162,11 +166,23 @@ describe('catalog routes (SQLite)', () => {
       headers: auth(token),
       payload: { code: 'forbidden', name: 'Forbidden Unit' },
     });
+    const product = await app.inject({
+      method: 'POST',
+      url: '/api/v1/products',
+      headers: auth(token),
+      payload: {
+        categoryId,
+        name: 'Forbidden Product',
+        kind: 'RAW',
+        inventoryUnitId: unitId,
+        salesUnitId: unitId,
+      },
+    });
 
-    expect(category.statusCode).toBe(403);
-    expect(category.json().error.code).toBe('FORBIDDEN');
-    expect(unit.statusCode).toBe(403);
-    expect(unit.json().error.code).toBe('FORBIDDEN');
+    for (const response of [category, unit, product]) {
+      expect(response.statusCode).toBe(403);
+      expect(response.json().error.code).toBe('FORBIDDEN');
+    }
   });
 
   it('creates, lists and updates a product category with a unique name', async () => {
@@ -390,6 +406,138 @@ describe('catalog routes (SQLite)', () => {
     expect(response.json().error.code).toBe('NOT_FOUND');
   });
 
+  it('creates, lists and updates raw and processed products', async () => {
+    const reader = await tokenFor('staff@inventory.test');
+    const token = await tokenFor('admin@inventory.test');
+    const name = `Watermelon ${randomUUID()}`;
+
+    const before = await app.inject({
+      method: 'GET',
+      url: '/api/v1/products',
+      headers: auth(reader),
+    });
+    expect(before.statusCode).toBe(200);
+    expect(Array.isArray(before.json().items)).toBe(true);
+
+    const created = await app.inject({
+      method: 'POST',
+      url: '/api/v1/products',
+      headers: auth(token),
+      payload: {
+        categoryId,
+        name: `  ${name}  `,
+        kind: 'PROCESSED',
+        inventoryUnitId: unitId,
+        salesUnitId: unitId,
+        purchaseUnitId: unitId,
+      },
+    });
+    expect(created.statusCode).toBe(201);
+    expect(created.json()).toMatchObject({
+      organizationId: DEVELOPMENT_ORGANIZATION_ID,
+      categoryId,
+      name,
+      kind: 'PROCESSED',
+      inventoryUnitId: unitId,
+      salesUnitId: unitId,
+      purchaseUnitId: unitId,
+      isActive: true,
+    });
+
+    const product = created.json();
+    const listed = await app.inject({
+      method: 'GET',
+      url: '/api/v1/products',
+      headers: auth(reader),
+    });
+    expect(listed.json().items).toContainEqual(product);
+
+    const renamed = `Seedless watermelon ${randomUUID()}`;
+    const updated = await app.inject({
+      method: 'PUT',
+      url: `/api/v1/products/${product.id}`,
+      headers: auth(token),
+      payload: {
+        categoryId,
+        name: renamed,
+        kind: 'RAW',
+        inventoryUnitId: unitId,
+        salesUnitId: unitId,
+        isActive: false,
+      },
+    });
+
+    expect(updated.statusCode).toBe(200);
+    expect(updated.json()).toMatchObject({
+      id: product.id,
+      categoryId,
+      name: renamed,
+      kind: 'RAW',
+      inventoryUnitId: unitId,
+      salesUnitId: unitId,
+      isActive: false,
+      createdAt: product.createdAt,
+      updatedAt: expect.any(String),
+    });
+    expect(updated.json().purchaseUnitId).toBeUndefined();
+  });
+
+  it('rejects product references outside the organization catalog', async () => {
+    const token = await tokenFor('admin@inventory.test');
+    const missing = randomUUID();
+
+    const unknownCategory = await app.inject({
+      method: 'POST',
+      url: '/api/v1/products',
+      headers: auth(token),
+      payload: {
+        categoryId: missing,
+        name: 'Missing Category Product',
+        kind: 'RAW',
+        inventoryUnitId: unitId,
+        salesUnitId: unitId,
+      },
+    });
+    const unknownUnit = await app.inject({
+      method: 'POST',
+      url: '/api/v1/products',
+      headers: auth(token),
+      payload: {
+        categoryId,
+        name: 'Missing Unit Product',
+        kind: 'RAW',
+        inventoryUnitId: missing,
+        salesUnitId: unitId,
+      },
+    });
+
+    for (const response of [unknownCategory, unknownUnit]) {
+      expect(response.statusCode).toBe(404);
+      expect(response.json().error.code).toBe('NOT_FOUND');
+    }
+  });
+
+  it('returns not found for an unknown product', async () => {
+    const token = await tokenFor('admin@inventory.test');
+
+    const response = await app.inject({
+      method: 'PUT',
+      url: `/api/v1/products/${randomUUID()}`,
+      headers: auth(token),
+      payload: {
+        categoryId,
+        name: 'Missing Product',
+        kind: 'RAW',
+        inventoryUnitId: unitId,
+        salesUnitId: unitId,
+        isActive: true,
+      },
+    });
+
+    expect(response.statusCode).toBe(404);
+    expect(response.json().error.code).toBe('NOT_FOUND');
+  });
+
   it('rejects invalid catalogue bodies with the standard validation envelope', async () => {
     const token = await tokenFor('admin@inventory.test');
 
@@ -411,8 +559,20 @@ describe('catalog routes (SQLite)', () => {
       headers: auth(token),
       payload: { name: 'Covered tray', averageWeightGrams: 0 },
     });
+    const product = await app.inject({
+      method: 'POST',
+      url: '/api/v1/products',
+      headers: auth(token),
+      payload: {
+        categoryId,
+        name: ' ',
+        kind: 'RAW',
+        inventoryUnitId: unitId,
+        salesUnitId: unitId,
+      },
+    });
 
-    for (const response of [category, unit, presentation]) {
+    for (const response of [category, unit, presentation, product]) {
       expect(response.statusCode).toBe(422);
       expect(response.json().error.code).toBe('VALIDATION_ERROR');
       expect(Array.isArray(response.json().error.details.issues)).toBe(true);

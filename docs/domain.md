@@ -99,7 +99,11 @@ stock; it does not own a private copy of the catalog.
   active flag.
 - `Product` belongs to one organization and one category. It references an
   inventory unit and a sales unit; purchase and production units are optional
-  because not every product is bought or prepared.
+  because not every product is bought or prepared. `createProduct` and
+  `updateProduct` trim and validate the name, require a known kind, and default
+  `isActive` to `true`; update can change the category, units, kind and active
+  flag while preserving identity and ownership. Names are not unique. References
+  are validated against the organization at the API boundary.
 - A product has a required `RAW` or `PROCESSED` kind. Raw products use their
   configured unit directly; processed products are prepared as trays.
 - `ProductPresentation` belongs to one product and one organization and carries

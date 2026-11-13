@@ -1,6 +1,7 @@
 export const common = {
   'common.nav.dashboard': 'Panel',
   'common.nav.inventory': 'Inventario',
+  'common.nav.products': 'Productos',
   'common.nav.settings': 'Configuración',
   'common.nav.primary': 'Principal',
   'common.shell.workspace': 'Espacio de inventario',

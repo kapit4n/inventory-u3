@@ -2,7 +2,7 @@
 
 > Canonical business roadmap. It supersedes the generic item/stock sequence in
 > the old [`docs/roadmap.md`](../roadmap.md), which now points here.
-> Last reviewed: 2026-11-09 after M2-T3 (supplier master data, uncommitted).
+> Last reviewed: 2026-11-12 after M2-T5 (product management, uncommitted).
 
 Status values are used exactly as follows:
 
@@ -134,7 +134,7 @@ confirmed (BQ-19); that is M2 work, not an M1 gap.
 
 ## M2 — Master Data
 
-**Status: IN_PROGRESS (M2-T1 branches, M2-T2 employees, M2-T3 suppliers and M2-T4 catalog master data complete).**
+**Status: IN_PROGRESS (M2-T1 branches, M2-T2 employees, M2-T3 suppliers, M2-T4 catalog master data and M2-T5 products complete).**
 
 ### Objective
 
@@ -165,7 +165,7 @@ M1 (domain and persistence foundation).
 | M2-T2 | Employee master data and branch assignment                      | COMPLETED   |
 | M2-T3 | Supplier master data                                            | COMPLETED   |
 | M2-T4 | Category, unit and presentation master data                     | COMPLETED   |
-| M2-T5 | Product create/edit/list for raw and processed products         | NOT_STARTED |
+| M2-T5 | Product create/edit/list for raw and processed products         | COMPLETED   |
 | M2-T6 | Average weight and selling-price configuration with history     | NOT_STARTED |
 | M2-T7 | Remaining API routes, validation, problem mapping, UI and tests | NOT_STARTED |
 
@@ -174,15 +174,16 @@ M1 (domain and persistence foundation).
 - [x] Operator can create, list and edit branches.
 - [x] Operator can create, list and edit employees and suppliers.
 - [x] Operator can create, list and edit categories and units.
-- [ ] Operator can create, list and edit products.
-- [ ] Every record is organization-scoped; branch-owned records carry a branch.
+- [x] Operator can create, list and edit products.
+- [x] Every record is organization-scoped; branch-owned records carry a branch.
 - [ ] A processed product can have a presentation, average weight per tray and
-      selling price per kilogram.
-- [ ] A raw product does not require tray configuration.
+      selling price per kilogram (selling price is M2-T6).
+- [x] A raw product does not require tray configuration.
 - [ ] Price changes are effective-dated or otherwise historically preserved.
-- [ ] No master-data screen contains business logic beyond form validation.
-- [ ] Both engines implement the same repository methods.
-- [ ] Unit, integration and browser tests cover the main flows.
+- [x] No master-data screen contains business logic beyond form validation.
+- [x] Both engines implement the same repository methods.
+- [ ] Unit, integration and browser tests cover the main flows (browser coverage
+      remains outstanding).
 
 ### Expected database changes
 
@@ -194,10 +195,10 @@ engines.
 ### Expected UI changes
 
 Master-data screens reachable from Settings or a new Administration area,
-including list/search/create/edit forms. Categories and units are managed in
-Settings. The presentation editor is deferred to the M2-T5 product screen because
-it requires a selected product (TD-014). Inventory route remains a placeholder
-until M4.
+including list/create/edit forms. Branches, employees, suppliers, categories and
+units are managed in Settings. Products use a dedicated `/products` route, and
+processed products open the presentation editor from the product screen (TD-015).
+Inventory route remains a placeholder until M4.
 
 ### Tests required
 
@@ -680,7 +681,7 @@ been executed." A passing unit suite is not a backup/restore drill.
 | ----------------------- | ----------- | -------------------------------------------------------------------------- |
 | Foundation prerequisite | COMPLETED   | Foundation code, migrations, tests and recorded verification               |
 | M1                      | COMPLETED   | Branch, catalog, measurement, stock and access note; docs and guard closed |
-| M2                      | IN_PROGRESS | Branch, employee and supplier master data, API and Settings UI complete    |
+| M2                      | IN_PROGRESS | Branch, employee, supplier, catalog and product master data complete       |
 | M3                      | NOT_STARTED | No purchase/receiving tables or screens                                    |
 | M4                      | NOT_STARTED | No stock tables or screens; inventory route is a placeholder               |
 | M5                      | NOT_STARTED | No production tables or screens                                            |

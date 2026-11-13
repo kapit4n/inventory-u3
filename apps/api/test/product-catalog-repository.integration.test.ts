@@ -25,6 +25,7 @@ import {
   createProductCategory,
   createProductPresentation,
   updateMeasurementUnit,
+  updateProduct,
   updateProductCategory,
   updateProductPresentation,
 } from '@inventory-u3/domain';
@@ -425,12 +426,32 @@ describe('product catalog repositories (SQLite)', () => {
       { name: `Large tray ${tag}`, averageWeightGrams: 750, isActive: false },
       later,
     );
+    const updatedProduct = updateProduct(
+      watermelon,
+      {
+        categoryId: fruit.id,
+        name: `Seedless watermelon ${tag}`,
+        kind: 'RAW',
+        inventoryUnitId: kilogram.id,
+        salesUnitId: kilogram.id,
+        isActive: false,
+      },
+      later,
+    );
 
     await expect(measurementUnits.update(updatedUnit)).resolves.toEqual(updatedUnit);
     await expect(productCategories.update(updatedCategory)).resolves.toEqual(updatedCategory);
     await expect(productPresentations.update(updatedPresentation)).resolves.toEqual(
       updatedPresentation,
     );
+    await expect(products.update(updatedProduct)).resolves.toEqual(updatedProduct);
+    await expect(products.findById(ORGANIZATION_A, updatedProduct.id)).resolves.toEqual(
+      updatedProduct,
+    );
+    await expect(products.findById(ORGANIZATION_B, updatedProduct.id)).resolves.toBeUndefined();
+    await expect(
+      products.update({ ...updatedProduct, organizationId: ORGANIZATION_B }),
+    ).resolves.toBeUndefined();
 
     await expect(measurementUnits.findByCode(ORGANIZATION_A, updatedUnit.code)).resolves.toEqual(
       updatedUnit,
@@ -726,12 +747,32 @@ describe.skipIf(!postgresUrl)('product catalog repositories (PostgreSQL)', () =>
       { name: `Large tray ${tag}`, averageWeightGrams: 750, isActive: false },
       later,
     );
+    const updatedProduct = updateProduct(
+      watermelon,
+      {
+        categoryId: fruit.id,
+        name: `Seedless watermelon ${tag}`,
+        kind: 'RAW',
+        inventoryUnitId: kilogram.id,
+        salesUnitId: kilogram.id,
+        isActive: false,
+      },
+      later,
+    );
 
     await expect(measurementUnits.update(updatedUnit)).resolves.toEqual(updatedUnit);
     await expect(productCategories.update(updatedCategory)).resolves.toEqual(updatedCategory);
     await expect(productPresentations.update(updatedPresentation)).resolves.toEqual(
       updatedPresentation,
     );
+    await expect(products.update(updatedProduct)).resolves.toEqual(updatedProduct);
+    await expect(products.findById(organizationA, updatedProduct.id)).resolves.toEqual(
+      updatedProduct,
+    );
+    await expect(products.findById(organizationB, updatedProduct.id)).resolves.toBeUndefined();
+    await expect(
+      products.update({ ...updatedProduct, organizationId: organizationB }),
+    ).resolves.toBeUndefined();
 
     await expect(measurementUnits.findByCode(organizationA, updatedUnit.code)).resolves.toEqual(
       updatedUnit,

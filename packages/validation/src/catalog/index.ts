@@ -5,6 +5,8 @@ import { isoDateTimeSchema, uuidSchema } from '../common/index.js';
 const measurementUnitCodeSchema = z.string().trim().min(1).max(32);
 const measurementUnitNameSchema = z.string().trim().min(1).max(80);
 const productCategoryNameSchema = z.string().trim().min(1).max(120);
+const productNameSchema = z.string().trim().min(1).max(160);
+const productKindSchema = z.enum(['RAW', 'PROCESSED']);
 const productPresentationNameSchema = z.string().trim().min(1).max(120);
 const averageWeightGramsSchema = z.number().int().positive().max(Number.MAX_SAFE_INTEGER);
 
@@ -65,6 +67,47 @@ export const productCategoryIdParamsSchema = z.object({
   categoryId: uuidSchema,
 });
 
+export const productSchema = z.object({
+  id: uuidSchema,
+  organizationId: uuidSchema,
+  categoryId: uuidSchema,
+  name: productNameSchema,
+  kind: productKindSchema,
+  inventoryUnitId: uuidSchema,
+  salesUnitId: uuidSchema,
+  purchaseUnitId: uuidSchema.optional(),
+  productionUnitId: uuidSchema.optional(),
+  isActive: z.boolean(),
+  createdAt: isoDateTimeSchema,
+  updatedAt: isoDateTimeSchema,
+});
+
+export const productListResponseSchema = z.object({
+  items: z.array(productSchema),
+});
+
+export const createProductSchema = z.object({
+  categoryId: uuidSchema,
+  name: productNameSchema,
+  kind: productKindSchema,
+  inventoryUnitId: uuidSchema,
+  salesUnitId: uuidSchema,
+  purchaseUnitId: uuidSchema.optional(),
+  productionUnitId: uuidSchema.optional(),
+  isActive: z.boolean().optional(),
+});
+
+export const updateProductSchema = z.object({
+  categoryId: uuidSchema,
+  name: productNameSchema,
+  kind: productKindSchema,
+  inventoryUnitId: uuidSchema,
+  salesUnitId: uuidSchema,
+  purchaseUnitId: uuidSchema.optional(),
+  productionUnitId: uuidSchema.optional(),
+  isActive: z.boolean(),
+});
+
 export const productPresentationSchema = z.object({
   id: uuidSchema,
   organizationId: uuidSchema,
@@ -109,6 +152,10 @@ export type ProductCategoryResponse = z.infer<typeof productCategorySchema>;
 export type ProductCategoryListResponse = z.infer<typeof productCategoryListResponseSchema>;
 export type CreateProductCategoryBody = z.infer<typeof createProductCategorySchema>;
 export type UpdateProductCategoryBody = z.infer<typeof updateProductCategorySchema>;
+export type ProductResponse = z.infer<typeof productSchema>;
+export type ProductListResponse = z.infer<typeof productListResponseSchema>;
+export type CreateProductBody = z.infer<typeof createProductSchema>;
+export type UpdateProductBody = z.infer<typeof updateProductSchema>;
 export type ProductPresentationResponse = z.infer<typeof productPresentationSchema>;
 export type ProductPresentationListResponse = z.infer<typeof productPresentationListResponseSchema>;
 export type CreateProductPresentationBody = z.infer<typeof createProductPresentationSchema>;

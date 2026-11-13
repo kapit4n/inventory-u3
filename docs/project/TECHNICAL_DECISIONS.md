@@ -332,3 +332,34 @@ averageWeightPerTray` and `estimatedValue = estimatedKg × sellingPricePerKg`.
   creates can still reach the database unique constraint after the pre-check, so
   the existing TD-10 risk applies to catalog rows too. No migration or catalog
   seed is required by this decision.
+
+### TD-015 — Products use a dedicated screen; presentation editing is exposed for processed products
+
+- **Date:** 2026-11-12
+- **Status:** ACCEPTED for M2-T5.
+- **Context:** M2-T5 needs product list/create/edit and the presentation editor
+  deferred from M2-T4. Product management is an operational catalog workflow,
+  larger than the Settings master-data sections, and presentations only make
+  sense for a selected product. The API already exposes presentations for every
+  product kind.
+- **Decision:** Put product management on a dedicated `/products` primary-nav
+  route rather than inside Settings. Products use the normal
+  `organization:read`/`organization:manage` boundary and organization-scoped
+  category/unit reference validation. Product names are not unique, and the
+  raw/processed kind remains editable. The product screen exposes the nested
+  presentation editor only for `PROCESSED` products. The API keeps presentations
+  product-scoped without a kind restriction.
+- **Alternatives considered:** Put products in Settings with the other master
+  data; rejected because the product list is an operational workflow with nested
+  presentation management and would overload the Settings screen. Add a backend
+  restriction that only processed products may have presentations; rejected
+  because the business has not confirmed that restriction and the existing API
+  contract is product-scoped. Make product names unique; rejected because two
+  products may legitimately share a name and no requirement confirms uniqueness.
+  Build a separate presentation screen; rejected because it would duplicate the
+  product workflow (TD-014).
+- **Consequences:** The product screen owns product and presentation maintenance.
+  Users can still read or write presentations for any product through the API;
+  only the UI action is limited to processed products. Inactive categories and
+  units remain selectable when editing a product that already references them.
+  No schema, migration or seed is required by this decision.

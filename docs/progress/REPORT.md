@@ -1,7 +1,8 @@
 # Inventory U3 — Phase 1 Business Foundation Report
 
 > Last updated: 2026-11-12. M1 is committed at `bfdc9cb`, M2-T1 at `814f397`,
-> M2-T2 at `6b50606` and M2-T3 at `5c96eeb`; M2-T4 is verified but uncommitted.
+> M2-T2 at `6b50606`, M2-T3 at `5c96eeb` and M2-T4 at `992d6ea`; M2-T5 is
+> verified but uncommitted.
 
 ## 1. Architecture overview
 
@@ -30,11 +31,10 @@ domain-purity, schema-parity and migration-parity checks.
 
 Implemented domain areas are organization, user, role, session, permissions,
 organization settings, branch, employee, supplier, product catalog, stock
-movement concepts, errors, time and identifiers. Branch, employee and supplier
-master data are persisted through both engines. Product catalog identity exists in domain and
-persistence but has no API or UI yet. Stock concepts remain domain-only. No
-inventory balance, purchase, production, sales checkpoint or closing entity is
-implemented.
+movement concepts, errors, time and identifiers. Branch, employee, supplier,
+catalog and product master data are persisted through both engines and exposed
+through API and UI. Stock concepts remain domain-only. No inventory balance,
+purchase, production, sales checkpoint or closing entity is implemented.
 
 ## 5. Web/Desktop strategy
 
@@ -47,12 +47,13 @@ unchanged between web and desktop.
 
 Fastify with Zod validation at every boundary, opaque bearer authentication,
 domain use cases, repository ports, standard problem envelopes and structured
-redacted logs. Branch, employee, supplier, category, unit and presentation routes
-are authenticated; writes require the administrator-only `organization:manage`
+redacted logs. Branch, employee, supplier, category, unit, product and presentation routes are
+authenticated; writes require the administrator-only `organization:manage`
 permission and reads require `organization:read`. Employee assignments are
-validated against a branch in the caller's organization; suppliers, categories
-and units are organization-wide. Presentations are nested under a product and
-verify product ownership.
+validated against a branch in the caller's organization; suppliers, categories,
+units and products are organization-wide. Product references are validated
+against the caller's organization, and presentations are nested under a product
+and verify product ownership.
 
 ## 7. Database architecture
 
@@ -75,8 +76,8 @@ Vitest covers domain rules, REST-client behavior, API route integration,
 dual-engine repository behavior and React components with React Testing Library.
 SQLite integration tests run by default; PostgreSQL cases skip without a
 reachable server. Playwright remains the browser strategy but has no master-data admin flow yet.
-The default suites report 261 passed and 9 skipped; the separately invoked SQLite
-integration command reports 64 passed and 9 skipped. Typecheck, lint, build and
+The default suites report 274 passed and 9 skipped; the separately invoked SQLite
+integration command reports 67 passed and 9 skipped. Typecheck, lint, build and
 formatting pass.
 
 ## 10. What was actually implemented
@@ -96,17 +97,18 @@ authenticated routes, typed client, Settings UI and tests (TD-013). Supplier
 contact, tax and payment fields remain open (BQ-21). M2-T4 added category, unit
 and presentation update rules, organization-scoped unique lookups, catalog
 validation, category/unit/nested-presentation routes, typed client functions,
-Settings category and unit management and tests. The presentation editor waits
-for the M2-T5 product screen (TD-014).
+Settings category and unit management and tests. M2-T5 added product update and
+organization-scoped reference validation, both-engine product repositories,
+product routes and typed client, the dedicated `/products` screen and the
+presentation editor for processed products (TD-015).
 
 ## 11. What was intentionally NOT implemented
 
 Employee login accounts, branch-scoped authorization, payroll, attendance,
-contact or identity data, supplier contact/tax/payment fields, product UI, the
-presentation editor until M2-T5, prices, weight snapshots, purchases, receiving,
-stock tables and balances, production, sales checkpoints, daily closing,
-reporting, offline mode, desktop-local data, synchronization, microservices,
-GraphQL and Redux.
+contact or identity data, supplier contact/tax/payment fields, prices, weight
+snapshots, purchases, receiving, stock tables and balances, production, sales
+checkpoints, daily closing, reporting, offline mode, desktop-local data,
+synchronization, microservices, GraphQL and Redux.
 
 ## 12. Open architectural questions
 
@@ -119,6 +121,6 @@ that blocks M6 (BR-013).
 
 ## 13. Recommended next milestone
 
-Continue **M2 — Master Data** with M2-T5 product create/edit/list and the
-product-screen presentation editor, following the established domain,
-dual-engine persistence, API, typed-client, UI and test pattern.
+Continue **M2 — Master Data** with M2-T6 average-weight and selling-price
+configuration with history, following the established domain, dual-engine
+persistence, API, typed-client, UI and test pattern.

@@ -29,4 +29,5 @@ export {
   updateProductPresentation,
 } from './catalog.js';
 export { createEmployee, listEmployees, updateEmployee } from './employees.js';
+export { createProduct, listProducts, updateProduct } from './products.js';
 export { createSupplier, listSuppliers, updateSupplier } from './suppliers.js';

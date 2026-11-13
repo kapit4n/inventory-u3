@@ -75,6 +75,26 @@ export class DrizzleProductRepository implements ProductRepository {
 
     return toProduct(row);
   }
+
+  async update(product: Product): Promise<Product | undefined> {
+    const [row] = await this.db
+      .update(products)
+      .set({
+        categoryId: product.categoryId,
+        name: product.name,
+        kind: product.kind,
+        inventoryUnitId: product.inventoryUnitId,
+        salesUnitId: product.salesUnitId,
+        purchaseUnitId: product.purchaseUnitId ?? null,
+        productionUnitId: product.productionUnitId ?? null,
+        isActive: product.isActive,
+        updatedAt: new Date(product.updatedAt),
+      })
+      .where(and(eq(products.organizationId, product.organizationId), eq(products.id, product.id)))
+      .returning();
+
+    return row ? toProduct(row) : undefined;
+  }
 }
 
 function toProduct(row: ProductRow): Product {

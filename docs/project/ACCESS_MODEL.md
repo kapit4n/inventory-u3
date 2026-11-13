@@ -1,6 +1,6 @@
 # Access Model
 
-> Status: **Access note through M2-T4.** This document defines the confirmed
+> Status: **Access note through M2-T5.** This document defines the confirmed
 > access boundary, the implemented foundation and the future branch-access
 > constraint. It does not implement branch authorization or settle BQ-09.
 
@@ -87,11 +87,13 @@ Catalog master data uses the same boundary:
   presentation reads require `organization:read`.
 - Category, unit and presentation writes require `organization:manage`, which
   only `ADMINISTRATOR` carries today.
-- Categories and units are organization-wide. Presentations belong to a product;
-  reads and writes verify the product belongs to the caller's organization.
+- Categories, units and products are organization-wide. Products reference a
+  category and units in the caller's organization. Presentations belong to a
+  product; reads and writes verify the product belongs to the caller's
+  organization.
 - Catalog rows are deactivated, not deleted, so products and operational rows
-  keep their references. The presentation editor is deferred to the M2-T5
-  product screen (TD-014).
+  keep their references. The product screen exposes the presentation editor for
+  processed products (TD-015).
 
 ## 3. Business actors and the initial version
 

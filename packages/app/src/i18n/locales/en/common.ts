@@ -5,6 +5,7 @@
 export const common = {
   'common.nav.dashboard': 'Dashboard',
   'common.nav.inventory': 'Inventory',
+  'common.nav.products': 'Products',
   'common.nav.settings': 'Settings',
   'common.nav.primary': 'Primary',
   'common.shell.workspace': 'Inventory workspace',

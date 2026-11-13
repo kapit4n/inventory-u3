@@ -23,19 +23,20 @@ pnpm run build
 ```
 
 Domain tests cover branch, employee and supplier creation and editing, catalog
-create/update invariants (including category and unit identity rules,
-raw/processed kind and average weight), stock-movement corrections and shared
-time rules. API integration tests exercise the branch, employee, supplier and
-catalog repositories on a real SQLite database; the same files run against
-PostgreSQL when a server is configured. Branch, employee, supplier, category,
-measurement-unit and product-presentation route tests build the real Fastify
-server and cover listing, permissions, create, duplicate business keys,
-rename/deactivate, branch membership, product ownership, not-found and
-validation. The branch, employee, supplier, category and unit management
-component tests cover the administrator create/edit flows and the read-only view
-for other roles. The API-client tests cover the branch, employee, supplier,
-category, unit and presentation collection envelopes, create/update contracts
-and response validation.
+and product create/update invariants (including identity rules, raw/processed
+kind, reference shape and average weight), stock-movement corrections and shared
+time rules. API integration tests exercise the branch, employee, supplier,
+catalog and product repositories on a real SQLite database; the same files run
+against PostgreSQL when a server is configured. Branch, employee, supplier,
+category, measurement-unit, product and product-presentation route tests build
+the real Fastify server and cover listing, permissions, create, duplicate
+business keys, rename/deactivate, branch membership, catalog/product ownership,
+unknown references, not-found and validation. The branch, employee, supplier,
+category, unit, product and presentation management component tests cover the
+administrator create/edit flows and the read-only view for other roles. The
+API-client tests cover the branch, employee, supplier, category, unit, product
+and presentation collection envelopes, create/update contracts and response
+validation.
 
 For SQLite integration tests on this machine, override the `.env` PostgreSQL test
 URL:
@@ -79,7 +80,6 @@ have the same entry count.
   those features do not exist.
 - No branch-scoped authorization tests exist until branch users are implemented.
 - E2E covers the foundation shell and settings only; branch, employee, supplier,
-  category and unit management have component coverage but no browser spec yet,
-  the presentation editor waits for the M2-T5 product screen, and no inventory
-  workflow screen exists.
+  category, unit, product and presentation management have component coverage
+  but no browser spec yet, and no inventory workflow screen exists.
 - There is no CI workflow; the commands above are run locally.

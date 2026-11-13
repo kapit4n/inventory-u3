@@ -51,9 +51,40 @@ export interface NewProduct {
   readonly isActive?: boolean;
 }
 
+export interface UpdateProduct {
+  readonly categoryId: ProductCategoryId;
+  readonly name: string;
+  readonly kind: ProductKind;
+  readonly inventoryUnitId: MeasurementUnitId;
+  readonly salesUnitId: MeasurementUnitId;
+  readonly purchaseUnitId?: MeasurementUnitId;
+  readonly productionUnitId?: MeasurementUnitId;
+  readonly isActive: boolean;
+}
+
 export const PRODUCT_NAME_MAX_LENGTH = 160;
 
 export function createProduct(input: NewProduct, now: IsoDateTime): Product {
+  return {
+    id: input.id,
+    organizationId: input.organizationId,
+    ...validatedFields(input),
+    isActive: input.isActive ?? true,
+    createdAt: now,
+    updatedAt: now,
+  };
+}
+
+export function updateProduct(product: Product, input: UpdateProduct, now: IsoDateTime): Product {
+  return {
+    ...product,
+    ...validatedFields(input),
+    isActive: input.isActive,
+    updatedAt: now,
+  };
+}
+
+function validatedFields(input: Omit<UpdateProduct, 'isActive'>): Omit<UpdateProduct, 'isActive'> {
   const name = input.name.trim();
 
   if (!isProductKind(input.kind)) {
@@ -68,8 +99,6 @@ export function createProduct(input: NewProduct, now: IsoDateTime): Product {
   }
 
   return {
-    id: input.id,
-    organizationId: input.organizationId,
     categoryId: input.categoryId,
     name,
     kind: input.kind,
@@ -77,8 +106,5 @@ export function createProduct(input: NewProduct, now: IsoDateTime): Product {
     salesUnitId: input.salesUnitId,
     purchaseUnitId: input.purchaseUnitId,
     productionUnitId: input.productionUnitId,
-    isActive: input.isActive ?? true,
-    createdAt: now,
-    updatedAt: now,
   };
 }

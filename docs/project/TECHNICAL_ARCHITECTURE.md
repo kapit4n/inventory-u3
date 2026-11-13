@@ -145,9 +145,11 @@ future operational row must carry organization and branch ownership.
 - A typed English/Spanish catalogue owns user-facing copy.
 - The platform abstraction (`packages/app/src/platform`) hides Tauri/OS
   capabilities. Features never import Tauri.
-- Current routes: `/` (redirect), `/dashboard`, `/inventory` (placeholder),
-  `/settings`.
-- There are no purchase, production, sales checkpoint, closing or report screens.
+- Current routes: `/` (redirect), `/dashboard`, `/products`, `/inventory`
+  (placeholder), `/settings`.
+- The `/products` screen contains product list/create/edit and, for processed
+  products, the presentation editor. There are no purchase, production, sales
+  checkpoint, closing or report screens.
 
 ## 8. Desktop
 
@@ -168,7 +170,7 @@ desktop shell does not open a database; it talks to the API over HTTP.
 PostgreSQL integration tests require `TEST_DATABASE_URL` and are skipped on this
 machine because no PostgreSQL server is available. The current integration files
 cover authentication, organization, branch, employee, supplier and catalog
-repository round-trips, branch, employee, supplier, category, unit and
+repository round-trips, branch, employee, supplier, category, unit, product and
 presentation route permissions and validation, cross-organization isolation,
 repository constraints and a migration smoke path. No stock or workflow API
 exists yet.
@@ -187,21 +189,20 @@ exists yet.
 
 ## 11. Architecture gaps for the business milestones
 
-The existing foundation is reusable. Branch, employee, supplier, category and
-measurement-unit entities, their dual-engine persistence, API routes and Settings
-UI now exist, as do presentation API and typed-client support. The following are
-not designed or built:
+The existing foundation is reusable. Branch, employee, supplier, category,
+measurement-unit and product entities, their dual-engine persistence, API routes
+and UI now exist, as do presentation API, typed-client and product-screen editor
+support. The following are not designed or built:
 
-1. Product create/edit/list UI and the product-screen presentation editor.
-2. Product price history and estimated/measured weight snapshots.
-3. Persisted stock ledger, balance strategy and reconciliation.
-4. Purchase receiving and auditable correction model.
-5. Production batch inputs/outputs and snapshot fields.
-6. Aggregate sales checkpoint model and snapshot fields.
-7. Daily closing aggregation and review state.
-8. Consolidated reporting queries and dashboard.
-9. Branch-aware authorization and audit history.
-10. CI pipeline; there is currently no `.github/` workflow.
+1. Product price history and estimated/measured weight snapshots.
+2. Persisted stock ledger, balance strategy and reconciliation.
+3. Purchase receiving and auditable correction model.
+4. Production batch inputs/outputs and snapshot fields.
+5. Aggregate sales checkpoint model and snapshot fields.
+6. Daily closing aggregation and review state.
+7. Consolidated reporting queries and dashboard.
+8. Branch-aware authorization and audit history.
+9. CI pipeline; there is currently no `.github/` workflow.
 
 These gaps are sequenced in
 [IMPLEMENTATION_ROADMAP.md](../development/IMPLEMENTATION_ROADMAP.md). Do not

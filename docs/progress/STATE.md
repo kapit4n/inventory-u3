@@ -11,7 +11,7 @@
 
 - **Foundation prerequisite:** complete.
 - **Business roadmap:** M1 is COMPLETED; M2 is IN_PROGRESS (branch, employee,
-  supplier and catalog slices complete); M3–M9 are NOT_STARTED.
+  supplier, catalog and product slices complete); M3–M9 are NOT_STARTED.
 - **Branch master data:** entity, dual-engine schema, migrations and repositories
   are implemented. `GET/POST/PUT /api/v1/branches`, the Settings management
   section and the reusable active-branch selector are implemented. The three
@@ -26,12 +26,13 @@
   Settings management and tests are implemented. Suppliers are deactivated, not
   deleted; names are not unique. No seed data exists and extra contact, tax or
   payment fields remain open (BQ-21, TD-013).
-- **Catalog master data:** units, categories and presentations have domain,
-  dual-engine persistence, API routes, typed client and tests. Category and unit
-  management is in Settings, read-only for non-administrators. Products carry a
-  raw/processed kind and presentations carry an average weight per tray.
-  Presentation editing is deferred to the M2-T5 product screen. No prices, weight
-  snapshots or catalog seed data exist yet.
+- **Catalog and product master data:** units, categories, products and
+  presentations have domain, dual-engine persistence, API routes, typed client,
+  UI and tests. Category and unit management is in Settings; products use
+  `/products`, read-only for non-administrators. Products carry a raw/processed
+  kind and presentations carry an average weight per tray; processed products
+  open the presentation editor from the product screen. No prices, weight
+  snapshots or catalog/product seed data exist yet.
 - **Stock concepts:** append-only movement, reason, source, correction and
   balance shapes exist in the domain only. No stock table, repository, API or
   balance calculation exists yet.
@@ -39,15 +40,15 @@
   organization-wide central operator initially. Branch users and assignment
   tables remain unimplemented.
 - **Technical docs and guard:** the database, backend, testing and architecture
-  references describe M1 and M2-T1 through M2-T4. The boundary guard checks
-  dependency direction, database access, thin shells, domain Node built-ins, schema-table
-  parity and migration-journal parity.
-- **Next task:** continue M2 with product create/edit/list and the product-screen
-  presentation editor (M2-T5). Branch seeding waits for BQ-19; employee, supplier
-  and catalog seed data waits for real master data.
+  references describe M1 and M2-T1 through M2-T5. The boundary guard checks
+  dependency direction, database access, thin shells, domain Node built-ins,
+  schema-table parity and migration-journal parity.
+- **Next task:** continue M2 with average-weight and selling-price configuration
+  with history (M2-T6). Branch seeding waits for BQ-19; employee, supplier and
+  catalog/product seed data waits for real master data.
 - **Commits:** M1 closeout `bfdc9cb`; M2-T1 `814f397`; M2-T2 `6b50606`; M2-T3
-  `5c96eeb`. M2-T4 is verified and uncommitted.
+  `5c96eeb`; M2-T4 `992d6ea`. M2-T5 is verified and uncommitted.
 
 The previous verification records are preserved in
-[SESSION_LOG.md](../development/SESSION_LOG.md) (Sessions 0–12).
+[SESSION_LOG.md](../development/SESSION_LOG.md) (Sessions 0–13).
 [LOG.md](./LOG.md) remains as a pointer to that history.

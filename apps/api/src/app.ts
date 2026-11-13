@@ -25,6 +25,7 @@ import { registerMeasurementUnitRoutes } from './http/routes/measurement-units.j
 import { registerOrganizationRoutes } from './http/routes/organization.js';
 import { registerProductCategoryRoutes } from './http/routes/product-categories.js';
 import { registerProductPresentationRoutes } from './http/routes/product-presentations.js';
+import { registerProductRoutes } from './http/routes/products.js';
 import { registerSupplierRoutes } from './http/routes/suppliers.js';
 import { systemClock } from './infrastructure/clock/system-clock.js';
 import { uuidGenerator } from './infrastructure/id/uuid-generator.js';
@@ -120,6 +121,14 @@ export async function buildServer(env: EnvSource = process.env): Promise<Invento
   });
 
   await registerMeasurementUnitRoutes(app, {
+    measurementUnits: connection.repositories.measurementUnits,
+    clock: systemClock,
+    ids: uuidGenerator,
+  });
+
+  await registerProductRoutes(app, {
+    products: connection.repositories.products,
+    productCategories: connection.repositories.productCategories,
     measurementUnits: connection.repositories.measurementUnits,
     clock: systemClock,
     ids: uuidGenerator,

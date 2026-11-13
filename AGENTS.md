@@ -29,8 +29,9 @@ The technical foundation is **complete** (monorepo, tooling, auth/session,
 dual-engine database, shared React app, web/desktop shells, tests, boundary
 guard). The current phase builds the business domain milestone by milestone: M1
 is complete and M2 master data is in progress, with branch, employee, supplier,
-category and measurement-unit management complete. Presentation API support
-exists; its editor lands with the product screen in M2-T5.
+category, measurement-unit and product management complete. Product management
+lives on `/products` and includes the presentation editor for processed products;
+average-weight and selling-price history is next in M2-T6.
 
 - Canonical roadmap: `docs/development/IMPLEMENTATION_ROADMAP.md`.
 - Current task and status: `docs/development/CURRENT_TASK.md` and

@@ -5,8 +5,9 @@ A modern inventory management system for **Web** and **Desktop**.
 > **Phase 1 — Business Foundation.**
 > The technical foundation is complete: monorepo, tooling, auth/session,
 > dual-engine database, shared React app, web/desktop shells and tests. The
-> business domain is now being built milestone by milestone, starting with
-> branches. No inventory operation is implemented yet. See
+> business domain is now being built milestone by milestone; master data covers
+> branches, employees, suppliers, catalog and products. No inventory operation is
+> implemented yet. See
 > [`docs/project/PROJECT_OVERVIEW.md`](./docs/project/PROJECT_OVERVIEW.md) and
 > [`docs/development/IMPLEMENTATION_ROADMAP.md`](./docs/development/IMPLEMENTATION_ROADMAP.md).
 

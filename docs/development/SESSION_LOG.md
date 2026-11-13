@@ -1308,3 +1308,135 @@ Documentation:
 Read `AGENTS.md`, `PROJECT_OVERVIEW.md`, `IMPLEMENTATION_PROGRESS.md`,
 `CURRENT_TASK.md`, `IMPLEMENTATION_ROADMAP.md` and the M2-T5 scope before
 starting product management.
+
+## Session 13 — 2026-11-12 — M2-T5 product management and presentation editor
+
+### Objective
+
+Deliver product list/create/edit for raw and processed products end to end and
+complete the M2-T4 deferred presentation editor inside the product screen. Do not
+start M2-T6 prices or weight snapshots.
+
+### Work completed
+
+- Added `UpdateProduct` and `updateProduct` domain behavior with shared trimmed
+  field validation; product identity, ownership and `createdAt` remain immutable.
+- Added `ProductRepository.update` to the port and implemented it on SQLite and
+  PostgreSQL, returning `undefined` when the product is missing from the caller's
+  organization.
+- Added product validation schemas and inferred request/response types, including
+  the `RAW`/`PROCESSED` kind and optional purchase/production units.
+- Added authenticated `GET/POST/PUT /api/v1/products` routes with
+  `organization:read`/`organization:manage` permissions, organization-scoped
+  category/unit reference validation and normal not-found problem mapping.
+- Added typed REST-client product functions with response validation.
+- Added the shared product feature: queries, create/update mutations, product
+  management table, product form dialog, presentation dialog and presentation
+  form dialog.
+- Added the dedicated `/products` route in primary navigation with English and
+  Spanish copy and read-only behavior for non-administrators.
+- Exposed presentation create/edit/deactivate from the product screen for
+  processed products while leaving the API product-scoped for every kind.
+- Added domain, dual-engine repository, route, REST-client and component tests.
+- Applied existing SQLite migrations through `0005` and re-ran the seed; no
+  schema or migration changed.
+- Corrected the committed M2-T4 documentation to record its commit as `992d6ea`.
+- Updated domain, backend, database, testing, access, architecture, decision,
+  overview, roadmap, progress, state, known-issues and current-task
+  documentation.
+
+### Files changed
+
+Domain and persistence:
+
+- `packages/domain/src/product/product.ts`, `product-catalog.test.ts`
+- `packages/domain/src/ports/index.ts`
+- `apps/api/src/infrastructure/persistence/repositories/product-repository.ts`
+- `apps/api/src/infrastructure/persistence/sqlite/repositories/product-repository.ts`
+
+Validation, API and client:
+
+- `packages/validation/src/catalog/index.ts`
+- `apps/api/src/http/routes/products.ts`, `apps/api/src/app.ts`
+- `apps/api/test/catalog.integration.test.ts`
+- `apps/api/test/product-catalog-repository.integration.test.ts`
+- `packages/api-client/src/products.ts`, `products.test.ts`, `index.ts`
+
+Application UI and copy:
+
+- `packages/app/src/features/products/**`
+- `packages/app/src/routes/products.tsx`, `packages/app/src/routeTree.gen.ts`
+- `packages/app/src/components/shell/sidebar.tsx`
+- `packages/app/src/i18n/locales/en/products.ts`, `common.ts`, `index.ts`
+- `packages/app/src/i18n/locales/es/products.ts`, `common.ts`, `index.ts`
+
+Documentation:
+
+- `docs/domain.md`, `docs/backend.md`, `docs/database.md`, `docs/testing.md`
+- `docs/project/ACCESS_MODEL.md`, `TECHNICAL_ARCHITECTURE.md`,
+  `PROJECT_OVERVIEW.md`, `TECHNICAL_DECISIONS.md` (TD-015)
+- `docs/development/*`, `docs/progress/STATE.md`, `docs/progress/REPORT.md`,
+  `AGENTS.md`
+
+### Technical decisions
+
+- Product names are not unique; identity is the product id. Product kind may be
+  changed on update.
+- Product create/update validate that category and all referenced units belong to
+  the caller's organization. Inactive references remain selectable when editing a
+  product that already uses them.
+- Products use a dedicated `/products` primary-nav route rather than Settings
+  because product management is an operational workflow with nested presentation
+  management (TD-015).
+- The product screen exposes the presentation editor only for processed products.
+  The API does not enforce a kind restriction because the business has not
+  confirmed one.
+- No migration was needed because the product table already carried every needed
+  column and ownership constraint. No product/catalog seed was added.
+
+### Validation
+
+- `pnpm run typecheck` — PASS, 12/12 tasks.
+- `pnpm run lint` — PASS, 12/12 tasks, `BOUNDARY GUARD OK`.
+- `pnpm run test` — PASS, 12/12 tasks, 274 passed, 9 skipped.
+- `TEST_DATABASE_URL= pnpm --filter @inventory-u3/api run test:integration` —
+  PASS, 10 files, 67 passed, 9 skipped.
+- `pnpm run build` — PASS, 5/5 tasks; only Vite chunk-size warnings.
+- `pnpm run db:migrate` — PASS; SQLite migrations applied through `0005`.
+- `pnpm run db:seed` — PASS; organization and development users only.
+- `pnpm run format:check` — PASS after formatting ten files.
+- Not run: Playwright E2E; PostgreSQL integration cases (no server).
+
+Current test counts: domain 6 files/70 tests, api-client 6/34, app 15/67, API
+14 files/93 passed + 9 skipped, database 1/6, desktop 1/4.
+
+### Problems found
+
+- `pnpm run format:check` found ten unformatted new or edited files. They were
+  formatted with Prettier before the final check.
+- The initial product form used `form.watch`/`setValue` for unit fields, which
+  triggered a React Hook Form lint warning. It was replaced with `Controller`
+  before the final lint run.
+- The final full typecheck found `kind` widened to `string` in the presentation
+  dialog test fixture. Annotating the fixture as `ProductResponse` fixed it;
+  typecheck, lint and the app suite then passed.
+- The first presentation-dialog component test needed a nested-dialog interaction
+  adjustment; both create and edit flows pass after the fix.
+- The PostgreSQL repository cases skip because no PostgreSQL server is available;
+  this is the same environment limitation recorded as SI-06.
+- The M2-T4 commit hash was not recorded in the committed docs; it is now
+  corrected to `992d6ea`.
+
+### Pending work
+
+- Commit M2-T5 only after explicit authorization.
+- Continue M2 with average-weight and selling-price configuration with history
+  (M2-T6).
+- Seed branches only after BQ-19; seed employees, suppliers and catalog/product
+  rows only when real master data is available.
+
+### Next session
+
+Read `AGENTS.md`, `PROJECT_OVERVIEW.md`, `IMPLEMENTATION_PROGRESS.md`,
+`CURRENT_TASK.md`, `IMPLEMENTATION_ROADMAP.md` and the M2-T6 scope before starting
+price and average-weight history.
