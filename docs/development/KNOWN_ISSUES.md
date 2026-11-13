@@ -1,6 +1,6 @@
 # Inventory U3 — Known Issues
 
-> Last reviewed: 2026-11-09. Separate confirmed defects from suspected issues and
+> Last reviewed: 2026-11-12. Separate confirmed defects from suspected issues and
 > from intentional scope gaps. Do not close an item by assumption.
 
 ## 1. Confirmed bugs
@@ -23,41 +23,41 @@ reproduced and confirmed in this review. Add an item here only with evidence
 
 ## 3. Incomplete features (expected at this stage)
 
-| Area                         | State                                                                                                                                                      |
-| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Branch master data           | Entity, dual-engine persistence, list/create/edit API, Settings UI and active-branch selector implemented. The three real branches are not seeded (BQ-19). |
-| Catalog identity             | Units, categories, products and presentations have domain + dual-engine persistence. No API route, UI or seed data.                                        |
-| Raw/processed products       | Product kind implemented; production/sales workflows that use it are not.                                                                                  |
-| Average weight per tray      | Configured weight implemented on presentations; estimation, measurement and snapshots are not.                                                             |
-| Product prices and history   | Not implemented; only documented.                                                                                                                          |
-| Suppliers and purchases      | Not implemented.                                                                                                                                           |
-| Stock movements and balances | Movement, reason, source, correction and balance concepts exist in the domain; no table, port, API, calculation or UI.                                     |
-| Production batches           | Not implemented.                                                                                                                                           |
-| Sales checkpoints            | Not implemented.                                                                                                                                           |
-| Daily closing                | Not implemented.                                                                                                                                           |
-| Consolidated reports         | Not implemented. `/dashboard` shows static foundation content.                                                                                             |
-| User administration          | Not implemented, although `users:read`/`users:manage` permissions exist.                                                                                   |
-| Branch-specific access       | Documented in `docs/project/ACCESS_MODEL.md`; no assignment, authorization or UI gate is implemented.                                                      |
-| Audit log                    | Not implemented.                                                                                                                                           |
-| Inventory UI                 | `/inventory` is a placeholder card; it does not list or edit stock.                                                                                        |
+| Area                         | State                                                                                                                                                                                                                                                                  |
+| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Branch master data           | Entity, dual-engine persistence, list/create/edit API, Settings UI and active-branch selector implemented. The three real branches are not seeded (BQ-19).                                                                                                             |
+| Catalog identity             | Units, categories and presentations have domain, dual-engine persistence, API, typed client and tests. Category and unit UI is in Settings; the presentation editor waits for the M2-T5 product screen (TD-014). Products have persistence only. No catalog seed data. |
+| Raw/processed products       | Product kind implemented; production/sales workflows that use it are not.                                                                                                                                                                                              |
+| Average weight per tray      | Configured weight implemented on presentations; estimation, measurement and snapshots are not.                                                                                                                                                                         |
+| Product prices and history   | Not implemented; only documented.                                                                                                                                                                                                                                      |
+| Suppliers and purchases      | Supplier master data is implemented; purchases and receiving are not.                                                                                                                                                                                                  |
+| Stock movements and balances | Movement, reason, source, correction and balance concepts exist in the domain; no table, port, API, calculation or UI.                                                                                                                                                 |
+| Production batches           | Not implemented.                                                                                                                                                                                                                                                       |
+| Sales checkpoints            | Not implemented.                                                                                                                                                                                                                                                       |
+| Daily closing                | Not implemented.                                                                                                                                                                                                                                                       |
+| Consolidated reports         | Not implemented. `/dashboard` shows static foundation content.                                                                                                                                                                                                         |
+| User administration          | Not implemented, although `users:read`/`users:manage` permissions exist.                                                                                                                                                                                               |
+| Branch-specific access       | Documented in `docs/project/ACCESS_MODEL.md`; no assignment, authorization or UI gate is implemented.                                                                                                                                                                  |
+| Audit log                    | Not implemented.                                                                                                                                                                                                                                                       |
+| Inventory UI                 | `/inventory` is a placeholder card; it does not list or edit stock.                                                                                                                                                                                                    |
 
 These are roadmap work, not defects. See
 [IMPLEMENTATION_ROADMAP.md](./IMPLEMENTATION_ROADMAP.md).
 
 ## 4. Technical debt
 
-| ID    | Debt                                                                                                                                                                       | Impact                                                                                  |
-| ----- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
-| TD-01 | Unused dependencies in `packages/app`: `@fullcalendar/*`, `luxon`, `date-fns`, `zustand`, `@tanstack/react-table`. Some are planned, none are imported today.              | Larger install, misleading stack signals, supply-chain surface.                         |
-| TD-02 | `docs/architecture.md`, `docs/domain.md` and the new `docs/project/` set overlap. The new documents are canonical summaries; the old ones hold detail.                     | Risk of drift if one is updated without the other.                                      |
-| TD-03 | The existing ADRs are undated.                                                                                                                                             | Harder to reconstruct decision chronology; new decisions record dates.                  |
-| TD-04 | The foundation-era roadmap and state files had to be reconciled with the business roadmap.                                                                                 | A reader could follow an old link; pointers are now in place.                           |
-| TD-05 | Password/session security is deliberately simple: bearer token in `localStorage`, in-process rate limiting.                                                                | Acceptable for the foundation, not a production security posture.                       |
-| TD-06 | PostgreSQL integration tests cannot run on this machine.                                                                                                                   | Engine parity is not continuously verified here.                                        |
-| TD-07 | The desktop shell was not rebuilt in the latest verification session.                                                                                                      | Rust/Tauri drift would not be caught by unit tests.                                     |
-| TD-08 | No database backup/restore procedure exists.                                                                                                                               | Operational risk once real data is entered.                                             |
-| TD-09 | The boundary guard compares schema table names and journal entry counts, not columns, indexes, foreign keys or migration contents. The guard script has no permanent spec. | Integration tests remain the authority for engine parity; guard drift is possible.      |
-| TD-10 | Branch duplicate-name handling checks with `findByName` before insert. A concurrent create can still hit the database unique constraint after the check.                   | Concurrent creates could surface as an unmapped 500 instead of the normal 409 conflict. |
+| ID    | Debt                                                                                                                                                                                                                       | Impact                                                                                 |
+| ----- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| TD-01 | Unused dependencies in `packages/app`: `@fullcalendar/*`, `luxon`, `date-fns`, `zustand`, `@tanstack/react-table`. Some are planned, none are imported today.                                                              | Larger install, misleading stack signals, supply-chain surface.                        |
+| TD-02 | `docs/architecture.md`, `docs/domain.md` and the new `docs/project/` set overlap. The new documents are canonical summaries; the old ones hold detail.                                                                     | Risk of drift if one is updated without the other.                                     |
+| TD-03 | The existing ADRs are undated.                                                                                                                                                                                             | Harder to reconstruct decision chronology; new decisions record dates.                 |
+| TD-04 | The foundation-era roadmap and state files had to be reconciled with the business roadmap.                                                                                                                                 | A reader could follow an old link; pointers are now in place.                          |
+| TD-05 | Password/session security is deliberately simple: bearer token in `localStorage`, in-process rate limiting.                                                                                                                | Acceptable for the foundation, not a production security posture.                      |
+| TD-06 | PostgreSQL integration tests cannot run on this machine.                                                                                                                                                                   | Engine parity is not continuously verified here.                                       |
+| TD-07 | The desktop shell was not rebuilt in the latest verification session.                                                                                                                                                      | Rust/Tauri drift would not be caught by unit tests.                                    |
+| TD-08 | No database backup/restore procedure exists.                                                                                                                                                                               | Operational risk once real data is entered.                                            |
+| TD-09 | The boundary guard compares schema table names and journal entry counts, not columns, indexes, foreign keys or migration contents. The guard script has no permanent spec.                                                 | Integration tests remain the authority for engine parity; guard drift is possible.     |
+| TD-10 | Duplicate-key handling for branches, categories, unit codes and per-product presentation names checks with a lookup before insert/update. A concurrent write can still hit the database unique constraint after the check. | Concurrent writes could surface as an unmapped 500 instead of the normal 409 conflict. |
 
 ## 5. Missing tests
 
@@ -66,10 +66,11 @@ These are roadmap work, not defects. See
 - PostgreSQL parity on this machine (skipped, not passed).
 - Browser E2E for the current working tree (last recorded run is from the
   foundation session).
-- Catalog API/UI tests and stock API/UI tests, because those routes and screens
-  do not exist yet. Branch management has domain, repository, route, API-client
-  and component coverage but no Playwright spec. The reusable branch selector has
-  no dedicated component test.
+- Product UI and presentation-editor tests, because those screens do not exist
+  yet. Branch, employee, supplier, category and unit management have domain,
+  repository, route, API-client and component coverage but no Playwright spec.
+  The reusable branch selector has no dedicated component test. Stock API/UI
+  tests wait for M4.
 - User-to-branch assignment and branch-scoped authorization tests (M9).
 - Estimated/measured weight, snapshot and price-history tests, because those
   fields do not exist yet.

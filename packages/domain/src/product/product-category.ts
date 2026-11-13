@@ -25,13 +25,42 @@ export interface NewProductCategory {
   readonly isActive?: boolean;
 }
 
+export interface UpdateProductCategory {
+  readonly name: string;
+  readonly isActive: boolean;
+}
+
 export const PRODUCT_CATEGORY_NAME_MAX_LENGTH = 120;
 
 export function createProductCategory(
   input: NewProductCategory,
   now: IsoDateTime,
 ): ProductCategory {
-  const name = input.name.trim();
+  return {
+    id: input.id,
+    organizationId: input.organizationId,
+    name: validatedName(input.name),
+    isActive: input.isActive ?? true,
+    createdAt: now,
+    updatedAt: now,
+  };
+}
+
+export function updateProductCategory(
+  productCategory: ProductCategory,
+  input: UpdateProductCategory,
+  now: IsoDateTime,
+): ProductCategory {
+  return {
+    ...productCategory,
+    name: validatedName(input.name),
+    isActive: input.isActive,
+    updatedAt: now,
+  };
+}
+
+function validatedName(value: string): string {
+  const name = value.trim();
 
   if (name.length === 0 || name.length > PRODUCT_CATEGORY_NAME_MAX_LENGTH) {
     throw new DomainError(
@@ -40,12 +69,5 @@ export function createProductCategory(
     );
   }
 
-  return {
-    id: input.id,
-    organizationId: input.organizationId,
-    name,
-    isActive: input.isActive ?? true,
-    createdAt: now,
-    updatedAt: now,
-  };
+  return name;
 }

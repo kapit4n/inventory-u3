@@ -89,8 +89,14 @@ stock; it does not own a private copy of the catalog.
 
 - `MeasurementUnit` has a code, a display name and an active flag. Units are
   organization-owned rows, not a closed enum, so BR-014's "other configurable
-  units" can be added. No conversion factor is stored (BQ-10 is open).
-- `ProductCategory` groups products with a name and an active flag.
+  units" can be added. No conversion factor is stored (BQ-10 is open). Codes are
+  unique per organization. `createMeasurementUnit` and
+  `updateMeasurementUnit` trim and validate the code (1–32 characters) and name
+  (1–80 characters); update can also change the active flag.
+- `ProductCategory` groups products with a name and an active flag. Names are
+  unique per organization. `createProductCategory` and `updateProductCategory`
+  trim and validate the name (1–120 characters); update can also change the
+  active flag.
 - `Product` belongs to one organization and one category. It references an
   inventory unit and a sales unit; purchase and production units are optional
   because not every product is bought or prepared.
@@ -98,7 +104,11 @@ stock; it does not own a private copy of the catalog.
   configured unit directly; processed products are prepared as trays.
 - `ProductPresentation` belongs to one product and one organization and carries
   the configured `averageWeightGrams` per tray. The weight is a positive integer
-  because the documented 0.001 kg precision is exactly one gram.
+  because the documented 0.001 kg precision is exactly one gram. Names are unique
+  within a product, `productId` is immutable, and update can change the name,
+  weight or active flag.
+- Categories, units and presentations are deactivated rather than deleted so
+  later product and operational references keep their identity.
 - Prices, estimated/measured weights and historical snapshots are not modelled
   yet. Those are M2/M5/M6 work.
 

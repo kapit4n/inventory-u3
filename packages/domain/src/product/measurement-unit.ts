@@ -31,6 +31,12 @@ export interface NewMeasurementUnit {
   readonly isActive?: boolean;
 }
 
+export interface UpdateMeasurementUnit {
+  readonly code: string;
+  readonly name: string;
+  readonly isActive: boolean;
+}
+
 export const MEASUREMENT_UNIT_CODE_MAX_LENGTH = 32;
 export const MEASUREMENT_UNIT_NAME_MAX_LENGTH = 80;
 
@@ -38,6 +44,33 @@ export function createMeasurementUnit(
   input: NewMeasurementUnit,
   now: IsoDateTime,
 ): MeasurementUnit {
+  return {
+    id: input.id,
+    organizationId: input.organizationId,
+    ...validatedFields(input),
+    isActive: input.isActive ?? true,
+    createdAt: now,
+    updatedAt: now,
+  };
+}
+
+export function updateMeasurementUnit(
+  measurementUnit: MeasurementUnit,
+  input: UpdateMeasurementUnit,
+  now: IsoDateTime,
+): MeasurementUnit {
+  return {
+    ...measurementUnit,
+    ...validatedFields(input),
+    isActive: input.isActive,
+    updatedAt: now,
+  };
+}
+
+function validatedFields(input: { readonly code: string; readonly name: string }): {
+  readonly code: string;
+  readonly name: string;
+} {
   const code = input.code.trim();
   const name = input.name.trim();
 
@@ -55,13 +88,5 @@ export function createMeasurementUnit(
     );
   }
 
-  return {
-    id: input.id,
-    organizationId: input.organizationId,
-    code,
-    name,
-    isActive: input.isActive ?? true,
-    createdAt: now,
-    updatedAt: now,
-  };
+  return { code, name };
 }

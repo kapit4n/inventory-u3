@@ -40,6 +40,21 @@ export class SQLiteMeasurementUnitRepository implements MeasurementUnitRepositor
     return row ? toMeasurementUnit(row) : undefined;
   }
 
+  async findByCode(
+    organizationId: OrganizationId,
+    code: string,
+  ): Promise<MeasurementUnit | undefined> {
+    const [row] = await this.db
+      .select()
+      .from(measurementUnits)
+      .where(
+        and(eq(measurementUnits.organizationId, organizationId), eq(measurementUnits.code, code)),
+      )
+      .limit(1);
+
+    return row ? toMeasurementUnit(row) : undefined;
+  }
+
   async listByOrganization(organizationId: OrganizationId): Promise<readonly MeasurementUnit[]> {
     const rows = await this.db
       .select()
@@ -69,6 +84,26 @@ export class SQLiteMeasurementUnitRepository implements MeasurementUnitRepositor
     }
 
     return toMeasurementUnit(row);
+  }
+
+  async update(measurementUnit: MeasurementUnit): Promise<MeasurementUnit | undefined> {
+    const [row] = await this.db
+      .update(measurementUnits)
+      .set({
+        code: measurementUnit.code,
+        name: measurementUnit.name,
+        isActive: measurementUnit.isActive,
+        updatedAt: new Date(measurementUnit.updatedAt),
+      })
+      .where(
+        and(
+          eq(measurementUnits.organizationId, measurementUnit.organizationId),
+          eq(measurementUnits.id, measurementUnit.id),
+        ),
+      )
+      .returning();
+
+    return row ? toMeasurementUnit(row) : undefined;
   }
 }
 

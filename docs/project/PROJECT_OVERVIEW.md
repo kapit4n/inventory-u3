@@ -1,8 +1,9 @@
 # Inventory U3 — Project Overview
 
-> Last verified: 2026-11-09. M1 is committed at `bfdc9cb`, M2-T1 at `814f397`
-> and M2-T2 at `6b50606`; M2-T3 supplier master data is verified but uncommitted.
-> See [IMPLEMENTATION_PROGRESS](../development/IMPLEMENTATION_PROGRESS.md).
+> Last verified: 2026-11-12. M1 is committed at `bfdc9cb`, M2-T1 at `814f397`,
+> M2-T2 at `6b50606` and M2-T3 at `5c96eeb`; M2-T4 catalog master data is verified
+> but uncommitted. See
+> [IMPLEMENTATION_PROGRESS](../development/IMPLEMENTATION_PROGRESS.md).
 
 ## Purpose
 
@@ -66,11 +67,13 @@ product.** As of this document:
   `measurement_units`, `product_categories`, `products`,
   `product_presentations`, `users` and `sessions`.
 - The `Branch`, `Employee`, `Supplier` and product-catalog domain entities and
-  their SQLite/PostgreSQL repositories are implemented. Branch, employee and
-  supplier list/create/edit are available through the API and the Settings
-  screen, with a reusable active-branch selector. Products carry a required
-  raw/processed kind and presentations carry an average weight per tray; catalog
-  API routes and screens do not exist yet.
+  their SQLite/PostgreSQL repositories are implemented. Branch, employee,
+  supplier, category and measurement-unit list/create/edit are available through
+  the API and the Settings screen, with a reusable active-branch selector.
+  Products carry a required raw/processed kind and presentations carry an
+  average weight per tray. Category, unit and product-nested presentation API
+  routes and typed-client functions exist; product screens and the presentation
+  editor wait for M2-T5.
 - The catalog has no prices or estimated/measured weight snapshots. Those are
   M2/M5/M6 work.
 - The domain defines append-only stock movement concepts and a balance shape,
@@ -86,9 +89,11 @@ product.** As of this document:
   [IMPLEMENTATION_ROADMAP.md](../development/IMPLEMENTATION_ROADMAP.md). M1 is
   complete: branch, product catalog, measurement configuration, stock concepts,
   the access note, technical docs and the dual-engine guard are done. M2 is in
-  progress with branch, employee and supplier management complete; the real
-  branches are not seeded until BQ-19 is answered, employee sharing across
-  branches remains open (BQ-20), and supplier detail fields remain open (BQ-21).
+  progress with branch, employee, supplier, category and measurement-unit
+  management complete and presentation API support ready for the product screen;
+  the real branches are not seeded until BQ-19 is answered, employee sharing
+  across branches remains open (BQ-20), and supplier detail fields remain open
+  (BQ-21).
 
 The inventory business model in this documentation is **proposed**. It separates
 confirmed product requirements from proposed design and from open questions. Do

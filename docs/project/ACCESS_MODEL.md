@@ -1,6 +1,6 @@
 # Access Model
 
-> Status: **Access note through M2-T3.** This document defines the confirmed
+> Status: **Access note through M2-T4.** This document defines the confirmed
 > access boundary, the implemented foundation and the future branch-access
 > constraint. It does not implement branch authorization or settle BQ-09.
 
@@ -80,6 +80,18 @@ Supplier master data uses the same organization-wide administration boundary:
   carry the branch that receives the goods.
 - Suppliers are deactivated, not deleted, so later purchases keep their supplier
   reference. Contact, tax and payment details are not modeled yet (BQ-21).
+
+Catalog master data uses the same boundary:
+
+- `GET /api/v1/product-categories`, `GET /api/v1/measurement-units` and product
+  presentation reads require `organization:read`.
+- Category, unit and presentation writes require `organization:manage`, which
+  only `ADMINISTRATOR` carries today.
+- Categories and units are organization-wide. Presentations belong to a product;
+  reads and writes verify the product belongs to the caller's organization.
+- Catalog rows are deactivated, not deleted, so products and operational rows
+  keep their references. The presentation editor is deferred to the M2-T5
+  product screen (TD-014).
 
 ## 3. Business actors and the initial version
 

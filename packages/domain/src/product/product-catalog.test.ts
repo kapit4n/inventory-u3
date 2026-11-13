@@ -8,15 +8,25 @@ import {
   asProductPresentationId,
 } from '@inventory-u3/types';
 
-import { MEASUREMENT_UNIT_CODE_MAX_LENGTH, createMeasurementUnit } from './measurement-unit.js';
-import { PRODUCT_CATEGORY_NAME_MAX_LENGTH, createProductCategory } from './product-category.js';
+import {
+  MEASUREMENT_UNIT_CODE_MAX_LENGTH,
+  createMeasurementUnit,
+  updateMeasurementUnit,
+} from './measurement-unit.js';
+import {
+  PRODUCT_CATEGORY_NAME_MAX_LENGTH,
+  createProductCategory,
+  updateProductCategory,
+} from './product-category.js';
 import {
   PRODUCT_PRESENTATION_NAME_MAX_LENGTH,
   createProductPresentation,
+  updateProductPresentation,
 } from './product-presentation.js';
 import { PRODUCT_NAME_MAX_LENGTH, createProduct } from './product.js';
 
 const NOW = '2026-11-09T12:00:00.000Z';
+const LATER = '2026-11-09T13:00:00.000Z';
 const ORGANIZATION_ID = asOrganizationId('11111111-1111-4111-8111-111111111111');
 const CATEGORY_ID = asProductCategoryId('22222222-2222-4222-8222-222222222222');
 const PRODUCT_ID = asProductId('33333333-3333-4333-8333-333333333333');
@@ -76,6 +86,53 @@ describe('createMeasurementUnit', () => {
   });
 });
 
+describe('updateMeasurementUnit', () => {
+  it('updates the editable fields and leaves identity and creation time intact', () => {
+    const unit = createMeasurementUnit(
+      {
+        id: KILOGRAM_ID,
+        organizationId: ORGANIZATION_ID,
+        code: 'kg',
+        name: 'Kilogram',
+      },
+      NOW,
+    );
+
+    expect(
+      updateMeasurementUnit(
+        unit,
+        { code: '  kilos  ', name: '  Kilograms  ', isActive: false },
+        LATER,
+      ),
+    ).toEqual({
+      ...unit,
+      code: 'kilos',
+      name: 'Kilograms',
+      isActive: false,
+      updatedAt: LATER,
+    });
+  });
+
+  it('rejects invalid edited codes and names', () => {
+    const unit = createMeasurementUnit(
+      {
+        id: KILOGRAM_ID,
+        organizationId: ORGANIZATION_ID,
+        code: 'kg',
+        name: 'Kilogram',
+      },
+      NOW,
+    );
+
+    expect(() =>
+      updateMeasurementUnit(unit, { code: ' ', name: 'Kilogram', isActive: true }, LATER),
+    ).toThrowError('Measurement unit code must be between 1 and 32 characters');
+    expect(() =>
+      updateMeasurementUnit(unit, { code: 'kg', name: ' ', isActive: true }, LATER),
+    ).toThrowError('Measurement unit name must be between 1 and 80 characters');
+  });
+});
+
 describe('createProductCategory', () => {
   it('creates an active category with a trimmed name', () => {
     const category = createProductCategory(
@@ -111,6 +168,43 @@ describe('createProductCategory', () => {
         },
         NOW,
       ),
+    ).toThrowError('Product category name must be between 1 and 120 characters');
+  });
+});
+
+describe('updateProductCategory', () => {
+  it('updates the editable fields and leaves identity and creation time intact', () => {
+    const category = createProductCategory(
+      {
+        id: CATEGORY_ID,
+        organizationId: ORGANIZATION_ID,
+        name: 'Fruit',
+      },
+      NOW,
+    );
+
+    expect(
+      updateProductCategory(category, { name: '  Fresh fruit  ', isActive: false }, LATER),
+    ).toEqual({
+      ...category,
+      name: 'Fresh fruit',
+      isActive: false,
+      updatedAt: LATER,
+    });
+  });
+
+  it('rejects an invalid edited name', () => {
+    const category = createProductCategory(
+      {
+        id: CATEGORY_ID,
+        organizationId: ORGANIZATION_ID,
+        name: 'Fruit',
+      },
+      NOW,
+    );
+
+    expect(() =>
+      updateProductCategory(category, { name: ' ', isActive: true }, LATER),
     ).toThrowError('Product category name must be between 1 and 120 characters');
   });
 });
@@ -267,6 +361,61 @@ describe('createProductPresentation', () => {
         NOW,
       ),
     ).toThrowError('Product presentation name must be between 1 and 120 characters');
+  });
+
+  it('updates the editable fields and leaves identity and creation time intact', () => {
+    const presentation = createProductPresentation(
+      {
+        id: PRESENTATION_ID,
+        organizationId: ORGANIZATION_ID,
+        productId: PRODUCT_ID,
+        name: 'Covered tray',
+        averageWeightGrams: 500,
+      },
+      NOW,
+    );
+
+    expect(
+      updateProductPresentation(
+        presentation,
+        { name: '  Large covered tray  ', averageWeightGrams: 750, isActive: false },
+        LATER,
+      ),
+    ).toEqual({
+      ...presentation,
+      name: 'Large covered tray',
+      averageWeightGrams: 750,
+      isActive: false,
+      updatedAt: LATER,
+    });
+  });
+
+  it('rejects invalid edited names and weights', () => {
+    const presentation = createProductPresentation(
+      {
+        id: PRESENTATION_ID,
+        organizationId: ORGANIZATION_ID,
+        productId: PRODUCT_ID,
+        name: 'Covered tray',
+        averageWeightGrams: 500,
+      },
+      NOW,
+    );
+
+    expect(() =>
+      updateProductPresentation(
+        presentation,
+        { name: ' ', averageWeightGrams: 500, isActive: true },
+        LATER,
+      ),
+    ).toThrowError('Product presentation name must be between 1 and 120 characters');
+    expect(() =>
+      updateProductPresentation(
+        presentation,
+        { name: 'Covered tray', averageWeightGrams: 1.5, isActive: true },
+        LATER,
+      ),
+    ).toThrowError('Product presentation average weight must be a positive whole number of grams');
   });
 
   it('rejects a missing, non-positive or fractional average weight', () => {

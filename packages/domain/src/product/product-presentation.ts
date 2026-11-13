@@ -37,12 +37,46 @@ export interface NewProductPresentation {
   readonly isActive?: boolean;
 }
 
+export interface UpdateProductPresentation {
+  readonly name: string;
+  readonly averageWeightGrams: number;
+  readonly isActive: boolean;
+}
+
 export const PRODUCT_PRESENTATION_NAME_MAX_LENGTH = 120;
 
 export function createProductPresentation(
   input: NewProductPresentation,
   now: IsoDateTime,
 ): ProductPresentation {
+  return {
+    id: input.id,
+    organizationId: input.organizationId,
+    productId: input.productId,
+    ...validatedFields(input),
+    isActive: input.isActive ?? true,
+    createdAt: now,
+    updatedAt: now,
+  };
+}
+
+export function updateProductPresentation(
+  productPresentation: ProductPresentation,
+  input: UpdateProductPresentation,
+  now: IsoDateTime,
+): ProductPresentation {
+  return {
+    ...productPresentation,
+    ...validatedFields(input),
+    isActive: input.isActive,
+    updatedAt: now,
+  };
+}
+
+function validatedFields(input: { readonly name: string; readonly averageWeightGrams: number }): {
+  readonly name: string;
+  readonly averageWeightGrams: number;
+} {
   const name = input.name.trim();
 
   if (name.length === 0 || name.length > PRODUCT_PRESENTATION_NAME_MAX_LENGTH) {
@@ -59,14 +93,5 @@ export function createProductPresentation(
     );
   }
 
-  return {
-    id: input.id,
-    organizationId: input.organizationId,
-    productId: input.productId,
-    name,
-    averageWeightGrams: input.averageWeightGrams,
-    isActive: input.isActive ?? true,
-    createdAt: now,
-    updatedAt: now,
-  };
+  return { name, averageWeightGrams: input.averageWeightGrams };
 }

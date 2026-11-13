@@ -1181,3 +1181,130 @@ Documentation:
 Read `AGENTS.md`, `PROJECT_OVERVIEW.md`, `IMPLEMENTATION_PROGRESS.md`,
 `CURRENT_TASK.md`, `IMPLEMENTATION_ROADMAP.md` and the M2 section of the roadmap
 before starting M2-T4.
+
+## Session 12 — 2026-11-12 — M2-T4 category, unit and presentation master data
+
+### Objective
+
+Deliver category and measurement-unit management end to end and add presentation
+domain, persistence, API and typed-client support, without implementing the
+M2-T5 product screen.
+
+### Work completed
+
+- Added `updateMeasurementUnit`, `updateProductCategory` and
+  `updateProductPresentation` domain behavior with shared trimmed-field
+  validation. Presentation `productId` remains immutable.
+- Extended both catalog repository ports with organization-scoped unique lookups
+  and update methods; implemented them on SQLite and PostgreSQL.
+- Added catalog validation schemas and inferred types for category, unit and
+  nested presentation requests and responses.
+- Added authenticated category and measurement-unit routes plus nested
+  product-presentation routes with duplicate-key, not-found, ownership and
+  validation handling.
+- Added typed REST-client category, unit and presentation functions with
+  response validation.
+- Added category and measurement-unit management to Settings, including
+  create/edit/deactivate dialogs, read-only behavior for non-administrators and
+  English/Spanish copy.
+- Deferred the presentation editor to the M2-T5 product screen because it
+  requires a selected product (TD-014).
+- Added domain, REST-client, dual-engine repository, route and component tests.
+- Applied existing SQLite migrations through `0005` and re-ran the seed; no
+  schema or migration changed.
+- Updated domain, backend, database, testing, access, decision, architecture,
+  overview, roadmap, progress, state, known-issues and current-task
+  documentation.
+
+### Files changed
+
+Domain and validation:
+
+- `packages/domain/src/product/measurement-unit.ts`,
+  `product-category.ts`, `product-presentation.ts`, `product-catalog.test.ts`
+- `packages/domain/src/ports/index.ts`
+- `packages/validation/src/catalog/`, `packages/validation/src/index.ts`
+
+Persistence, API and client:
+
+- `apps/api/src/infrastructure/persistence/repositories/measurement-unit-repository.ts`,
+  `product-category-repository.ts`, `product-presentation-repository.ts`
+- `apps/api/src/infrastructure/persistence/sqlite/repositories/measurement-unit-repository.ts`,
+  `product-category-repository.ts`, `product-presentation-repository.ts`
+- `apps/api/src/http/routes/product-categories.ts`, `measurement-units.ts`,
+  `product-presentations.ts`, `apps/api/src/app.ts`
+- `apps/api/test/catalog.integration.test.ts`,
+  `apps/api/test/product-catalog-repository.integration.test.ts`
+- `packages/api-client/src/catalog.ts`, `catalog.test.ts`, `index.ts`
+
+Application UI and copy:
+
+- `packages/app/src/features/product-categories/**`
+- `packages/app/src/features/measurement-units/**`
+- `packages/app/src/features/settings/components/settings-page.tsx`
+- `packages/app/src/i18n/locales/en/product-categories.ts`,
+  `measurement-units.ts` and locale index
+- `packages/app/src/i18n/locales/es/product-categories.ts`,
+  `measurement-units.ts` and locale index
+
+Documentation:
+
+- `docs/domain.md`, `docs/backend.md`, `docs/database.md`, `docs/testing.md`
+- `docs/project/ACCESS_MODEL.md`, `TECHNICAL_ARCHITECTURE.md`,
+  `PROJECT_OVERVIEW.md`, `TECHNICAL_DECISIONS.md` (TD-014)
+- `docs/development/*`, `docs/progress/STATE.md`, `docs/progress/REPORT.md`,
+  `AGENTS.md`
+
+### Technical decisions
+
+- Categories, units and presentations use the existing organization/product
+  ownership and unique keys. Category names and unit codes are unique per
+  organization; presentation names are unique per product (TD-014).
+- Reads use `organization:read`; writes use `organization:manage`. All three are
+  deactivated, never hard-deleted.
+- Presentation routes verify that the product and presentation both belong to
+  the caller's organization and that the presentation belongs to the path
+  product.
+- The presentation editor is deferred to the M2-T5 product screen rather than
+  building a standalone product picker.
+- No migration was needed because the catalog tables and unique constraints
+  already existed. No catalog seed was added because real values are unconfirmed.
+
+### Validation
+
+- `pnpm run typecheck` — PASS, 12/12 tasks.
+- `pnpm run lint` — PASS, 12/12 tasks, `BOUNDARY GUARD OK`.
+- `pnpm run test` — PASS, 12/12 tasks, 261 passed, 9 skipped.
+- `TEST_DATABASE_URL= pnpm --filter @inventory-u3/api run test:integration` —
+  PASS, 10 files, 64 passed, 9 skipped.
+- `pnpm run build` — PASS, 5/5 tasks; only Vite chunk-size warnings.
+- `pnpm run db:migrate` — PASS; SQLite migrations applied through `0005`.
+- `pnpm run db:seed` — PASS; organization and development users only.
+- `pnpm run format:check` — PASS.
+- Not run: Playwright E2E; PostgreSQL integration cases (no server).
+
+### Problems found
+
+- The first full unit run failed in `packages/api-client/src/catalog.test.ts`
+  because an unused mock parameter used the name `url`; it was renamed to `_url`.
+  After the fix, the full suite passed.
+- The presentation PUT client mock initially returned the list envelope instead
+  of a single presentation; it was corrected before the final run.
+- The PostgreSQL repository cases skip because no PostgreSQL server is
+  available; this is the same environment limitation recorded as SI-06.
+- Concurrent catalog writes can still reach the database unique constraint after
+  the application-level pre-check, extending the TD-10 risk to catalog rows.
+
+### Pending work
+
+- Commit M2-T4 only after explicit authorization.
+- Continue M2 with product create/edit/list and the product-screen presentation
+  editor (M2-T5).
+- Seed branches only after BQ-19; seed employees, suppliers and catalog rows only
+  when real master data is available.
+
+### Next session
+
+Read `AGENTS.md`, `PROJECT_OVERVIEW.md`, `IMPLEMENTATION_PROGRESS.md`,
+`CURRENT_TASK.md`, `IMPLEMENTATION_ROADMAP.md` and the M2-T5 scope before
+starting product management.

@@ -1,0 +1,42 @@
+export const measurementUnits = {
+  'measurementUnits.list.title': 'Measurement units',
+  'measurementUnits.list.description':
+    'Units used to count purchases, inventory, production and sales.',
+  'measurementUnits.list.empty': 'No measurement units yet.',
+  'measurementUnits.list.emptyDescription':
+    'Create the units used by the business before adding products.',
+  'measurementUnits.loading': 'Loading measurement units…',
+  'measurementUnits.loadFailure': 'Measurement units could not be loaded.',
+  'measurementUnits.retry': 'Try again',
+  'measurementUnits.new': 'New unit',
+  'measurementUnits.column.code': 'Code',
+  'measurementUnits.column.name': 'Unit',
+  'measurementUnits.column.status': 'Status',
+  'measurementUnits.column.actions': 'Actions',
+  'measurementUnits.status.active': 'Active',
+  'measurementUnits.status.inactive': 'Inactive',
+  'measurementUnits.edit': 'Edit',
+  'measurementUnits.readOnly': 'Only an administrator can create or edit measurement units.',
+  'measurementUnits.form.createTitle': 'New measurement unit',
+  'measurementUnits.form.createDescription': 'Add a unit such as kilogram, unit or tray.',
+  'measurementUnits.form.editTitle': 'Edit measurement unit',
+  'measurementUnits.form.editDescription':
+    'Change the code, name or active state of the measurement unit.',
+  'measurementUnits.form.code': 'Code',
+  'measurementUnits.form.codeHint':
+    'Between 1 and 32 characters, for example kg. Codes must be unique.',
+  'measurementUnits.form.name': 'Name',
+  'measurementUnits.form.nameHint': 'Between 1 and 80 characters.',
+  'measurementUnits.form.status': 'Status',
+  'measurementUnits.form.create': 'Create unit',
+  'measurementUnits.form.save': 'Save changes',
+  'measurementUnits.form.saving': 'Saving…',
+  'measurementUnits.form.failure': 'The measurement unit could not be saved.',
+  'measurementUnits.form.failure.validation': 'Check the fields and try again.',
+  'measurementUnits.form.failure.forbidden': 'Only an administrator can change measurement units.',
+  'measurementUnits.form.failure.network':
+    'The API could not be reached. Check the connection and try again.',
+  'measurementUnits.form.failure.duplicate': 'A measurement unit with that code already exists.',
+  'measurementUnits.form.codeRequired': 'A unit code is required.',
+  'measurementUnits.form.nameRequired': 'A unit name is required.',
+} as const;

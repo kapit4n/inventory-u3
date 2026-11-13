@@ -5,50 +5,53 @@
 
 ## Summary
 
-| Field                  | Value                                                                    |
-| ---------------------- | ------------------------------------------------------------------------ |
-| Current milestone      | M2 — Master Data (in progress); M1 is complete                           |
-| Current task           | M2-T3 complete; next task is catalog master data (M2-T4)                 |
-| Overall project status | Branch, employee and supplier master data delivered on the M1 foundation |
-| Completed milestones   | M1; the foundation prerequisite is also complete                         |
-| In-progress milestones | M2                                                                       |
-| Blocked milestones     | M6 finalization is blocked on BR-013 (WhatsApp reporting format)         |
-| Pending milestones     | M3, M4, M5, M6, M7, M8, M9                                               |
-| Last verified commit   | `6b50606` (M2-T2); M2-T1 `814f397`. M2-T3 is uncommitted.                |
-| Last update date       | 2026-11-09                                                               |
-| Next recommended task  | Continue M2 with catalog master data (M2-T4)                             |
+| Field                  | Value                                                              |
+| ---------------------- | ------------------------------------------------------------------ |
+| Current milestone      | M2 — Master Data (in progress); M1 is complete                     |
+| Current task           | M2-T4 complete; next task is product management (M2-T5)            |
+| Overall project status | Branch, employee, supplier, category and unit management delivered |
+| Completed milestones   | M1; the foundation prerequisite is also complete                   |
+| In-progress milestones | M2                                                                 |
+| Blocked milestones     | M6 finalization is blocked on BR-013 (WhatsApp reporting format)   |
+| Pending milestones     | M3, M4, M5, M6, M7, M8, M9                                         |
+| Last verified commit   | `5c96eeb` (M2-T3); M2-T4 is verified but uncommitted.              |
+| Last update date       | 2026-11-12                                                         |
+| Next recommended task  | Continue M2 with product management (M2-T5)                        |
 
 ### Working tree at the time of this update
 
-M2-T3 adds the supplier domain entity, `SupplierId`, `SupplierRepository` on both
-engines, dual-engine schema and migrations, supplier validation, typed REST-client
-functions, `GET/POST/PUT /api/v1/suppliers`, the Settings supplier-management
-section and tests. Suppliers are organization-wide, have a trimmed name and an
-active flag, allow duplicate names, and are deactivated rather than deleted. No
-supplier seed was added because real supplier data is unavailable. Extra supplier
-contact, tax and payment fields remain open (BQ-21, TD-013). M2-T2 employee
-management is committed as `6b50606`; M2-T3 changes are uncommitted.
+M2-T4 adds category, measurement-unit and presentation update behavior to the
+domain; organization-scoped unique lookups and updates on both engines; catalog
+validation schemas; authenticated category, unit and nested presentation routes;
+typed REST-client functions; and Settings category and unit management. Category
+names are unique per organization, unit codes are unique per organization, and
+presentation names are unique per product. All three are deactivated rather than
+deleted. The presentation editor is deferred to the M2-T5 product screen because
+a presentation requires a product and no product UI exists yet (TD-014). No
+catalog seed was added because real master data is unavailable. M2-T3 supplier
+management is committed as `5c96eeb`; M2-T4 changes are uncommitted.
 
 ## Verification for this update
 
-M2-T3 changes the domain, both repository implementations, schema and
-migrations, API routes, REST client, React UI, tests and documentation.
+M2-T4 changes the domain, both repository implementations, validation, API
+routes, REST client, React UI, tests and documentation. No schema or migration
+changed because the existing catalog tables and constraints already cover it.
 
-| Command                                                                   | Result                                                    |
-| ------------------------------------------------------------------------- | --------------------------------------------------------- |
-| `pnpm run typecheck`                                                      | PASS — 12/12 tasks                                        |
-| `pnpm run lint`                                                           | PASS — 12/12 tasks, `BOUNDARY GUARD OK`                   |
-| `pnpm run guard:boundaries`                                               | PASS via lint — `BOUNDARY GUARD OK`                       |
-| `pnpm run test`                                                           | PASS — 12/12 tasks, 234 passed, 8 skipped                 |
-| `TEST_DATABASE_URL= pnpm --filter @inventory-u3/api run test:integration` | PASS — 9 files, 53 passed, 8 skipped                      |
-| `pnpm run build`                                                          | PASS — 5/5 tasks; Vite chunk-size warnings only           |
-| `pnpm run db:migrate`                                                     | PASS — SQLite migrations applied through `0005`           |
-| `pnpm run db:seed`                                                        | PASS — organization/users only; no employees or suppliers |
-| `pnpm run format:check`                                                   | PASS — all files use Prettier style                       |
-| `pnpm run test:e2e`                                                       | NOT RUN; master data has RTL component coverage           |
+| Command                                                                   | Result                                                 |
+| ------------------------------------------------------------------------- | ------------------------------------------------------ |
+| `pnpm run typecheck`                                                      | PASS — 12/12 tasks                                     |
+| `pnpm run lint`                                                           | PASS — 12/12 tasks, `BOUNDARY GUARD OK`                |
+| `pnpm run guard:boundaries`                                               | PASS via lint — `BOUNDARY GUARD OK`                    |
+| `pnpm run test`                                                           | PASS — 12/12 tasks, 261 passed, 9 skipped              |
+| `TEST_DATABASE_URL= pnpm --filter @inventory-u3/api run test:integration` | PASS — 10 files, 64 passed, 9 skipped                  |
+| `pnpm run build`                                                          | PASS — 5/5 tasks; Vite chunk-size warnings only        |
+| `pnpm run db:migrate`                                                     | PASS — SQLite migrations applied through `0005`        |
+| `pnpm run db:seed`                                                        | PASS — organization/users only; no catalog master data |
+| `pnpm run format:check`                                                   | PASS — all files use Prettier style                    |
+| `pnpm run test:e2e`                                                       | NOT RUN; master data has RTL component coverage        |
 
-Current test counts: domain 62, api-client 27, app 56, API 79 passed + 8 skipped,
-database 6 and desktop 4 — 234 passed and 8 skipped in total. The skipped tests
+Current test counts: domain 68, api-client 31, app 62, API 90 passed + 9 skipped,
+database 6 and desktop 4 — 261 passed and 9 skipped in total. The skipped tests
 are the PostgreSQL repository cases, which require a reachable
 `TEST_DATABASE_URL`. The full typecheck, lint, test, build and SQLite integration
 suite were re-run after the final Prettier pass.
@@ -100,7 +103,8 @@ None. M1 is complete.
 ### Pending
 
 - [x] Branch API route and management UI (completed in M2-T1).
-- [ ] Catalog API routes and management UI (M2).
+- [x] Category and unit API routes and management UI (M2-T4); presentation API
+      ready for the product-screen editor (M2-T5).
 - [ ] Seed the three branches once their names and codes are confirmed.
 - [ ] Product prices and price history (M2).
 
@@ -209,7 +213,7 @@ complete. See [CURRENT_TASK.md](./CURRENT_TASK.md).
 
 ## M2 — Master Data
 
-**Status: IN_PROGRESS (M2-T1, M2-T2 and M2-T3 complete)**
+**Status: IN_PROGRESS (M2-T1 through M2-T4 complete)**
 
 ### Completed
 
@@ -254,46 +258,60 @@ complete. See [CURRENT_TASK.md](./CURRENT_TASK.md).
 - [x] M2-T3 domain, REST-client, dual-engine repository, route and component
       tests.
 - [x] M2-T3 documentation and TD-013 supplier decision.
+- [x] M2-T4 category, unit and presentation update behavior in the domain.
+- [x] M2-T4 organization-scoped unique lookups and updates for units,
+      categories and presentations on SQLite and PostgreSQL.
+- [x] M2-T4 category, unit and nested presentation validation schemas and
+      inferred types.
+- [x] M2-T4 authenticated `GET/POST/PUT /api/v1/product-categories`,
+      `/api/v1/measurement-units` and product-nested presentation routes.
+- [x] M2-T4 duplicate-name/code conflicts, not-found and validation problem
+      mapping.
+- [x] M2-T4 typed REST-client category, unit and presentation functions with
+      response validation.
+- [x] M2-T4 Settings category and unit list/create/edit/deactivate UI, read-only
+      for non-administrators.
+- [x] M2-T4 domain, REST-client, dual-engine repository, route and component
+      tests.
+- [x] M2-T4 documentation and TD-014 catalog management decision.
 
 ### Pending
 
-- [ ] Product categories.
-- [ ] Products (raw and processed).
-- [ ] Measurement units.
-- [ ] Product presentations.
-- [ ] Average weight per tray configuration.
-- [ ] Selling prices and price history.
+- [ ] Products (raw and processed) and the product screen (M2-T5).
+- [ ] Presentation editor inside the product screen (M2-T5, TD-014).
+- [ ] Average weight and selling-price configuration with history (M2-T6).
 - [ ] Raw-to-finished product relationship rules.
 
 ### Validation
 
-- Domain: 6 files, 62 passed.
-- API client: 4 files, 27 passed.
-- App: 11 files, 56 passed.
-- API: 13 files, 79 passed + 8 skipped.
-- SQLite integration command: 9 files, 53 passed + 8 skipped.
+- Domain: 6 files, 68 passed.
+- API client: 5 files, 31 passed.
+- App: 13 files, 62 passed.
+- API: 14 files, 90 passed + 9 skipped.
+- SQLite integration command: 10 files, 64 passed + 9 skipped.
 - Full typecheck, lint with boundary guard, build and formatting pass.
-- SQLite migrations applied through `0005`; seed contains no employees or
-  suppliers.
+- SQLite migrations applied through `0005`; seed contains no catalog master
+  data.
 - PostgreSQL cases skip without a reachable `TEST_DATABASE_URL`.
-- No browser E2E spec was added for branch, employee or supplier management.
+- No browser E2E spec was added for master-data management.
 
 ### Notes
 
-Branch, employee and supplier writes are administrator-only through
-`organization:manage` (TD-011, TD-012, TD-013). All three are deactivated, never
+Branch, employee, supplier, category and unit writes are administrator-only
+through `organization:manage` (TD-011 through TD-014). All are deactivated, never
 hard-deleted. Employees belong to one branch and are validated against the
 caller's organization; branch sharing remains open (BQ-20). Suppliers are
 organization-wide with non-unique names; contact, tax and payment fields remain
-open (BQ-21). The selector lists active branches by default, includes inactive
-branches when editing an employee, and is covered indirectly through employee
-component tests. Branch, employee and supplier seeding wait on BQ-19 and real
-master data.
+open (BQ-21). Categories and units are organization-wide; category names and unit
+codes are unique per organization. Presentations remain available through the API
+and typed client but their editor is deferred to M2-T5 because it needs a
+selected product (TD-014). Branch, employee, supplier and catalog seeding wait on
+BQ-19 and real master data.
 
 ### Next action
 
-Continue M2 with category, measurement-unit and presentation master data (M2-T4).
-See [CURRENT_TASK.md](./CURRENT_TASK.md).
+Continue M2 with product create/edit/list and the product-screen presentation
+editor (M2-T5). See [CURRENT_TASK.md](./CURRENT_TASK.md).
 
 ---
 

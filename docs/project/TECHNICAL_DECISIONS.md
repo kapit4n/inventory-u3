@@ -300,3 +300,35 @@ averageWeightPerTray` and `estimatedValue = estimatedKg × sellingPricePerKg`.
   branch. Extra supplier details require an explicit schema and migration change
   after BQ-21 is answered. Administrators manage suppliers today; other roles can
   read them and use supplier selection in later purchase forms.
+
+### TD-014 — Catalog master data uses explicit business keys; the presentation editor lands with the product screen
+
+- **Date:** 2026-11-12
+- **Status:** ACCEPTED for M2-T4.
+- **Context:** Product management in M2-T5 needs stable categories and units, and
+  presentations need a product before they can be edited. The existing catalog
+  tables already define unique keys: category name per organization, unit code
+  per organization and presentation name per product. The repository and API
+  previously supported create/list only, while Settings already hosts the other
+  organization-wide master data.
+- **Decision:** Expose category and unit management in Settings and enforce the
+  existing unique keys through organization-scoped lookups before create/update,
+  with duplicate values reported as a domain conflict. Reads use
+  `organization:read`; writes use `organization:manage`. Categories, units and
+  presentations are deactivated, never hard-deleted. Presentation create/list/
+  update is available through the API and typed client, but its editor is
+  deferred to the M2-T5 product screen because a presentation is always scoped to
+  a selected product.
+- **Alternatives considered:** Build a standalone presentation screen with a
+  product picker; rejected because it duplicates the M2-T5 product workflow and
+  would be replaced immediately. Add new permissions or branch ownership for
+  catalog data; rejected because catalog master data is organization-wide
+  (TD-009) and the existing administration boundary is sufficient. Hard-delete
+  catalog rows; rejected because products and future operational records need
+  stable references.
+- **Consequences:** Category names and unit codes identify catalog rows within an
+  organization; presentation identity is product plus name. M2-T5 owns the
+  product and presentation UI, including active/inactive selection. Concurrent
+  creates can still reach the database unique constraint after the pre-check, so
+  the existing TD-10 risk applies to catalog rows too. No migration or catalog
+  seed is required by this decision.

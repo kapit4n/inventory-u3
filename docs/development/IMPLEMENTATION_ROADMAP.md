@@ -134,7 +134,7 @@ confirmed (BQ-19); that is M2 work, not an M1 gap.
 
 ## M2 — Master Data
 
-**Status: IN_PROGRESS (M2-T1 branches, M2-T2 employees and M2-T3 suppliers complete).**
+**Status: IN_PROGRESS (M2-T1 branches, M2-T2 employees, M2-T3 suppliers and M2-T4 catalog master data complete).**
 
 ### Objective
 
@@ -164,7 +164,7 @@ M1 (domain and persistence foundation).
 | M2-T1 | Branch list/create/edit, permissions and branch selector        | COMPLETED   |
 | M2-T2 | Employee master data and branch assignment                      | COMPLETED   |
 | M2-T3 | Supplier master data                                            | COMPLETED   |
-| M2-T4 | Category, unit and presentation master data                     | NOT_STARTED |
+| M2-T4 | Category, unit and presentation master data                     | COMPLETED   |
 | M2-T5 | Product create/edit/list for raw and processed products         | NOT_STARTED |
 | M2-T6 | Average weight and selling-price configuration with history     | NOT_STARTED |
 | M2-T7 | Remaining API routes, validation, problem mapping, UI and tests | NOT_STARTED |
@@ -173,7 +173,8 @@ M1 (domain and persistence foundation).
 
 - [x] Operator can create, list and edit branches.
 - [x] Operator can create, list and edit employees and suppliers.
-- [ ] Operator can create, list and edit categories, units and products.
+- [x] Operator can create, list and edit categories and units.
+- [ ] Operator can create, list and edit products.
 - [ ] Every record is organization-scoped; branch-owned records carry a branch.
 - [ ] A processed product can have a presentation, average weight per tray and
       selling price per kilogram.
@@ -193,7 +194,9 @@ engines.
 ### Expected UI changes
 
 Master-data screens reachable from Settings or a new Administration area,
-including list/search/create/edit forms. Inventory route remains a placeholder
+including list/search/create/edit forms. Categories and units are managed in
+Settings. The presentation editor is deferred to the M2-T5 product screen because
+it requires a selected product (TD-014). Inventory route remains a placeholder
 until M4.
 
 ### Tests required

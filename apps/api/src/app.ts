@@ -21,7 +21,10 @@ import { registerBranchRoutes } from './http/routes/branches.js';
 import { registerEmployeeRoutes } from './http/routes/employees.js';
 import { registerDevAuthRoutes } from './http/routes/dev-auth.js';
 import { registerHealthRoutes } from './http/routes/health.js';
+import { registerMeasurementUnitRoutes } from './http/routes/measurement-units.js';
 import { registerOrganizationRoutes } from './http/routes/organization.js';
+import { registerProductCategoryRoutes } from './http/routes/product-categories.js';
+import { registerProductPresentationRoutes } from './http/routes/product-presentations.js';
 import { registerSupplierRoutes } from './http/routes/suppliers.js';
 import { systemClock } from './infrastructure/clock/system-clock.js';
 import { uuidGenerator } from './infrastructure/id/uuid-generator.js';
@@ -106,6 +109,25 @@ export async function buildServer(env: EnvSource = process.env): Promise<Invento
 
   await registerSupplierRoutes(app, {
     suppliers: connection.repositories.suppliers,
+    clock: systemClock,
+    ids: uuidGenerator,
+  });
+
+  await registerProductCategoryRoutes(app, {
+    productCategories: connection.repositories.productCategories,
+    clock: systemClock,
+    ids: uuidGenerator,
+  });
+
+  await registerMeasurementUnitRoutes(app, {
+    measurementUnits: connection.repositories.measurementUnits,
+    clock: systemClock,
+    ids: uuidGenerator,
+  });
+
+  await registerProductPresentationRoutes(app, {
+    productPresentations: connection.repositories.productPresentations,
+    products: connection.repositories.products,
     clock: systemClock,
     ids: uuidGenerator,
   });

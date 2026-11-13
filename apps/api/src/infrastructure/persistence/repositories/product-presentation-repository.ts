@@ -44,6 +44,26 @@ export class DrizzleProductPresentationRepository implements ProductPresentation
     return row ? toProductPresentation(row) : undefined;
   }
 
+  async findByProductAndName(
+    organizationId: OrganizationId,
+    productId: ProductId,
+    name: string,
+  ): Promise<ProductPresentation | undefined> {
+    const [row] = await this.db
+      .select()
+      .from(productPresentations)
+      .where(
+        and(
+          eq(productPresentations.organizationId, organizationId),
+          eq(productPresentations.productId, productId),
+          eq(productPresentations.name, name),
+        ),
+      )
+      .limit(1);
+
+    return row ? toProductPresentation(row) : undefined;
+  }
+
   async listByProduct(
     organizationId: OrganizationId,
     productId: ProductId,
@@ -82,6 +102,26 @@ export class DrizzleProductPresentationRepository implements ProductPresentation
     }
 
     return toProductPresentation(row);
+  }
+
+  async update(productPresentation: ProductPresentation): Promise<ProductPresentation | undefined> {
+    const [row] = await this.db
+      .update(productPresentations)
+      .set({
+        name: productPresentation.name,
+        averageWeightGrams: productPresentation.averageWeightGrams,
+        isActive: productPresentation.isActive,
+        updatedAt: new Date(productPresentation.updatedAt),
+      })
+      .where(
+        and(
+          eq(productPresentations.organizationId, productPresentation.organizationId),
+          eq(productPresentations.id, productPresentation.id),
+        ),
+      )
+      .returning();
+
+    return row ? toProductPresentation(row) : undefined;
   }
 }
 

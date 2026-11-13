@@ -42,6 +42,21 @@ export class DrizzleProductCategoryRepository implements ProductCategoryReposito
     return row ? toProductCategory(row) : undefined;
   }
 
+  async findByName(
+    organizationId: OrganizationId,
+    name: string,
+  ): Promise<ProductCategory | undefined> {
+    const [row] = await this.db
+      .select()
+      .from(productCategories)
+      .where(
+        and(eq(productCategories.organizationId, organizationId), eq(productCategories.name, name)),
+      )
+      .limit(1);
+
+    return row ? toProductCategory(row) : undefined;
+  }
+
   async listByOrganization(organizationId: OrganizationId): Promise<readonly ProductCategory[]> {
     const rows = await this.db
       .select()
@@ -70,6 +85,25 @@ export class DrizzleProductCategoryRepository implements ProductCategoryReposito
     }
 
     return toProductCategory(row);
+  }
+
+  async update(productCategory: ProductCategory): Promise<ProductCategory | undefined> {
+    const [row] = await this.db
+      .update(productCategories)
+      .set({
+        name: productCategory.name,
+        isActive: productCategory.isActive,
+        updatedAt: new Date(productCategory.updatedAt),
+      })
+      .where(
+        and(
+          eq(productCategories.organizationId, productCategory.organizationId),
+          eq(productCategories.id, productCategory.id),
+        ),
+      )
+      .returning();
+
+    return row ? toProductCategory(row) : undefined;
   }
 }
 

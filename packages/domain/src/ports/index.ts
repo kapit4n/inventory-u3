@@ -92,8 +92,11 @@ export interface MeasurementUnitRepository {
     organizationId: OrganizationId,
     measurementUnitId: MeasurementUnitId,
   ): Promise<MeasurementUnit | undefined>;
+  findByCode(organizationId: OrganizationId, code: string): Promise<MeasurementUnit | undefined>;
   listByOrganization(organizationId: OrganizationId): Promise<readonly MeasurementUnit[]>;
   create(measurementUnit: MeasurementUnit): Promise<MeasurementUnit>;
+  /** Returns `undefined` when the unit does not belong to the organization. */
+  update(measurementUnit: MeasurementUnit): Promise<MeasurementUnit | undefined>;
 }
 
 export interface ProductCategoryRepository {
@@ -101,8 +104,11 @@ export interface ProductCategoryRepository {
     organizationId: OrganizationId,
     productCategoryId: ProductCategoryId,
   ): Promise<ProductCategory | undefined>;
+  findByName(organizationId: OrganizationId, name: string): Promise<ProductCategory | undefined>;
   listByOrganization(organizationId: OrganizationId): Promise<readonly ProductCategory[]>;
   create(productCategory: ProductCategory): Promise<ProductCategory>;
+  /** Returns `undefined` when the category does not belong to the organization. */
+  update(productCategory: ProductCategory): Promise<ProductCategory | undefined>;
 }
 
 export interface ProductRepository {
@@ -116,11 +122,18 @@ export interface ProductPresentationRepository {
     organizationId: OrganizationId,
     productPresentationId: ProductPresentationId,
   ): Promise<ProductPresentation | undefined>;
+  findByProductAndName(
+    organizationId: OrganizationId,
+    productId: ProductId,
+    name: string,
+  ): Promise<ProductPresentation | undefined>;
   listByProduct(
     organizationId: OrganizationId,
     productId: ProductId,
   ): Promise<readonly ProductPresentation[]>;
   create(productPresentation: ProductPresentation): Promise<ProductPresentation>;
+  /** Returns `undefined` when the presentation does not belong to the organization. */
+  update(productPresentation: ProductPresentation): Promise<ProductPresentation | undefined>;
 }
 
 export interface UserRepository {

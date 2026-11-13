@@ -24,6 +24,9 @@ import {
   createProduct,
   createProductCategory,
   createProductPresentation,
+  updateMeasurementUnit,
+  updateProductCategory,
+  updateProductPresentation,
 } from '@inventory-u3/domain';
 import {
   asMeasurementUnitId,
@@ -355,6 +358,104 @@ describe('product catalog repositories (SQLite)', () => {
       `Open tray ${tag}`,
     ]);
   });
+
+  it('updates catalog rows and finds them by their unique business key', async () => {
+    const tag = suffix();
+    const kilogram = await measurementUnits.create(
+      createMeasurementUnit(
+        {
+          id: asMeasurementUnitId(randomUUID()),
+          organizationId: ORGANIZATION_A,
+          code: `kg-${tag}`,
+          name: 'Kilogram',
+        },
+        NOW,
+      ),
+    );
+    const fruit = await productCategories.create(
+      createProductCategory(
+        {
+          id: asProductCategoryId(randomUUID()),
+          organizationId: ORGANIZATION_A,
+          name: `Fruit ${tag}`,
+        },
+        NOW,
+      ),
+    );
+    const watermelon = await products.create(
+      createProduct(
+        {
+          id: asProductId(randomUUID()),
+          organizationId: ORGANIZATION_A,
+          categoryId: fruit.id,
+          name: `Watermelon ${tag}`,
+          kind: 'PROCESSED',
+          inventoryUnitId: kilogram.id,
+          salesUnitId: kilogram.id,
+        },
+        NOW,
+      ),
+    );
+    const tray = await productPresentations.create(
+      createProductPresentation(
+        {
+          id: asProductPresentationId(randomUUID()),
+          organizationId: ORGANIZATION_A,
+          productId: watermelon.id,
+          name: `Covered tray ${tag}`,
+          averageWeightGrams: 500,
+        },
+        NOW,
+      ),
+    );
+
+    const later = '2026-11-09T13:00:00.000Z';
+    const updatedUnit = updateMeasurementUnit(
+      kilogram,
+      { code: `kilos-${tag}`, name: 'Kilograms', isActive: false },
+      later,
+    );
+    const updatedCategory = updateProductCategory(
+      fruit,
+      { name: `Fresh fruit ${tag}`, isActive: false },
+      later,
+    );
+    const updatedPresentation = updateProductPresentation(
+      tray,
+      { name: `Large tray ${tag}`, averageWeightGrams: 750, isActive: false },
+      later,
+    );
+
+    await expect(measurementUnits.update(updatedUnit)).resolves.toEqual(updatedUnit);
+    await expect(productCategories.update(updatedCategory)).resolves.toEqual(updatedCategory);
+    await expect(productPresentations.update(updatedPresentation)).resolves.toEqual(
+      updatedPresentation,
+    );
+
+    await expect(measurementUnits.findByCode(ORGANIZATION_A, updatedUnit.code)).resolves.toEqual(
+      updatedUnit,
+    );
+    await expect(
+      productCategories.findByName(ORGANIZATION_A, updatedCategory.name),
+    ).resolves.toEqual(updatedCategory);
+    await expect(
+      productPresentations.findByProductAndName(
+        ORGANIZATION_A,
+        watermelon.id,
+        updatedPresentation.name,
+      ),
+    ).resolves.toEqual(updatedPresentation);
+
+    await expect(
+      measurementUnits.update({ ...updatedUnit, organizationId: ORGANIZATION_B }),
+    ).resolves.toBeUndefined();
+    await expect(
+      productCategories.update({ ...updatedCategory, organizationId: ORGANIZATION_B }),
+    ).resolves.toBeUndefined();
+    await expect(
+      productPresentations.update({ ...updatedPresentation, organizationId: ORGANIZATION_B }),
+    ).resolves.toBeUndefined();
+  });
 });
 
 const postgresUrl = process.env.TEST_DATABASE_URL;
@@ -548,5 +649,112 @@ describe.skipIf(!postgresUrl)('product catalog repositories (PostgreSQL)', () =>
     await expect(productPresentations.listByProduct(organizationB, watermelon.id)).resolves.toEqual(
       [],
     );
+  });
+
+  it('updates catalog rows and finds them by their unique business key', async () => {
+    const measurementUnits = new DrizzleMeasurementUnitRepository(connection.db);
+    const productCategories = new DrizzleProductCategoryRepository(connection.db);
+    const products = new DrizzleProductRepository(connection.db);
+    const productPresentations = new DrizzleProductPresentationRepository(connection.db);
+
+    const tag = suffix();
+    const kilogram = await measurementUnits.create(
+      createMeasurementUnit(
+        {
+          id: asMeasurementUnitId(randomUUID()),
+          organizationId: organizationA,
+          code: `kg-${tag}`,
+          name: 'Kilogram',
+        },
+        NOW,
+      ),
+    );
+    unitIds.push(kilogram.id);
+    const fruit = await productCategories.create(
+      createProductCategory(
+        {
+          id: asProductCategoryId(randomUUID()),
+          organizationId: organizationA,
+          name: `Fruit ${tag}`,
+        },
+        NOW,
+      ),
+    );
+    categoryIds.push(fruit.id);
+    const watermelon = await products.create(
+      createProduct(
+        {
+          id: asProductId(randomUUID()),
+          organizationId: organizationA,
+          categoryId: fruit.id,
+          name: `Watermelon ${tag}`,
+          kind: 'PROCESSED',
+          inventoryUnitId: kilogram.id,
+          salesUnitId: kilogram.id,
+        },
+        NOW,
+      ),
+    );
+    productIds.push(watermelon.id);
+    const tray = await productPresentations.create(
+      createProductPresentation(
+        {
+          id: asProductPresentationId(randomUUID()),
+          organizationId: organizationA,
+          productId: watermelon.id,
+          name: `Covered tray ${tag}`,
+          averageWeightGrams: 500,
+        },
+        NOW,
+      ),
+    );
+    presentationIds.push(tray.id);
+
+    const later = '2026-11-09T13:00:00.000Z';
+    const updatedUnit = updateMeasurementUnit(
+      kilogram,
+      { code: `kilos-${tag}`, name: 'Kilograms', isActive: false },
+      later,
+    );
+    const updatedCategory = updateProductCategory(
+      fruit,
+      { name: `Fresh fruit ${tag}`, isActive: false },
+      later,
+    );
+    const updatedPresentation = updateProductPresentation(
+      tray,
+      { name: `Large tray ${tag}`, averageWeightGrams: 750, isActive: false },
+      later,
+    );
+
+    await expect(measurementUnits.update(updatedUnit)).resolves.toEqual(updatedUnit);
+    await expect(productCategories.update(updatedCategory)).resolves.toEqual(updatedCategory);
+    await expect(productPresentations.update(updatedPresentation)).resolves.toEqual(
+      updatedPresentation,
+    );
+
+    await expect(measurementUnits.findByCode(organizationA, updatedUnit.code)).resolves.toEqual(
+      updatedUnit,
+    );
+    await expect(
+      productCategories.findByName(organizationA, updatedCategory.name),
+    ).resolves.toEqual(updatedCategory);
+    await expect(
+      productPresentations.findByProductAndName(
+        organizationA,
+        watermelon.id,
+        updatedPresentation.name,
+      ),
+    ).resolves.toEqual(updatedPresentation);
+
+    await expect(
+      measurementUnits.update({ ...updatedUnit, organizationId: organizationB }),
+    ).resolves.toBeUndefined();
+    await expect(
+      productCategories.update({ ...updatedCategory, organizationId: organizationB }),
+    ).resolves.toBeUndefined();
+    await expect(
+      productPresentations.update({ ...updatedPresentation, organizationId: organizationB }),
+    ).resolves.toBeUndefined();
   });
 });

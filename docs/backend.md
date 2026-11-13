@@ -23,37 +23,49 @@ Secrets are read from the environment and never logged.
 
 ## Endpoints
 
-| Method | Path                            | Permission            |
-| ------ | ------------------------------- | --------------------- |
-| GET    | `/health`                       | public                |
-| POST   | `/api/v1/auth/login`            | public                |
-| POST   | `/api/v1/auth/logout`           | authenticated         |
-| GET    | `/api/v1/auth/me`               | authenticated         |
-| GET    | `/api/v1/auth/dev-users`        | non-production only   |
-| POST   | `/api/v1/auth/dev-login`        | non-production only   |
-| GET    | `/api/v1/organization`          | `organization:read`   |
-| PUT    | `/api/v1/organization`          | `organization:manage` |
-| GET    | `/api/v1/branches`              | `organization:read`   |
-| POST   | `/api/v1/branches`              | `organization:manage` |
-| PUT    | `/api/v1/branches/:branchId`    | `organization:manage` |
-| GET    | `/api/v1/employees`             | `organization:read`   |
-| POST   | `/api/v1/employees`             | `organization:manage` |
-| PUT    | `/api/v1/employees/:employeeId` | `organization:manage` |
-| GET    | `/api/v1/suppliers`             | `organization:read`   |
-| POST   | `/api/v1/suppliers`             | `organization:manage` |
-| PUT    | `/api/v1/suppliers/:supplierId` | `organization:manage` |
+| Method | Path                                                        | Permission            |
+| ------ | ----------------------------------------------------------- | --------------------- |
+| GET    | `/health`                                                   | public                |
+| POST   | `/api/v1/auth/login`                                        | public                |
+| POST   | `/api/v1/auth/logout`                                       | authenticated         |
+| GET    | `/api/v1/auth/me`                                           | authenticated         |
+| GET    | `/api/v1/auth/dev-users`                                    | non-production only   |
+| POST   | `/api/v1/auth/dev-login`                                    | non-production only   |
+| GET    | `/api/v1/organization`                                      | `organization:read`   |
+| PUT    | `/api/v1/organization`                                      | `organization:manage` |
+| GET    | `/api/v1/branches`                                          | `organization:read`   |
+| POST   | `/api/v1/branches`                                          | `organization:manage` |
+| PUT    | `/api/v1/branches/:branchId`                                | `organization:manage` |
+| GET    | `/api/v1/employees`                                         | `organization:read`   |
+| POST   | `/api/v1/employees`                                         | `organization:manage` |
+| PUT    | `/api/v1/employees/:employeeId`                             | `organization:manage` |
+| GET    | `/api/v1/suppliers`                                         | `organization:read`   |
+| POST   | `/api/v1/suppliers`                                         | `organization:manage` |
+| PUT    | `/api/v1/suppliers/:supplierId`                             | `organization:manage` |
+| GET    | `/api/v1/product-categories`                                | `organization:read`   |
+| POST   | `/api/v1/product-categories`                                | `organization:manage` |
+| PUT    | `/api/v1/product-categories/:categoryId`                    | `organization:manage` |
+| GET    | `/api/v1/measurement-units`                                 | `organization:read`   |
+| POST   | `/api/v1/measurement-units`                                 | `organization:manage` |
+| PUT    | `/api/v1/measurement-units/:measurementUnitId`              | `organization:manage` |
+| GET    | `/api/v1/products/:productId/presentations`                 | `organization:read`   |
+| POST   | `/api/v1/products/:productId/presentations`                 | `organization:manage` |
+| PUT    | `/api/v1/products/:productId/presentations/:presentationId` | `organization:manage` |
 
-Branch, employee and supplier routes are implemented with create, list and edit;
-there is no delete endpoint because all three are deactivated. Employee creation
-and update validate that the assigned branch belongs to the caller's
-organization. Suppliers are organization-wide and have no branch assignment.
-Catalog entities have domain models and repository ports, but no HTTP route or UI
-yet. Inventory endpoints are intentionally absent until their milestone.
+Branch, employee, supplier, category and unit routes are implemented with create,
+list and edit; there is no delete endpoint because all five are deactivated.
+Employee creation and update validate that the assigned branch belongs to the
+caller's organization. Suppliers, categories and units are organization-wide and
+have no branch assignment. Presentation create/list/update is nested under a
+product, requires the product to belong to the caller's organization, and checks
+that the presentation belongs to that product. Presentation UI is deferred to the
+M2-T5 product screen (TD-014). Inventory endpoints are intentionally absent until
+their milestone.
 
-The branch, employee and supplier collections return `{ "items": [...] }`.
-Duplicate branch names within an organization return a
-`DOMAIN_RULE_VIOLATION` problem rather than a database error. Employee full names
-and supplier names are not unique.
+The branch, employee, supplier, category and unit collections return
+`{ "items": [...] }`. Duplicate branch names, category names, unit codes and
+per-product presentation names return a `DOMAIN_RULE_VIOLATION` problem rather
+than a database error. Employee full names and supplier names are not unique.
 
 ## Request pipeline
 
@@ -86,10 +98,11 @@ stock repository exists.
 ## Testing
 
 API unit tests cover configuration, problem mapping and authentication.
-Integration tests cover authentication, branch, employee and supplier route
-permissions and validation, the organization plus branch, employee, supplier and
-catalog repository round-trips on SQLite, cross-organization isolation,
-repository constraints and a migration smoke path. The same integration files
-run against PostgreSQL when `TEST_DATABASE_URL` answers and skip otherwise.
-Domain and validation tests cover their invariants. Component tests cover branch,
-employee and supplier management; browser tests mock the API through Playwright.
+Integration tests cover authentication, branch, employee, supplier, category,
+unit and presentation route permissions and validation, the organization plus
+branch, employee, supplier and catalog repository round-trips on SQLite,
+cross-organization isolation, repository constraints and a migration smoke path.
+The same integration files run against PostgreSQL when `TEST_DATABASE_URL`
+answers and skip otherwise. Domain and validation tests cover their invariants.
+Component tests cover branch, employee, supplier, category and unit management;
+browser tests mock the API through Playwright.

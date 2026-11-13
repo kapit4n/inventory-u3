@@ -1,7 +1,7 @@
 # Inventory U3 — Phase 1 Business Foundation Report
 
-> Last updated: 2026-11-09. M1 is committed at `bfdc9cb`, M2-T1 at `814f397`
-> and M2-T2 at `6b50606`; M2-T3 is verified but uncommitted.
+> Last updated: 2026-11-12. M1 is committed at `bfdc9cb`, M2-T1 at `814f397`,
+> M2-T2 at `6b50606` and M2-T3 at `5c96eeb`; M2-T4 is verified but uncommitted.
 
 ## 1. Architecture overview
 
@@ -47,10 +47,12 @@ unchanged between web and desktop.
 
 Fastify with Zod validation at every boundary, opaque bearer authentication,
 domain use cases, repository ports, standard problem envelopes and structured
-redacted logs. Branch, employee and supplier routes are authenticated; writes
-require the administrator-only `organization:manage` permission and reads require
-`organization:read`. Employee assignments are validated against a branch in the
-caller's organization; suppliers are organization-wide.
+redacted logs. Branch, employee, supplier, category, unit and presentation routes
+are authenticated; writes require the administrator-only `organization:manage`
+permission and reads require `organization:read`. Employee assignments are
+validated against a branch in the caller's organization; suppliers, categories
+and units are organization-wide. Presentations are nested under a product and
+verify product ownership.
 
 ## 7. Database architecture
 
@@ -72,11 +74,10 @@ global API-data store and no giant Zustand store.
 Vitest covers domain rules, REST-client behavior, API route integration,
 dual-engine repository behavior and React components with React Testing Library.
 SQLite integration tests run by default; PostgreSQL cases skip without a
-reachable server. Playwright remains the browser strategy but has no branch,
-employee or supplier admin flow yet. The default suites report 234 passed and 8
-skipped; the separately invoked SQLite integration command reports 53 passed and
-8 skipped.
-Typecheck, lint, build and formatting pass.
+reachable server. Playwright remains the browser strategy but has no master-data admin flow yet.
+The default suites report 261 passed and 9 skipped; the separately invoked SQLite
+integration command reports 64 passed and 9 skipped. Typecheck, lint, build and
+formatting pass.
 
 ## 10. What was actually implemented
 
@@ -92,16 +93,20 @@ assignment assumes one branch per employee pending BQ-20 (TD-012). M2-T3 added
 organization-wide supplier master data with create/list/edit, deactivation
 instead of deletion, non-unique names, dual-engine migrations and repositories,
 authenticated routes, typed client, Settings UI and tests (TD-013). Supplier
-contact, tax and payment fields remain open (BQ-21).
+contact, tax and payment fields remain open (BQ-21). M2-T4 added category, unit
+and presentation update rules, organization-scoped unique lookups, catalog
+validation, category/unit/nested-presentation routes, typed client functions,
+Settings category and unit management and tests. The presentation editor waits
+for the M2-T5 product screen (TD-014).
 
 ## 11. What was intentionally NOT implemented
 
 Employee login accounts, branch-scoped authorization, payroll, attendance,
-contact or identity data, supplier contact/tax/payment fields, product/catalog
-API and UI, prices, weight
-snapshots, purchases, receiving, stock tables and balances, production, sales
-checkpoints, daily closing, reporting, offline mode, desktop-local data,
-synchronization, microservices, GraphQL and Redux.
+contact or identity data, supplier contact/tax/payment fields, product UI, the
+presentation editor until M2-T5, prices, weight snapshots, purchases, receiving,
+stock tables and balances, production, sales checkpoints, daily closing,
+reporting, offline mode, desktop-local data, synchronization, microservices,
+GraphQL and Redux.
 
 ## 12. Open architectural questions
 
@@ -114,6 +119,6 @@ that blocks M6 (BR-013).
 
 ## 13. Recommended next milestone
 
-Continue **M2 — Master Data** with M2-T4 category, unit and presentation master
-data, following the established domain, dual-engine persistence, API,
-typed-client, UI and test pattern. Then add product management (M2-T5).
+Continue **M2 — Master Data** with M2-T5 product create/edit/list and the
+product-screen presentation editor, following the established domain,
+dual-engine persistence, API, typed-client, UI and test pattern.

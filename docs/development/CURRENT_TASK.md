@@ -1,79 +1,86 @@
 # Current Task
 
-> Last updated: 2026-11-09.
+> Last updated: 2026-11-12.
 >
-> **M2-T3 is COMPLETE.** M2-T1 branch and M2-T2 employee management are also
-> complete. This slice adds organization-wide supplier master data for the
-> purchases recorded in M3. The work is uncommitted pending explicit
-> authorization.
+> **M2-T4 is COMPLETE.** M2-T1 branch, M2-T2 employee and M2-T3 supplier
+> management are also complete. This slice adds category and measurement-unit
+> management through Settings, plus presentation domain, persistence, API and
+> typed-client support. The work is uncommitted pending explicit authorization.
 
 ## Task identity
 
-| Field        | Value                                                    |
-| ------------ | -------------------------------------------------------- |
-| Milestone    | M2 — Master Data                                         |
-| Task ID      | M2-T3                                                    |
-| Task         | Supplier master data                                     |
-| Status       | COMPLETED                                                |
-| Dependencies | M2-T1 and M2-T2 complete; organization permissions exist |
-| Blocks       | M3 supplier purchases and receiving                      |
+| Field        | Value                                                               |
+| ------------ | ------------------------------------------------------------------- |
+| Milestone    | M2 — Master Data                                                    |
+| Task ID      | M2-T4                                                               |
+| Task         | Category, unit and presentation master data                         |
+| Status       | COMPLETED                                                           |
+| Dependencies | M2-T1 through M2-T3 complete; catalog entities and ports exist      |
+| Blocks       | M2-T5 product management and presentation editing in the product UI |
 
 ## Objective
 
-Let an authenticated administrator list, create and edit the suppliers that
-deliver products to the business. Provide read-only supplier visibility to the
-other authenticated roles and a typed API that M3 purchases can reference.
+Let an authenticated administrator maintain the organization-wide category and
+measurement-unit catalogue that product management depends on, and expose a
+typed product-presentation API that the M2-T5 product screen can edit.
 
 ## Scope
 
-- Add a `Supplier` entity with a name and active flag.
-- Add a `SupplierId` branded identifier and repository port.
-- Keep suppliers organization-wide because the same provider can deliver to more
-  than one branch; M3 purchases carry the branch.
-- Deactivate rather than delete suppliers so later purchases keep their supplier
-  reference.
-- Add `GET`, `POST` and `PUT /api/v1/suppliers` routes.
-- Use `organization:read` for listing and `organization:manage` for writes, the
-  same administration boundary as branches and employees (TD-011, TD-012).
-- Add typed REST-client functions and response validation.
-- Add supplier management to Settings, read-only for non-administrators.
+- Add category and measurement-unit update behavior to the domain.
+- Add organization-scoped unique lookups and updates to both repository ports and
+  both engines: unit `code`, category `name`, and presentation `name` per product.
+- Add category and unit validation schemas and inferred request/response types.
+- Add authenticated `GET/POST/PUT /api/v1/product-categories` and
+  `/api/v1/measurement-units` routes.
+- Add nested `GET/POST/PUT /api/v1/products/:productId/presentations` routes.
+- Enforce the existing unique constraints with normal `409` domain conflicts.
+- Add typed REST-client functions and response validation for all three resources.
+- Add category and unit management to Settings, read-only for non-administrators.
+- Defer the presentation editor to the M2-T5 product screen because a
+  presentation always requires a product and no product UI exists yet.
 - Add domain, dual-engine repository, route, REST-client and component tests.
-- Update the domain, backend, access, progress, roadmap, state, known-issues and
-  session documentation.
+- Update the domain, backend, database, testing, access, architecture,
+  decision, progress, roadmap, state, known-issues and session documentation.
 
 ## Out of scope
 
-- Supplier contact details, addresses, tax identifiers, payment terms, accounts
-  payable or taxes (BQ-21).
-- Supplier-branch assignment or supplier-specific purchase prices.
-- Purchases, receiving, stock effect or purchase history (M3).
-- Supplier login accounts.
-- Hard deletion.
-- Seeding real suppliers; their names and data are not confirmed.
+- Product create/edit/list and product selection UI (M2-T5).
+- Presentation editing UI until the product screen exists (M2-T5, TD-014).
+- Prices, price history, estimated/measured weight snapshots or conversion
+  factors (BQ-06, BQ-10).
+- Hard deletion of categories, units or presentations.
+- Catalog seeding; real product, category and unit values are not confirmed.
 
 ## Assumptions and open questions
 
-- **Assumption:** suppliers are organization-wide, not branch-owned. The same
-  supplier may deliver to several branches and each purchase records its branch.
-- **Assumption:** supplier names are not unique. Duplicate names are allowed and
-  the supplier identity is the id.
-- **OPEN QUESTION (BQ-21):** which contact, tax and payment details suppliers
-  need beyond a name. None are modeled yet.
-- Suppliers are deactivated; they are never hard-deleted.
-- `Supplier` contains no application-user link.
+- **Assumption:** category names are unique per organization and unit codes are
+  unique per organization, matching the existing database constraints.
+- **Assumption:** presentation names are unique per product, matching the
+  existing database constraint.
+- **Assumption:** catalog master data remains organization-wide (TD-009).
+- Categories, units and presentations are deactivated, never hard-deleted.
+- Unit conversion, price scope and price history remain open (BQ-06, BQ-10).
 
 ## Acceptance criteria
 
-- [x] A supplier name is trimmed and validated by the domain on create and update.
-- [x] Every supplier read and write is scoped to the caller's organization.
-- [x] Both engines implement `findById`, `listByOrganization`, `create` and
-      `update`, with migrations and parity.
-- [x] Supplier routes require authentication and the documented permissions.
-- [x] Settings lists suppliers and lets an administrator create, edit and
-      deactivate them.
-- [x] Non-administrators see suppliers read-only and cannot call write routes.
+- [x] Category and unit editable fields are trimmed and validated by the domain
+      on create and update.
+- [x] Presentation names, integer gram weights and active state are validated on
+      create and update.
+- [x] Every read and write is scoped to the caller's organization; presentations
+      also verify the product and product/name pair.
+- [x] Both engines implement the unique lookups and updates with matching
+      behavior.
+- [x] Category, unit and presentation routes require authentication and the
+      documented permissions.
+- [x] Settings lists categories and units and lets an administrator create, edit
+      and deactivate them.
+- [x] Non-administrators see categories and units read-only and cannot call
+      write routes.
+- [x] Presentation create/list/update is available through the API and typed
+      client, ready for the M2-T5 product screen.
 - [x] Tests cover domain rules, both repository methods, routes, REST client and
-      the Settings component.
+      both Settings components.
 - [x] Typecheck, lint, unit/integration tests, guard, build and formatting pass.
 
 ## Completion record
@@ -81,14 +88,17 @@ other authenticated roles and a typed API that M3 purchases can reference.
 - Implementation and documentation are in the working tree; no commit was made
   without explicit authorization.
 - Verified: typecheck 12/12, lint 12/12 with `BOUNDARY GUARD OK`, unit/component
-  234 passed + 8 skipped, SQLite integration 53 passed + 8 skipped, build 5/5,
-  SQLite migrations through `0005`, seed, and formatting.
+  tests 261 passed + 9 skipped, SQLite integration 64 passed + 9 skipped,
+  build 5/5, SQLite migrations through `0005`, seed, and formatting.
 - PostgreSQL repository cases were skipped because no server is available.
-- No supplier seed was added because real supplier data is unavailable.
-- Suppliers are organization-wide and names are not unique (TD-013); extra
-  supplier fields remain open (BQ-21).
+- No catalog seed was added because real catalog master data is unavailable.
+- No new migration was required: the existing catalog tables and unique
+  constraints already cover this task.
+- Category and unit management is in Settings. Presentation editing is
+  deliberately deferred to M2-T5 because it belongs inside a product (TD-014).
 
 ## Next task
 
-M2-T4 category, unit and presentation master data. Do not seed suppliers until
-real supplier data is available.
+M2-T5 product create/edit/list for raw and processed products, including the
+presentation editor for the selected product. Do not add prices or weight
+snapshots until their milestones.

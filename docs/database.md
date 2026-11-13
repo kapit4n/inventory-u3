@@ -63,7 +63,9 @@ database/migrations-sqlite/   SQLite migrations + journal
 Both journals currently contain six entries, `0000` through `0005`; `0002` adds
 branches and the catalog, `0003` adds product kind and average weight, `0004`
 adds employees with organization and branch references, and `0005` adds
-organization-wide suppliers.
+organization-wide suppliers. M2-T4 did not change the schema: the catalog tables
+already carry the organization and product ownership and the unique constraints
+used by category names, unit codes and per-product presentation names.
 Generate both engines when the schema changes:
 
 ```bash
@@ -103,6 +105,9 @@ Development users:
 | `staff@inventory.test`   | `STAFF`         |
 
 The development password is `inventory-dev` and is not a production secret.
+No branch, employee, supplier, category, unit, product or presentation seed has
+been added; catalog values are real business master data that has not been
+confirmed.
 
 ## Rules
 

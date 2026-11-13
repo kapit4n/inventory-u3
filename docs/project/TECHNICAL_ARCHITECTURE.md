@@ -126,8 +126,9 @@ implemented on both engines. Catalog and supplier master data are
 organization-wide; branches own stock and purchases, not a separate catalog or
 supplier list (TD-009, TD-013). An employee carries both organization and branch
 references and is deactivated rather than deleted (TD-012). Suppliers carry
-organization ownership only and are also deactivated (TD-013). `products.kind`
-distinguishes raw from processed products, and
+organization ownership only and are also deactivated (TD-013). Category names and
+unit codes are unique per organization, and presentation names are unique per
+product (TD-014). `products.kind` distinguishes raw from processed products, and
 `product_presentations.average_weight_grams` stores the configured weight exactly
 (TD-010). Prices, estimated/measured weight snapshots, stock, production and sales
 tables do not exist yet. The domain contains the append-only stock movement
@@ -167,9 +168,10 @@ desktop shell does not open a database; it talks to the API over HTTP.
 PostgreSQL integration tests require `TEST_DATABASE_URL` and are skipped on this
 machine because no PostgreSQL server is available. The current integration files
 cover authentication, organization, branch, employee, supplier and catalog
-repository round-trips, branch, employee and supplier route permissions and
-validation, cross-organization isolation, repository constraints and a migration
-smoke path. No stock or workflow API exists yet.
+repository round-trips, branch, employee, supplier, category, unit and
+presentation route permissions and validation, cross-organization isolation,
+repository constraints and a migration smoke path. No stock or workflow API
+exists yet.
 
 ## 10. Guardrails and quality gates
 
@@ -185,11 +187,12 @@ smoke path. No stock or workflow API exists yet.
 
 ## 11. Architecture gaps for the business milestones
 
-The existing foundation is reusable. The branch, employee and supplier entities,
-their dual-engine persistence, API routes and Settings UI now exist; the following
-are not designed or built:
+The existing foundation is reusable. Branch, employee, supplier, category and
+measurement-unit entities, their dual-engine persistence, API routes and Settings
+UI now exist, as do presentation API and typed-client support. The following are
+not designed or built:
 
-1. Catalog API routes and management UI (entities and repositories exist).
+1. Product create/edit/list UI and the product-screen presentation editor.
 2. Product price history and estimated/measured weight snapshots.
 3. Persisted stock ledger, balance strategy and reconciliation.
 4. Purchase receiving and auditable correction model.
