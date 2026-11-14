@@ -1,9 +1,9 @@
 # Inventory Workflow
 
-> Implementation status: **DOMAIN CONCEPTS ONLY.** The branch and product catalog
-> tables exist. M1-T4 defines the stock movement vocabulary, invariants and
-> balance shape; there is still no stock table, repository or inventory screen.
-> This is the design target for M4.
+> Implementation status: **MOVEMENT LEDGER PERSISTED; BALANCES PENDING.** M3
+> writes append-only stock movements from purchase receiving and corrections.
+> The balance shape is still conceptual and `/inventory` remains a placeholder;
+> balances, adjustments, waste and reconciliation are the design target for M4.
 
 ## 1. Scope
 
@@ -38,7 +38,7 @@ inventory only through aggregate sales checkpoints (M6).
 ## 3. Proposed record model
 
 ```text
-StockMovement (domain concept implemented; not persisted)
+StockMovement (implemented and persisted; written by M3 receiving/correction)
   id
   organizationId
   branchId

@@ -16,6 +16,7 @@ database/schema/              PostgreSQL Drizzle schema
   employee.ts
   enums.ts
   organization.ts
+  purchase.ts
   supplier.ts
   index.ts
   sqlite/                     SQLite Drizzle schema
@@ -25,25 +26,30 @@ database/schema/              PostgreSQL Drizzle schema
     defaults.ts
     enum-check.ts
     organization.ts
+    purchase.ts
     supplier.ts
     index.ts
 ```
 
 The current tables are:
 
-| Table                   | Ownership                | Purpose                                                     |
-| ----------------------- | ------------------------ | ----------------------------------------------------------- |
-| `organizations`         | tenant root              | Name, timezone, currency and active flag                    |
-| `branches`              | organization             | Physical location with independent inventory                |
-| `employees`             | organization and branch  | Person whose production work is recorded; no login          |
-| `suppliers`             | organization             | Provider referenced by purchases; no login                  |
-| `measurement_units`     | organization             | Configurable unit code, name and active flag                |
-| `product_categories`    | organization             | Catalog grouping with a name and active flag                |
-| `products`              | organization             | Category, raw/processed kind and inventory/sales units      |
-| `product_presentations` | organization and product | Presentation name and configured average weight in grams    |
-| `product_price_history` | organization and product | Effective-dated selling price, currency, kind-derived basis |
-| `users`                 | organization             | Email, password hash, role and active flag                  |
-| `sessions`              | organization and user    | Hashed opaque token, issue/expiry and revocation            |
+| Table                   | Ownership                 | Purpose                                                     |
+| ----------------------- | ------------------------- | ----------------------------------------------------------- |
+| `organizations`         | tenant root               | Name, timezone, currency and active flag                    |
+| `branches`              | organization              | Physical location with independent inventory                |
+| `employees`             | organization and branch   | Person whose production work is recorded; no login          |
+| `suppliers`             | organization              | Provider referenced by purchases; no login                  |
+| `measurement_units`     | organization              | Configurable unit code, name and active flag                |
+| `product_categories`    | organization              | Catalog grouping with a name and active flag                |
+| `products`              | organization              | Category, raw/processed kind and inventory/sales units      |
+| `product_presentations` | organization and product  | Presentation name and configured average weight in grams    |
+| `product_price_history` | organization and product  | Effective-dated selling price, currency, kind-derived basis |
+| `purchases`             | organization and branch   | Supplier delivery with status, date, currency and totals    |
+| `purchase_items`        | organization and purchase | Immutable product, quantity, unit and purchase price        |
+| `purchase_corrections`  | organization and purchase | Audited full reversal with reason and before/after totals   |
+| `stock_movements`       | organization and branch   | Append-only stock change with reason and source             |
+| `users`                 | organization              | Email, password hash, role and active flag                  |
+| `sessions`              | organization and user     | Hashed opaque token, issue/expiry and revocation            |
 
 Branch, employee, supplier and catalog tables carry `organization_id`.
 Employees also carry `branch_id`; suppliers and catalog master data are
@@ -57,6 +63,20 @@ a non-null `average_weight_grams`, validated as a positive integer by the domain
 lookup index; it is append-only and organization-wide until BQ-06 is answered
 (TD-016).
 
+Purchases carry `organization_id`, `branch_id`, `supplier_id`, `status`,
+`delivery_date`, captured `currency`, integer `total_minor`, optional note and
+actor/timestamp fields for creation, receiving and correction. Items carry
+`quantity_milli`, `unit_price_minor`, `line_total_minor` and a 1-based `position`;
+they are immutable after creation. `purchase_corrections` has a unique
+organization/purchase key, so a purchase has at most one correction (TD-017).
+`stock_movements` is append-only and stores a signed non-zero `quantity_delta`,
+reason, optional source type/id, optional `corrects_movement_id`, occurrence and
+recording timestamps, actor and note (ADR 0040). Receiving writes `RECEIVING`
+movements sourced by `PURCHASE_RECEIPT`; correction writes `CORRECTION` movements
+sourced by `PURCHASE_CORRECTION`. The movement quantity remains a floating
+number (`double precision`/`real`) while integer thousandths are used on purchase
+lines; M4 owns balance and precision decisions.
+
 ## Migrations
 
 ```
@@ -64,13 +84,16 @@ database/migrations/          PostgreSQL migrations + journal
 database/migrations-sqlite/   SQLite migrations + journal
 ```
 
-Both journals currently contain seven entries, `0000` through `0006`; `0002` adds
+Both journals currently contain nine entries, `0000` through `0008`; `0002` adds
 branches and the catalog, `0003` adds product kind and average weight, `0004`
 adds employees with organization and branch references, `0005` adds
-organization-wide suppliers, and `0006` adds effective-dated product price
-history on both engines. M2-T4 and M2-T5 did not change the schema because the
-catalog and product tables already carried the needed ownership, unique keys and
-active-state columns.
+organization-wide suppliers, `0006` adds effective-dated product price history,
+`0007` adds purchases, purchase items, corrections and stock movements, and
+`0008` adds the `PURCHASE_CORRECTION` source type plus the unique
+organization/purchase correction index. M2-T4 and M2-T5 did not change the schema
+because the catalog and product tables already carried the needed ownership,
+unique keys and active-state columns. The SQLite `0008` migration rebuilds
+`stock_movements` to extend its source-type `CHECK` constraint.
 Generate both engines when the schema changes:
 
 ```bash

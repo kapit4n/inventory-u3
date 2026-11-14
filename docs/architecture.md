@@ -38,7 +38,7 @@ supplied.
 
 | Package               | Responsibility                                              |
 | --------------------- | ----------------------------------------------------------- |
-| `packages/domain`     | Organization, branch, catalog, stock vocabulary, ports      |
+| `packages/domain`     | Organization, branch, catalog, purchases, stock, ports      |
 | `packages/validation` | Zod schemas used at every boundary                          |
 | `packages/types`      | Branded identifiers, time and currency primitives           |
 | `packages/api-client` | Typed REST transport, error mapping and bearer token header |

@@ -1,16 +1,18 @@
 # Domain
 
 > This file documents the domain **currently implemented in `packages/domain`**.
-> The proposed remainder of the business domain (prices, estimated/measured
-> weights, stock, production, sales checkpoints) is documented in
+> The proposed remainder of the business domain (stock balances, estimated/
+> measured weights, production, sales checkpoints) is documented in
 > [BUSINESS_DOMAIN_MODEL.md](./project/BUSINESS_DOMAIN_MODEL.md). Do not read a
 > proposed entity from that document as implemented code.
 
 `packages/domain` is framework-independent TypeScript. It contains the
 organization, identity, session, branch, employee, supplier and product-catalog
-foundation, including the raw/processed kind and average-weight configuration. It
-also contains the stock movement vocabulary and balance shape; stock persistence
-and transactional entities arrive in later milestones.
+foundation, including the raw/processed kind, average-weight configuration and
+effective-dated selling prices. It also contains supplier purchases, immutable
+purchase items, audited purchase corrections, persisted append-only stock
+movements and the stock balance shape. Balance strategy and the remaining
+transactional entities arrive in later milestones.
 
 ## Branch
 

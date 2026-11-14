@@ -19,6 +19,7 @@ import type {
 } from '@inventory-u3/types';
 
 import { DomainError } from '../shared/errors.js';
+import { isValidIsoDate } from '../shared/time.js';
 import { isProductKind, type ProductKind } from './product-kind.js';
 
 export const PRODUCT_PRICE_BASES = ['PER_KILOGRAM', 'PER_SALES_UNIT'] as const;
@@ -49,7 +50,6 @@ export interface NewProductPriceHistory {
   readonly effectiveFrom: IsoDate;
 }
 
-const ISO_DATE_PATTERN = /^(\d{4})-(\d{2})-(\d{2})$/;
 const CURRENCY_PATTERN = /^[A-Z]{3}$/;
 
 export function isProductPriceBasis(value: unknown): value is ProductPriceBasis {
@@ -96,20 +96,4 @@ export function createProductPriceHistory(
     effectiveFrom: input.effectiveFrom,
     createdAt: now,
   };
-}
-
-function isValidIsoDate(value: string): boolean {
-  const match = ISO_DATE_PATTERN.exec(value);
-  if (!match) {
-    return false;
-  }
-
-  const year = Number(match[1]);
-  const month = Number(match[2]);
-  const day = Number(match[3]);
-  const date = new Date(Date.UTC(year, month - 1, day));
-
-  return (
-    date.getUTCFullYear() === year && date.getUTCMonth() === month - 1 && date.getUTCDate() === day
-  );
 }

@@ -56,6 +56,13 @@ Secrets are read from the environment and never logged.
 | PUT    | `/api/v1/products/:productId/presentations/:presentationId` | `organization:manage` |
 | GET    | `/api/v1/products/:productId/prices`                        | `organization:read`   |
 | POST   | `/api/v1/products/:productId/prices`                        | `organization:manage` |
+| GET    | `/api/v1/purchases`                                         | `inventory:read`      |
+| GET    | `/api/v1/purchases/:purchaseId`                             | `inventory:read`      |
+| POST   | `/api/v1/purchases`                                         | `inventory:write`     |
+| POST   | `/api/v1/purchases/:purchaseId/receive`                     | `inventory:write`     |
+| POST   | `/api/v1/purchases/:purchaseId/cancel`                      | `inventory:write`     |
+| GET    | `/api/v1/purchases/:purchaseId/correction`                  | `inventory:read`      |
+| POST   | `/api/v1/purchases/:purchaseId/correct`                     | `inventory:write`     |
 
 Branch, employee, supplier, category, unit and product routes are implemented
 with create, list and edit; there is no delete endpoint because all of them are
@@ -69,12 +76,20 @@ presentation belongs to that product. The product screen hosts the presentation
 editor for processed products (TD-015). Price create/list is nested under a
 product, verifies product ownership, derives basis from the product kind and
 currency from the organization, rejects duplicate effective dates as a domain
-conflict, and exposes no update or delete route (TD-016). Inventory endpoints are
-intentionally absent until their milestone.
+conflict, and exposes no update or delete route (TD-016). Purchase creation
+validates branch, supplier, organization, every product and the product inventory
+unit, then stores a `DRAFT` with immutable lines and captured organization
+currency. Receiving, cancellation and correction run through transactional use
+cases in `apps/api/src/application/purchase/`; receiving is a one-shot
+`DRAFT -> RECEIVED` transition with one stock movement per line, and correction
+is an audited full reversal (TD-017). The purchase list accepts an optional
+`branchId` filter. Inventory balance, adjustment and reconciliation endpoints are
+intentionally absent until M4.
 
-The branch, employee, supplier, category, unit and product collections return
-`{ "items": [...] }`. Product prices return `{ "items": [...], "currency": "USD" }`
-so the create form knows the current organization currency. Duplicate branch names, category names, unit codes and
+The branch, employee, supplier, category, unit, product and purchase collections
+return `{ "items": [...] }`. Product prices return
+`{ "items": [...], "currency": "USD" }` so the create form knows the current
+organization currency. Duplicate branch names, category names, unit codes and
 per-product presentation names return a `DOMAIN_RULE_VIOLATION` problem rather
 than a database error. Employee full names, supplier names and product names are
 not unique.
@@ -102,10 +117,12 @@ both. SQLite is the default; PostgreSQL integration tests run only when a test
 database URL answers.
 
 Implemented repository ports: organization, branch, employee, supplier,
-measurement unit, product category, product, product presentation, user and
-session. The branch, employee, supplier, catalog and product ports are exercised
-through integration tests on both engines. Stock remains a domain vocabulary
-only; no stock repository exists.
+measurement unit, product category, product, product presentation, product price
+history, purchase, purchase correction, stock movement, user and session. The
+branch, employee, supplier, catalog, product, purchase, correction and
+stock-movement ports are exercised through integration tests on both engines.
+Stock movements are written by M3 receiving and corrections; balance calculation,
+adjustment, waste and stock queries remain M4 work.
 
 ## Testing
 

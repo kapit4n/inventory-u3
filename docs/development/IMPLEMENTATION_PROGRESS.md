@@ -7,18 +7,35 @@
 
 | Field                  | Value                                                            |
 | ---------------------- | ---------------------------------------------------------------- |
-| Current milestone      | M3 — Supplier Purchases and Receiving (M2 complete)              |
-| Current task           | M2 complete and committed at `cc70bfc`                           |
-| Overall project status | M2 master data complete, including browser coverage              |
-| Completed milestones   | M1 and M2; the foundation prerequisite is also complete          |
-| In-progress milestones | None; M3 is the next milestone                                   |
+| Current milestone      | M4 — Branch Inventory (M3 complete)                              |
+| Current task           | M3 verified in the working tree; pending commit                  |
+| Overall project status | M3 purchases and receiving complete, including browser coverage  |
+| Completed milestones   | M1, M2 and M3; the foundation prerequisite is also complete      |
+| In-progress milestones | None; M4 is the next milestone                                   |
 | Blocked milestones     | M6 finalization is blocked on BR-013 (WhatsApp reporting format) |
-| Pending milestones     | M3, M4, M5, M6, M7, M8, M9                                       |
-| Last verified commit   | `cc70bfc` (M2 complete: price history, seed, browser coverage)   |
+| Pending milestones     | M4, M5, M6, M7, M8, M9                                           |
+| Last verified commit   | `cc70bfc` (M2 complete); M3 closeout is not yet committed        |
 | Last update date       | 2026-11-13                                                       |
-| Next recommended task  | Start M3 purchase and receiving work                             |
+| Next recommended task  | Start M4 branch inventory after committing M3                    |
 
 ### Working tree at the time of this update
+
+M3 adds the supplier-purchase flow on top of the M2 master data. A purchase is
+registered for one branch and supplier with immutable multi-line items, integer
+thousandth quantities, integer minor-unit prices and captured organization
+currency. Receiving is a transactional, one-shot `DRAFT -> RECEIVED` transition
+that appends one `RECEIVING` stock movement per line; drafts can be cancelled
+without stock effect. A received purchase can be fully reversed through a
+required-reason correction that stores actor, reason and before/after totals and
+appends one compensating `CORRECTION` movement per receipt movement (TD-017).
+`/purchases` provides the list, multi-line form, receive/cancel actions and
+correction dialog.
+
+Both engines have purchase, correction and stock-movement repositories. The
+migration set is `0007` for the four M3 tables and `0008` for the
+`PURCHASE_CORRECTION` source type, the SQLite source-type check rebuild and the
+unique organization/purchase correction index. M4 now owns balance strategy and
+the inventory UI; M3 only writes the movement ledger.
 
 M2-T6 adds an append-only, effective-dated `product_price_history` domain entity,
 port, dual-engine tables and repositories, validation, authenticated price
@@ -40,29 +57,26 @@ master-data list queries so the expanded page stays console-error free.
 
 ## Verification for this update
 
-M2-T6 changes the domain, both repository implementations, validation, API
-routes, REST client, React UI, tests, database schema, migrations and
-documentation.
+M3 changes the domain, both repository implementations, validation, API routes,
+REST client, React UI, tests, database schema, migrations and documentation.
 
-| Command                                                                   | Result                                                                    |
-| ------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
-| `pnpm run typecheck`                                                      | PASS — 12/12 tasks                                                        |
-| `pnpm run lint`                                                           | PASS — 12/12 tasks, `BOUNDARY GUARD OK`                                   |
-| `pnpm run guard:boundaries`                                               | PASS via lint — `BOUNDARY GUARD OK`                                       |
-| `pnpm run test`                                                           | PASS — 12/12 tasks, 292 passed, 10 skipped                                |
-| `TEST_DATABASE_URL= pnpm --filter @inventory-u3/api run test:integration` | PASS — 10 files, 69 passed, 10 skipped                                    |
-| `pnpm run build`                                                          | PASS — 5/5 tasks; Vite chunk-size warnings only                           |
-| `pnpm run db:migrate`                                                     | PASS — SQLite migrations applied through `0006`                           |
-| `pnpm run db:seed`                                                        | PASS — organization/users plus the sample fruit-and-vegetable catalogue   |
-| `pnpm run format:check`                                                   | PASS — all files use Prettier style                                       |
-| `pnpm run test:e2e`                                                       | PASS — 29 Chromium tests, including the new master-data and product specs |
+| Command                                                                   | Result                                                   |
+| ------------------------------------------------------------------------- | -------------------------------------------------------- |
+| `pnpm run format:check`                                                   | PASS                                                     |
+| `pnpm run typecheck`                                                      | PASS — 12/12 tasks                                       |
+| `pnpm run lint`                                                           | PASS — 12/12 tasks, `BOUNDARY GUARD OK`                  |
+| `pnpm run guard:boundaries`                                               | PASS — `BOUNDARY GUARD OK`                               |
+| `pnpm run test`                                                           | PASS — 12/12 tasks, 335 passed, 12 skipped               |
+| `TEST_DATABASE_URL= pnpm --filter @inventory-u3/api run test:integration` | PASS — 12 files, 77 passed, 12 skipped                   |
+| `pnpm run build`                                                          | PASS — 5/5 tasks; Vite chunk-size warnings only          |
+| `pnpm run db:migrate`                                                     | PASS — SQLite migrations applied through `0008`          |
+| `pnpm run test:e2e`                                                       | PASS — 32 Chromium tests, including three purchase specs |
 
-Current test counts: domain 74, api-client 37, app 76, API 95 passed + 10 skipped,
-database 6 and desktop 4 — 292 passed and 10 skipped in total, plus 29 browser
-tests. The skipped tests are the PostgreSQL repository cases, which require a
-reachable `TEST_DATABASE_URL`. Typecheck, lint, tests, build and SQLite
-integration were run after the final code changes; only documentation was edited
-afterwards, then Prettier and the final checks were re-run.
+Current test counts: domain 99, api-client 42, app 81, API 103 passed + 12
+skipped, database 6 and desktop 4 — 335 passed and 12 skipped in total, plus 32
+browser tests. The skipped tests are PostgreSQL repository cases, which require a
+reachable `TEST_DATABASE_URL`. All commands above were re-run after the final
+Prettier pass.
 
 PostgreSQL integration tests were not executed because no PostgreSQL server is
 available on this machine. This is a known environment limitation, not a pass.
@@ -383,34 +397,64 @@ receiving. See [CURRENT_TASK.md](./CURRENT_TASK.md).
 
 ## M3 — Supplier Purchases and Receiving
 
-**Status: NOT_STARTED**
+**Status: COMPLETED**
 
 ### Completed
 
-- [ ] Nothing.
+- [x] Purchase, purchase-item and purchase-correction domain entities, statuses,
+      totals, integer-thousandth quantities and validation rules.
+- [x] `PurchaseId`, `PurchaseItemId` and `PurchaseCorrectionId`, repository ports
+      and the `INVALID_STATE` domain error mapped to a 409 problem.
+- [x] Dual-engine `purchases`, `purchase_items`, `purchase_corrections` and
+      `stock_movements` schema, migrations `0007`/`0008`, indexes and unique
+      correction key.
+- [x] PostgreSQL and SQLite purchase, correction and stock-movement repositories
+      with branch/organization isolation.
+- [x] Transactional receiving use case: full purchase, exactly once, one
+      `RECEIVING` movement per line.
+- [x] Transactional correction use case: audited full reversal with required
+      reason, before/after totals and compensating movements.
+- [x] Purchase validation schemas and inferred types.
+- [x] Authenticated purchase routes with `inventory:read`/`inventory:write`,
+      reference validation, unit equality and problem mapping.
+- [x] Typed REST-client purchase functions and response validation.
+- [x] `/purchases` list, multi-line create form, receive/cancel actions,
+      correction dialog, primary navigation and bilingual copy.
+- [x] Domain, dual-engine repository, route, REST-client, component and Playwright
+      tests.
 
 ### Pending
 
-- [ ] Purchase and purchase-item model.
-- [ ] Branch/supplier assignment.
-- [ ] Multi-line purchase entry.
-- [ ] Receiving confirmation and stock effect.
-- [ ] Purchase-price history.
-- [ ] Auditable corrections.
-- [ ] UI and tests.
+None for M3. Partial receiving, taxes, freight, shared deliveries and unit
+conversion remain open business questions (BQ-10, BQ-13, BQ-14, BQ-15). A revised
+replacement purchase after a correction is not part of M3.
 
 ### Validation
 
-No implementation and no tests.
+- Domain: 7 files, 99 passed (25 purchase tests).
+- API client: 8 files, 42 passed (5 purchase tests).
+- App: 18 files, 81 passed (2 purchase-page and 3 quantity tests).
+- API unit/integration-style suite: 16 files, 103 passed + 12 skipped.
+- SQLite integration command: 12 files, 77 passed + 12 skipped.
+- Full root suite: 335 passed + 12 skipped.
+- Typecheck, lint with boundary guard, build and formatting pass.
+- SQLite migrations applied through `0008`.
+- Browser E2E: 32 Chromium tests pass, including three purchase tests.
+- PostgreSQL cases skip without a reachable `TEST_DATABASE_URL`; they were not
+  executed (SI-06).
 
 ### Notes
 
-Receiving must be idempotent and update stock only once. Correction mechanism is
-pending.
+Receiving is all-or-nothing and idempotent. Purchase prices are preserved by
+immutable received items; no separate purchase-price table was added. Correction
+is a full reversal (`afterTotalMinor = 0`), never a silent edit, and at most one
+correction is stored per purchase. Stock movements are append-only and now
+persisted; balances, adjustments, waste and reconciliation are M4. See TD-017
+and `docs/workflows/PURCHASE_WORKFLOW.md`.
 
 ### Next action
 
-Start after M1/M2 are verified.
+Start M4 branch inventory after the M3 closeout is committed.
 
 ---
 

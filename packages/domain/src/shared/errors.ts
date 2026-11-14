@@ -9,6 +9,7 @@ export type DomainErrorCode =
   | 'INVALID_INPUT'
   | 'NOT_FOUND'
   | 'DUPLICATED_RECORD'
+  | 'INVALID_STATE'
   /**
    * The caller is not (or is no longer) authenticated.
    *

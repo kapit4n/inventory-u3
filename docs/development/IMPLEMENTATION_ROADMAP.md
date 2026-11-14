@@ -2,8 +2,8 @@
 
 > Canonical business roadmap. It supersedes the generic item/stock sequence in
 > the old [`docs/roadmap.md`](../roadmap.md), which now points here.
-> Last reviewed: 2026-11-13 after M2-T7 (master-data browser coverage), which
-> completes M2.
+> Last reviewed: 2026-11-13 after M3 (supplier purchases and receiving), which
+> is complete.
 
 Status values are used exactly as follows:
 
@@ -222,7 +222,11 @@ Do not add purchasing, stock or production records in this milestone.
 
 ## M3 — Supplier Purchases and Receiving
 
-**Status: NOT_STARTED**
+**Status: COMPLETED.** Purchase registration, one-shot receiving, purchase-price
+history through immutable items, audited full reversals, dual-engine persistence,
+API/client/UI and browser coverage are implemented. Partial receiving, taxes,
+freight and unit conversion remain out of scope or open (BQ-10, BQ-13, BQ-14,
+BQ-15).
 
 ### Objective
 
@@ -245,24 +249,24 @@ M1 and M2. The stock movement foundation from M1/M4 is consumed here.
 
 ### Tasks
 
-- Purchase and purchase-item domain entities and states.
-- Receiving use case that creates stock movements exactly once.
-- Purchase-price history capture.
-- Correction/reversal path with audit fields.
-- API routes, validation and problem mapping.
-- Purchase and receiving UI.
-- Tests across domain, repository, API and browser.
+- Purchase and purchase-item domain entities and states. **COMPLETED**
+- Receiving use case that creates stock movements exactly once. **COMPLETED**
+- Purchase-price history capture. **COMPLETED** via immutable received items.
+- Correction/reversal path with audit fields. **COMPLETED** as a full reversal.
+- API routes, validation and problem mapping. **COMPLETED**
+- Purchase and receiving UI. **COMPLETED**
+- Tests across domain, repository, API and browser. **COMPLETED**
 
 ### Acceptance criteria
 
-- [ ] Operator can register a purchase with multiple lines for one branch.
-- [ ] A draft purchase does not change stock.
-- [ ] Confirming receiving creates stock movements and cannot run twice.
-- [ ] Purchase line prices are preserved for history.
-- [ ] A received purchase cannot be silently edited or deleted.
-- [ ] Correction path records actor, reason and before/after evidence.
-- [ ] Both engines pass the same receiving tests.
-- [ ] Branch isolation is enforced.
+- [x] Operator can register a purchase with multiple lines for one branch.
+- [x] A draft purchase does not change stock.
+- [x] Confirming receiving creates stock movements and cannot run twice.
+- [x] Purchase line prices are preserved for history.
+- [x] A received purchase cannot be silently edited or deleted.
+- [x] Correction path records actor, reason and before/after evidence.
+- [x] Both engines pass the same receiving tests.
+- [x] Branch isolation is enforced.
 
 ### Expected database changes
 
@@ -281,8 +285,11 @@ integration, price-history immutability, branch isolation, browser test.
 
 ### Notes
 
-Whether partial receiving, taxes, freight or payment terms are in scope is
-pending. Do not invent them.
+M3 receives the full purchase in one transition; partial receiving is not
+implemented (BQ-15). Taxes and freight are not modeled (BQ-14). A line unit must
+equal the product inventory unit until conversion is confirmed (BQ-10). Purchase
+corrections are full reversals with a required reason and compensating movements
+(TD-017). M4 owns balances built on the movement ledger.
 
 ---
 
@@ -686,15 +693,15 @@ been executed." A passing unit suite is not a backup/restore drill.
 
 ## Status summary
 
-| Milestone               | Status      | Evidence                                                                   |
-| ----------------------- | ----------- | -------------------------------------------------------------------------- |
-| Foundation prerequisite | COMPLETED   | Foundation code, migrations, tests and recorded verification               |
-| M1                      | COMPLETED   | Branch, catalog, measurement, stock and access note; docs and guard closed |
-| M2                      | COMPLETED   | Master data, product presentations, price history and browser coverage     |
-| M3                      | NOT_STARTED | No purchase/receiving tables or screens                                    |
-| M4                      | NOT_STARTED | No stock tables or screens; inventory route is a placeholder               |
-| M5                      | NOT_STARTED | No production tables or screens                                            |
-| M6                      | NOT_STARTED | No checkpoint tables or screens; BR-013 pending                            |
-| M7                      | NOT_STARTED | No closing tables or screens                                               |
-| M8                      | NOT_STARTED | Dashboard is static foundation content; no reports                         |
-| M9                      | NOT_STARTED | No CI, branch permissions, audit log or backup drill                       |
+| Milestone               | Status      | Evidence                                                                          |
+| ----------------------- | ----------- | --------------------------------------------------------------------------------- |
+| Foundation prerequisite | COMPLETED   | Foundation code, migrations, tests and recorded verification                      |
+| M1                      | COMPLETED   | Branch, catalog, measurement, stock and access note; docs and guard closed        |
+| M2                      | COMPLETED   | Master data, product presentations, price history and browser coverage            |
+| M3                      | COMPLETED   | Purchases, receiving, audited corrections, dual-engine tests and browser coverage |
+| M4                      | NOT_STARTED | No stock tables or screens; inventory route is a placeholder                      |
+| M5                      | NOT_STARTED | No production tables or screens                                                   |
+| M6                      | NOT_STARTED | No checkpoint tables or screens; BR-013 pending                                   |
+| M7                      | NOT_STARTED | No closing tables or screens                                                      |
+| M8                      | NOT_STARTED | Dashboard is static foundation content; no reports                                |
+| M9                      | NOT_STARTED | No CI, branch permissions, audit log or backup drill                              |

@@ -119,7 +119,8 @@ engine (ADR 0025).
   SQLite paths against the repository root.
 - Current tables: `organizations`, `branches`, `employees`, `suppliers`,
   `measurement_units`, `product_categories`, `products`,
-  `product_presentations`, `product_price_history`, `users`, `sessions`.
+  `product_presentations`, `product_price_history`, `purchases`, `purchase_items`,
+  `purchase_corrections`, `stock_movements`, `users`, `sessions`.
 
 The `branches`, `employees` and `suppliers` tables and the four catalog tables are
 implemented on both engines. Catalog and supplier master data are
@@ -132,10 +133,13 @@ product (TD-014). `products.kind` distinguishes raw from processed products, and
 `product_presentations.average_weight_grams` stores the configured weight exactly
 (TD-010). `product_price_history` stores append-only effective-dated integer
 amounts with captured currency and kind-derived basis, unique per product and
-effective date (TD-016). Estimated/measured weight snapshots, stock, production
-and sales tables do not exist yet. The domain contains the append-only stock movement
-vocabulary and a balance shape, but no stock port or table (ADR 0040). Every
-future operational row must carry organization and branch ownership.
+effective date (TD-016). Purchases carry organization and branch ownership plus
+one supplier, immutable items, captured currency, status and actor/timestamp
+evidence; corrections are audited full reversals (TD-017). `stock_movements` is
+the persisted append-only ledger written by receiving and correction; the
+`StockBalance` shape is not persisted, and balance strategy belongs to M4
+(ADR 0040). Estimated/measured weight snapshots, production and sales tables do
+not exist yet. Every operational row carries organization and branch ownership.
 
 ## 7. Frontend architecture
 
@@ -147,12 +151,14 @@ future operational row must carry organization and branch ownership.
 - A typed English/Spanish catalogue owns user-facing copy.
 - The platform abstraction (`packages/app/src/platform`) hides Tauri/OS
   capabilities. Features never import Tauri.
-- Current routes: `/` (redirect), `/dashboard`, `/products`, `/inventory`
-  (placeholder), `/settings`.
+- Current routes: `/` (redirect), `/dashboard`, `/products`, `/purchases`,
+  `/inventory` (placeholder), `/settings`.
 - The `/products` screen contains product list/create/edit, the presentation
   editor for processed products, and an append-only selling-price history dialog
-  readable by every role and writable by administrators. There are no purchase,
-  production, sales checkpoint, closing or report screens.
+  readable by every role and writable by administrators. `/purchases` contains
+  the purchase list, multi-line form, receiving/cancellation actions and the
+  audited correction dialog. There are no production, sales checkpoint, closing
+  or report screens.
 
 ## 8. Desktop
 

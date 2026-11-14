@@ -27,6 +27,7 @@ import { registerProductCategoryRoutes } from './http/routes/product-categories.
 import { registerProductPresentationRoutes } from './http/routes/product-presentations.js';
 import { registerProductPriceHistoryRoutes } from './http/routes/product-price-history.js';
 import { registerProductRoutes } from './http/routes/products.js';
+import { registerPurchaseRoutes } from './http/routes/purchases.js';
 import { registerSupplierRoutes } from './http/routes/suppliers.js';
 import { systemClock } from './infrastructure/clock/system-clock.js';
 import { uuidGenerator } from './infrastructure/id/uuid-generator.js';
@@ -146,6 +147,18 @@ export async function buildServer(env: EnvSource = process.env): Promise<Invento
     productPriceHistory: connection.repositories.productPriceHistory,
     products: connection.repositories.products,
     organizations: connection.repositories.organizations,
+    clock: systemClock,
+    ids: uuidGenerator,
+  });
+
+  await registerPurchaseRoutes(app, {
+    purchases: connection.repositories.purchases,
+    purchaseCorrections: connection.repositories.purchaseCorrections,
+    branches: connection.repositories.branches,
+    suppliers: connection.repositories.suppliers,
+    products: connection.repositories.products,
+    organizations: connection.repositories.organizations,
+    unitOfWork: connection.unitOfWork,
     clock: systemClock,
     ids: uuidGenerator,
   });

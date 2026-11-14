@@ -2,75 +2,88 @@
 
 > Last updated: 2026-11-13.
 >
-> **M2-T7 is COMPLETE and committed as `cc70bfc`; M2 is COMPLETE.** M2-T1
-> through M2-T6 are also complete. The only deferred M2 scope item,
-> raw-to-finished product relationships, moved to M5 by BQ-11.
+> **M3 is COMPLETE and verified in the working tree. M2 remains complete and
+> committed as `cc70bfc`.** The M3 closeout changes are not yet committed.
 
 ## Task identity
 
-| Field        | Value                                                        |
-| ------------ | ------------------------------------------------------------ |
-| Milestone    | M2 — Master Data                                             |
-| Task ID      | M2-T7                                                        |
-| Task         | Remaining API routes, validation, problem mapping, UI, tests |
-| Status       | COMPLETED (committed as `cc70bfc`)                           |
-| Dependencies | M2-T1 through M2-T6 complete                                 |
-| Blocks       | M3 supplier purchases and receiving                          |
+| Field        | Value                                                                                   |
+| ------------ | --------------------------------------------------------------------------------------- |
+| Milestone    | M3 — Supplier Purchases and Receiving                                                   |
+| Task ID      | M3 (all planned tasks)                                                                  |
+| Task         | Purchase registration, one-shot receiving, audited corrections, API/client/UI and tests |
+| Status       | COMPLETED (working tree; pending commit)                                                |
+| Dependencies | M1 and M2 complete                                                                      |
+| Blocks       | M4 branch inventory                                                                     |
 
 ## Objective
 
-Close M2 by proving the master-data and product screens work in a real browser,
-not only in jsdom component tests.
+Let the operator register supplier deliveries per branch, change stock only on
+confirmed receiving, preserve purchase prices, and reverse a received purchase
+through an auditable correction.
 
-## Scope
+## Completed scope
 
-- Add Playwright coverage for `/settings`: branch, employee, supplier, product
-  category and measurement unit list/create/edit flows.
-- Add Playwright coverage for `/products`: product create/edit, tray
-  presentation create, price-history display and effective-dated price create.
-- Cover the duplicate-branch problem mapping and the read-only view for
-  non-administrators.
-- Keep the existing settings and i18n specs working now that `/settings` mounts
-  all six master-data queries.
+- Purchase, purchase-item and purchase-correction domain entities, statuses and
+  rules, including integer-thousandth quantities and minor-unit totals.
+- Dual-engine schema and migrations `0007` and `0008`: `purchases`,
+  `purchase_items`, `purchase_corrections` and append-only `stock_movements`,
+  plus the `PURCHASE_CORRECTION` source type and unique correction key.
+- PostgreSQL and SQLite repositories for purchases, corrections and stock
+  movements.
+- Receiving use case: transactional one-shot `DRAFT -> RECEIVED`, one
+  `RECEIVING` movement per line, exactly once.
+- Correction use case: audited full reversal with reason and before/after totals,
+  one compensating `CORRECTION` movement per receipt movement.
+- Validation schemas, authenticated routes (`inventory:read`/`inventory:write`),
+  problem mapping and typed REST client.
+- `/purchases` list, multi-line form, receive/cancel actions, correction dialog,
+  navigation entry and English/Spanish copy.
+- Domain, dual-engine repository, route, REST-client, component and Playwright
+  purchase tests.
 
 ## Out of scope
 
-- New API routes or validation schemas: the M2 routes already exist and are
-  covered by route and REST-client tests.
-- Raw-to-finished product relationship rules: BQ-11 resolves production inputs
-  as free-form per batch with no recipe/BOM entity; this belongs to M5.
-- Purchase, stock, production, sales, closing or reporting work (M3 onward).
-- Replacing the illustrative sample catalogue with real master data (BQ-19).
+- Partial receiving (BQ-15).
+- Taxes and freight (BQ-14).
+- Unit conversion between purchase and inventory units (BQ-10).
+- Shared supplier deliveries across branches (BQ-13).
+- Balance calculation, adjustments, waste and reconciliation: M4.
+- Supplier payment, invoice and accounts-payable records (BQ-21).
 
 ## Acceptance criteria
 
-- [x] A browser spec drives branch create/edit and the duplicate-name message.
-- [x] A browser spec creates an employee assigned to a branch.
-- [x] A browser spec creates a supplier, a category and a unit.
-- [x] A browser spec lists master data read-only for a STAFF session.
-- [x] A browser spec lists products and opens current/scheduled price history.
-- [x] A browser spec creates a raw product and edits a processed product.
-- [x] A browser spec creates a tray presentation.
-- [x] A browser spec appends an effective-dated selling price and asserts the
-      minor-unit payload.
-- [x] A browser spec keeps products and prices visible but hides writes for a
-      STAFF session.
-- [x] `pnpm --filter @inventory-u3/e2e run typecheck`, lint and
-      `pnpm run test:e2e` pass.
+- [x] Operator can register a purchase with multiple lines for one branch.
+- [x] A draft purchase does not change stock.
+- [x] Confirming receiving creates stock movements and cannot run twice.
+- [x] Purchase line prices are preserved for history.
+- [x] A received purchase cannot be silently edited or deleted.
+- [x] Correction path records actor, reason and before/after evidence.
+- [x] Both engines implement the same purchase/receiving methods; PostgreSQL
+      tests exist and skip without a server.
+- [x] Branch and organization isolation are enforced and tested.
+- [x] `/purchases` browser coverage passes.
 
-## Completion record
+## Verification
 
-- Added `e2e/web/master-data.spec.ts`, `e2e/web/products.spec.ts` and the
-  `e2e/web/fixtures/session.ts` role helper.
-- Updated `e2e/web/settings.spec.ts` and `e2e/web/i18n.spec.ts` to mock the
-  master-data list queries now mounted on `/settings`.
-- Browser verification: 29 Chromium tests passed (6 new master-data, 5 new
-  product, plus the existing 18 specs).
-- No production code changed; the API routes, validation, problem mapping and UI
-  already existed from M2-T1 through M2-T6.
-- The working-tree changes are committed as `cc70bfc`.
+All commands were re-run after the final Prettier pass.
+
+- `pnpm run format:check` — PASS.
+- `pnpm run typecheck` — PASS, 12/12 tasks.
+- `pnpm run lint` — PASS, 12/12 tasks and `BOUNDARY GUARD OK`.
+- `pnpm run guard:boundaries` — PASS.
+- `pnpm run test` — PASS, 12/12 tasks; 335 passed and 12 skipped.
+- `TEST_DATABASE_URL= pnpm --filter @inventory-u3/api run test:integration` —
+  PASS, 12 files, 77 passed and 12 skipped.
+- `pnpm run build` — PASS, 5/5 tasks; Vite chunk-size warnings only.
+- `pnpm run test:e2e` — PASS, 32 Chromium tests.
+- `pnpm run db:migrate` — PASS, SQLite migrations applied through `0008`.
+
+PostgreSQL integration tests were not executed because no PostgreSQL server is
+available on this machine. See SI-06.
 
 ## Next task
 
-Start M3 supplier purchases and receiving, beginning with the purchase and
-purchase-item domain entities and states. Do not start M4 stock work first.
+Start M4 branch inventory. Read the M4 roadmap section and BQ-07/BQ-08 first.
+Build the movement ledger/balance decision on top of the persisted M3 movements;
+do not add production, sales, closing or reporting work.

@@ -2,7 +2,8 @@
 
 > Last verified: 2026-11-13. M1 is committed at `bfdc9cb`, M2-T1 at `814f397`,
 > M2-T2 at `6b50606`, M2-T3 at `5c96eeb`, M2-T4 at `992d6ea`, M2-T5 at
-> `c8526d0` and M2-T6/T7 with the sample seed at `cc70bfc`. See
+> `c8526d0` and M2-T6/T7 with the sample seed at `cc70bfc`. M3 is implemented
+> and verified in the working tree; see
 > [IMPLEMENTATION_PROGRESS](../development/IMPLEMENTATION_PROGRESS.md).
 
 ## Purpose
@@ -65,7 +66,8 @@ product.** As of this document:
   settings, SQLite/PostgreSQL persistence and test harness are implemented.
 - Persisted tables are `organizations`, `branches`, `employees`, `suppliers`,
   `measurement_units`, `product_categories`, `products`,
-  `product_presentations`, `product_price_history`, `users` and `sessions`.
+  `product_presentations`, `product_price_history`, `purchases`, `purchase_items`,
+  `purchase_corrections`, `stock_movements`, `users` and `sessions`.
 - The `Branch`, `Employee`, `Supplier` and product-catalog domain entities and
   their SQLite/PostgreSQL repositories are implemented. Branch, employee,
   supplier, category and measurement-unit list/create/edit are available through
@@ -76,26 +78,30 @@ product.** As of this document:
   per tray. Category, unit, product and product-nested presentation API routes
   and typed-client functions exist. Effective-dated, append-only selling-price
   history is available on `/products` and through the API.
+- Purchases can be registered on `/purchases` with multiple lines for one branch
+  and supplier. Receiving is a single, idempotent `DRAFT -> RECEIVED` transition
+  that appends one stock movement per line; drafts can be cancelled, and received
+  purchases can be fully reversed through an audited correction with a reason and
+  before/after totals. Purchase line prices are preserved as history.
+- Stock movements are now persisted through receiving, but balance calculation,
+  adjustments, waste and reconciliation remain M4 work (ADR 0040).
 - Estimated/measured weight snapshots and operational price consumption are
   M5/M6 work.
-- The domain defines append-only stock movement concepts and a balance shape,
-  but there is no stock table, repository, API or screen (ADR 0040).
 - The `/inventory` screen is a placeholder.
-- No purchase, stock, production, sales checkpoint, daily closing or report
-  feature exists. Employees and suppliers are master data only; they do not log
-  in.
+- No production, sales checkpoint, daily closing or report feature exists.
+  Employees and suppliers are master data only; they do not log in.
 - The initial access boundary is documented in
   [ACCESS_MODEL.md](./ACCESS_MODEL.md): one organization-wide central operator,
   no branch employee login, and no branch-scoped authorization yet.
 - The nine business milestones are defined in
-  [IMPLEMENTATION_ROADMAP.md](../development/IMPLEMENTATION_ROADMAP.md). M1 is
-  complete: branch, product catalog, measurement configuration, stock concepts,
-  the access note, technical docs and the dual-engine guard are done. M2 is
-  complete with branch, employee, supplier, category, measurement-unit, product,
-  presentation and price-history management. The sample seed carries three
-  illustrative branches until the real names are confirmed (BQ-19), employee
-  sharing across branches remains open (BQ-20), and supplier detail fields
-  remain open (BQ-21).
+  [IMPLEMENTATION_ROADMAP.md](../development/IMPLEMENTATION_ROADMAP.md). M1 and
+  M2 are complete: branch, product catalog, measurement configuration, stock
+  concepts, master data, product presentations, price history, the access note,
+  technical docs and the dual-engine guard are done. M3 purchase registration,
+  receiving and audited corrections are complete. M4 branch inventory is next.
+  The sample seed carries three illustrative branches until the real names are
+  confirmed (BQ-19), employee sharing across branches remains open (BQ-20), and
+  supplier detail fields remain open (BQ-21).
 
 The inventory business model in this documentation is **proposed**. It separates
 confirmed product requirements from proposed design and from open questions. Do

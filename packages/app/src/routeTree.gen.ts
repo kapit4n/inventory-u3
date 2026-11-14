@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as InventoryRouteImport } from './routes/inventory'
 import { Route as ProductsRouteImport } from './routes/products'
+import { Route as PurchasesRouteImport } from './routes/purchases'
 import { Route as SettingsRouteImport } from './routes/settings'
 
 const IndexRoute = IndexRouteImport.update({
@@ -35,6 +36,11 @@ const ProductsRoute = ProductsRouteImport.update({
   path: '/products',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PurchasesRoute = PurchasesRouteImport.update({
+  id: '/purchases',
+  path: '/purchases',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SettingsRoute = SettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -46,6 +52,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRoute
   '/inventory': typeof InventoryRoute
   '/products': typeof ProductsRoute
+  '/purchases': typeof PurchasesRoute
   '/settings': typeof SettingsRoute
 }
 export interface FileRoutesByTo {
@@ -53,6 +60,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof DashboardRoute
   '/inventory': typeof InventoryRoute
   '/products': typeof ProductsRoute
+  '/purchases': typeof PurchasesRoute
   '/settings': typeof SettingsRoute
 }
 export interface FileRoutesById {
@@ -61,14 +69,24 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRoute
   '/inventory': typeof InventoryRoute
   '/products': typeof ProductsRoute
+  '/purchases': typeof PurchasesRoute
   '/settings': typeof SettingsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/dashboard' | '/inventory' | '/products' | '/settings'
+  fullPaths:
+    '/' | '/dashboard' | '/inventory' | '/products' | '/purchases' | '/settings'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/dashboard' | '/inventory' | '/products' | '/settings'
-  id: '__root__' | '/' | '/dashboard' | '/inventory' | '/products' | '/settings'
+  to:
+    '/' | '/dashboard' | '/inventory' | '/products' | '/purchases' | '/settings'
+  id:
+    | '__root__'
+    | '/'
+    | '/dashboard'
+    | '/inventory'
+    | '/products'
+    | '/purchases'
+    | '/settings'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -76,6 +94,7 @@ export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRoute
   InventoryRoute: typeof InventoryRoute
   ProductsRoute: typeof ProductsRoute
+  PurchasesRoute: typeof PurchasesRoute
   SettingsRoute: typeof SettingsRoute
 }
 
@@ -109,6 +128,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProductsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/purchases': {
+      id: '/purchases'
+      path: '/purchases'
+      fullPath: '/purchases'
+      preLoaderRoute: typeof PurchasesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/settings': {
       id: '/settings'
       path: '/settings'
@@ -124,6 +150,7 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRoute: DashboardRoute,
   InventoryRoute: InventoryRoute,
   ProductsRoute: ProductsRoute,
+  PurchasesRoute: PurchasesRoute,
   SettingsRoute: SettingsRoute,
 }
 export const routeTree = rootRouteImport

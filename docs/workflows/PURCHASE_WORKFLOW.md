@@ -1,8 +1,10 @@
 # Purchase and Receiving Workflow
 
-> Implementation status: **NOT_IMPLEMENTED.** Suppliers exist as name-only master
-> data (TD-013), but no purchase or receiving table exists. This is the design
-> target for M3; supplier detail fields remain open (BQ-21).
+> Implementation status: **IMPLEMENTED (M3).** Multi-line purchases can be
+> registered for one branch and supplier, received exactly once into append-only
+> stock movements, cancelled while still drafts, and fully reversed through an
+> audited correction. Partial receiving, taxes and freight are not implemented;
+> supplier detail fields remain open (BQ-21).
 
 ## 1. Scope
 
@@ -10,8 +12,8 @@ A purchase records a supplier delivery assigned to one branch. A delivery may
 contain multiple products at different quantities and prices. Receiving updates
 stock only after it is confirmed (BR-002, BR-023).
 
-Suppliers may deliver daily or every one or two days. The model must allow
-multiple purchases per branch per date without requiring one delivery per day.
+Suppliers may deliver daily or every one or two days. The model allows multiple
+purchases per branch per date without requiring one delivery per day.
 
 ## 2. Confirmed rules
 
@@ -21,86 +23,145 @@ multiple purchases per branch per date without requiring one delivery per day.
 4. A purchase has one or more items.
 5. Each item records product, quantity, unit and purchase price.
 6. Stock changes only on confirmed receiving.
-7. Purchase price history is preserved for later cost/valuation use.
+7. Purchase price history is preserved by immutable received items.
 8. Corrections must be auditable.
+9. Receiving is all-or-nothing; partial receiving is not supported.
+10. M3 purchase prices contain no tax or freight component.
 
-## 3. Proposed statuses
+## 3. Statuses
 
-| Status      | Meaning                                                     |
-| ----------- | ----------------------------------------------------------- |
-| `DRAFT`     | Entered but not received; stock unchanged.                  |
-| `RECEIVED`  | Confirmed; stock movements created.                         |
-| `CANCELLED` | Never received; no stock effect.                            |
-| `CORRECTED` | A received purchase has been corrected via an audited path. |
+| Status      | Meaning                                                         |
+| ----------- | --------------------------------------------------------------- |
+| `DRAFT`     | Entered but not received; stock unchanged.                      |
+| `RECEIVED`  | Confirmed; stock movements created.                             |
+| `CANCELLED` | Never received; no stock effect.                                |
+| `CORRECTED` | A received purchase was fully reversed through an audit record. |
 
-The exact status names are **PROPOSED**. The important confirmed distinction is
-between "registered" and "received".
+The status vocabulary is implemented as a PostgreSQL enum and a SQLite `CHECK`
+constraint. The important boundary remains "registered" versus "received": no
+stock movement is created before receiving.
 
-## 4. Proposed workflow
+## 4. Workflow
 
-1. The operator selects a branch and supplier.
-2. The operator registers delivery date/business date and one or more lines:
-   product, quantity, purchase unit, unit price.
-3. The system calculates line and purchase totals using money minor units.
-4. The operator saves a draft or proceeds to receiving.
-5. On confirmation:
-   - the purchase is marked received;
-   - stock movements are created for each line;
-   - purchase-price history is recorded;
-   - the actor and timestamp are recorded.
-6. After confirmation, editing is not a silent overwrite. A correction creates an
-   auditable adjustment/reversal and a replacement record, or an amended record
-   with before/after history. The exact mechanism is **PENDING**.
+1. An operator with `inventory:write` selects a branch and supplier.
+2. The operator registers a delivery date and one or more lines: product,
+   quantity, unit and unit price.
+3. The API validates that the branch, supplier, products and units belong to the
+   caller's organization.
+4. The system calculates line and purchase totals using integer minor units and
+   integer thousandths of the purchase quantity.
+5. Saving creates a `DRAFT`; stock is unchanged.
+6. Receiving is a single `DRAFT -> RECEIVED` transition. In one transaction it:
+   - marks the purchase received with actor and timestamp;
+   - creates one `RECEIVING` stock movement per line;
+   - records the source as `PURCHASE_RECEIPT` and the purchase id.
+7. The conditional status update and the transaction make receiving exactly once;
+   a second request returns `DOMAIN_RULE_VIOLATION`.
+8. A draft may be cancelled without stock effect. A received purchase cannot be
+   edited or deleted.
+9. A received purchase may be corrected. The correction records actor, reason,
+   before/after totals and appends a compensating `CORRECTION` movement for every
+   receipt movement, referencing the reversed movement.
 
-## 5. Price history
+## 5. Quantities, money and units
 
-- Each received line preserves the unit price paid at that time.
-- Changing a product's current purchase price does not rewrite past purchases.
+- Purchase quantities are stored as integer thousandths (`12.5 kg` = `12_500`).
+- Unit prices and totals are integer minor units in the organization currency
+  captured when the purchase is created.
+- A line total is rounded once, half-up:
+  `floor((quantityMilli * unitPriceMinor + 500) / 1000)`.
+- Until unit conversion is confirmed (BQ-10), a purchase line unit must equal the
+  product's inventory unit. The API rejects a mismatch with `INVALID_INPUT`.
+- Stock movements currently store `quantityDelta` as a JavaScript number
+  (`double precision` in PostgreSQL, `real` in SQLite), converted from the
+  integer thousandths at receiving time.
+
+## 6. Price history
+
+- Each received line is immutable and preserves the unit price paid at that time.
+- Changing a product's current master data does not rewrite past purchases.
+- A separate purchase-price history table is not needed in M3; received
+  `purchase_items` are the history.
 - Later cost calculations may use the latest, weighted-average or another basis.
-  That basis is **PENDING** and belongs to daily closing (M7).
+  That basis is **PENDING** and belongs to daily closing (M7, BQ-04).
 
-## 6. Validation rules (proposed)
+## 7. Correction semantics
+
+- Only a `RECEIVED` purchase can be corrected.
+- The correction reason is required and trimmed; the maximum length is 500.
+- A purchase can have at most one correction, enforced by a unique
+  organization/purchase index.
+- M3 performs a **full reversal**: `afterTotalMinor = 0`. The original purchase,
+  items and receipt movements remain unchanged.
+- The purchase becomes `CORRECTED`; the correction stores the actor, reason,
+  before/after totals and timestamp.
+- Every receipt movement gets a reversal with reason `CORRECTION`, source type
+  `PURCHASE_CORRECTION`, `sourceId = correction.id`, and
+  `correctsMovementId = originalMovement.id`.
+- Replacing a correction with a revised purchase is not implemented; it would be
+  a later explicit workflow rather than an edit.
+
+## 8. Validation rules
 
 - Branch and supplier must belong to the operator's organization.
-- At least one item is required to receive a purchase.
-- Quantity must be positive; price must be non-negative.
-- The product's purchase unit must be a configured unit.
+- Every product must belong to the operator's organization.
+- At least one item is required.
+- Quantity must be a positive integer number of thousandths.
+- Unit price must be a non-negative integer number of minor units.
+- The purchase note is optional and limited to 500 characters.
 - A purchase cannot be received twice.
-- A received purchase cannot be deleted.
-- A correction must reference the original and record the reason and actor.
-- Duplicate delivery entry should be detectable (supplier + branch + date +
-  reference), but the exact duplicate rule is **PENDING**.
+- A cancelled or corrected purchase cannot be received.
+- A received purchase cannot be cancelled or deleted.
+- A correction reason is required.
+- Duplicate delivery entry is not automatically detected; the exact duplicate
+  rule remains **PENDING**.
 
-## 7. UI expectations (M3)
+## 9. API and UI
 
-- Supplier list/create.
-- Purchase entry form with a branch selector and multiple line items.
-- Draft vs received state clearly visible.
-- Receive confirmation that explains stock will change.
-- Purchase detail with line prices and totals.
-- Correction flow with a visible audit note.
+- Routes: `GET/POST /api/v1/purchases`,
+  `GET /api/v1/purchases/:purchaseId`,
+  `POST /api/v1/purchases/:purchaseId/receive`,
+  `POST /api/v1/purchases/:purchaseId/cancel`,
+  `GET /api/v1/purchases/:purchaseId/correction` and
+  `POST /api/v1/purchases/:purchaseId/correct`.
+- Reads use `inventory:read`; writes use `inventory:write`.
+- `/purchases` lists purchases with their branch, supplier, status, delivery
+  date, total and line count.
+- The purchase form supports multiple lines, comma or dot decimal input for
+  quantities with up to three decimals, and minor-unit price entry.
+- Receive and cancel act immediately from the list; the correction dialog asks
+  for the required audit reason and explains the full reversal.
+- The list shows the branch on each row; a branch filter is not part of the M3
+  UI, though the list API accepts an optional `branchId`.
+- Purchase line prices are displayed with the organization currency stored on the
+  purchase.
 
-## 8. Tests required
+## 10. Tests
 
-- Domain validation for positive quantities, non-negative prices and state
-  transitions.
-- Receiving is idempotent and cannot run twice.
-- Repository tests on both engines, including multi-line purchases.
-- Branch isolation tests.
-- Price-history test: changing a product price does not alter history.
-- Integration test: receive a purchase and verify stock movements.
-- Browser test: create a purchase and confirm receiving.
+- Domain tests cover positive quantities, non-negative prices, line rounding,
+  totals, notes, status transitions, duplicate item ids and correction rules.
+- SQLite and PostgreSQL repository tests cover create/find/list, branch filters,
+  organization isolation, exactly-once receiving, cancellation, corrections and
+  stock-movement source lookup. PostgreSQL cases skip when no server is present.
+- Route tests cover create, list, branch filter, receiving, cancellation, invalid
+  references, unit mismatch, not found and audited correction.
+- REST-client tests cover every purchase function and response validation.
+- Component tests cover draft creation, receiving, correction reason validation
+  and quantity input.
+- Playwright covers the multi-line create payload, explicit receiving and the
+  correction dialog on `/purchases`.
 
-## 9. Dependencies and open questions
+## 11. Dependencies and open questions
 
 Depends on M1 (branch, product, unit) and M2 (suppliers, products).
 
 Open:
 
-1. Are purchase prices tax-inclusive? Are taxes modeled at all?
-2. Are freight or other costs part of the purchase cost?
-3. Can one delivery be split across branches?
-4. Is partial receiving allowed?
-5. Who may confirm receiving: the central operator only, or an administrator?
-6. Are payment terms, invoices or supplier balances in scope? (Currently not.)
-7. What is the exact correction/reversal rule?
+1. Are purchase prices tax-inclusive? Are taxes modeled at all? (BQ-14)
+2. Are freight or other costs part of the purchase cost? (BQ-14)
+3. Can one delivery be split across branches? (BQ-13)
+4. Are unit conversions needed between purchase and inventory units? (BQ-10)
+5. Are payment terms, invoices or supplier balances in scope? (BQ-21)
+6. What is the duplicate-delivery rule?
+7. Is a corrected purchase ever replaced by a revised record, or is full reversal
+   final for M3?

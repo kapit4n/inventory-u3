@@ -397,3 +397,45 @@ averageWeightPerTray` and `estimatedValue = estimatedKg × sellingPricePerKg`.
   migration must be added explicitly rather than changing existing history.
   Average weight remains presentation master data; historical weight snapshots
   belong to later production/sales records (BR-018, BR-019).
+
+### TD-017 — Purchases are received once in full and reversed through an audited correction
+
+- **Date:** 2026-11-13
+- **Status:** ACCEPTED for M3; partial receiving, taxes, freight, unit conversion
+  and shared deliveries remain open (BQ-10, BQ-13, BQ-14, BQ-15).
+- **Context:** M3 registers supplier deliveries per branch and must change stock
+  only on confirmed receiving. A purchase may contain several products at
+  different quantities and prices, and its line prices must remain available for
+  later cost calculations. The business selected a correction path with an audit
+  record and stock compensation rather than silent edits; partial receiving,
+  taxes and freight were explicitly excluded from M3.
+- **Decision:** Store purchases with organization and branch ownership, one
+  supplier, a delivery date, captured currency, integer minor-unit totals and
+  immutable line items. Quantities use integer thousandths. A purchase starts as
+  `DRAFT`; receiving is one `DRAFT -> RECEIVED` transition that appends one
+  `RECEIVING` stock movement per line and cannot run twice. Drafts may be
+  cancelled. Received purchases are corrected through a `purchase_corrections`
+  row with actor, required reason and before/after totals, plus one compensating
+  `CORRECTION` movement per receipt movement; the purchase becomes `CORRECTED`.
+  The correction is a full reversal (`afterTotalMinor = 0`), and at most one
+  correction is stored per purchase. Reads use `inventory:read`; creation,
+  receiving, cancellation and correction use `inventory:write`. A line unit must
+  equal the product inventory unit until unit conversion is supported.
+- **Alternatives considered:** Allow partial receipts; rejected for M3 because a
+  delivery is entered as one confirmed purchase and receipt state per line would
+  add unconfirmed complexity (BQ-15). Edit a received purchase in place;
+  rejected because it would rewrite price history and provide no audit trail.
+  Delete a received purchase and recreate it; rejected because stock and price
+  history would lose their source. Reverse and immediately create a replacement
+  purchase automatically; rejected because the replacement lines are business
+  input and are not confirmed by a correction reason. Store purchase prices in a
+  separate history table; rejected because received purchase items are already
+  immutable and preserve the same information. Convert purchase units to inventory
+  units now; rejected while BQ-10 is unresolved.
+- **Consequences:** M4 can build balances from the persisted movement ledger
+  without changing M3's receiving records. A correction reverses the whole
+  purchase; a revised purchase must be entered explicitly after the correction.
+  Purchase price history is the set of received items, including corrected
+  purchases. If partial receiving, taxes, freight, unit conversion or a
+  branch-shared delivery is confirmed, each requires an explicit schema,
+  workflow and migration change rather than reinterpretation of existing rows.

@@ -2,7 +2,16 @@ import { useState } from 'react';
 import { Link, useRouterState } from '@tanstack/react-router';
 import { Button, cn } from '@inventory-u3/ui';
 import { useTranslation, type TranslationKey } from '../../i18n/index.js';
-import { Boxes, Home, Package, PanelLeftClose, PanelLeftOpen, Settings, Tags } from 'lucide-react';
+import {
+  Boxes,
+  Home,
+  Package,
+  PanelLeftClose,
+  PanelLeftOpen,
+  Settings,
+  ShoppingCart,
+  Tags,
+} from 'lucide-react';
 import { readSidebarCollapsed, rememberSidebarCollapsed, sidebarStorage } from './sidebar-state.js';
 
 interface NavItem {
@@ -27,6 +36,11 @@ const navItems: NavItem[] = [
     titleKey: 'common.nav.products',
     href: '/products',
     icon: Tags,
+  },
+  {
+    titleKey: 'common.nav.purchases',
+    href: '/purchases',
+    icon: ShoppingCart,
   },
 ];
 

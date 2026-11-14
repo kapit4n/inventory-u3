@@ -7,6 +7,7 @@ import { inventory } from './inventory.js';
 import { measurementUnits } from './measurement-units.js';
 import { productCategories } from './product-categories.js';
 import { products } from './products.js';
+import { purchases } from './purchases.js';
 import { settings } from './settings.js';
 import { suppliers } from './suppliers.js';
 
@@ -20,6 +21,7 @@ export const es = {
   ...measurementUnits,
   ...productCategories,
   ...products,
+  ...purchases,
   ...settings,
   ...suppliers,
 } as const;

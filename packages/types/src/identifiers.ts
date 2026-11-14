@@ -24,6 +24,9 @@ export type ProductId = Brand<string, 'ProductId'>;
 export type ProductPresentationId = Brand<string, 'ProductPresentationId'>;
 export type ProductPriceHistoryId = Brand<string, 'ProductPriceHistoryId'>;
 export type StockMovementId = Brand<string, 'StockMovementId'>;
+export type PurchaseId = Brand<string, 'PurchaseId'>;
+export type PurchaseItemId = Brand<string, 'PurchaseItemId'>;
+export type PurchaseCorrectionId = Brand<string, 'PurchaseCorrectionId'>;
 
 export type OrganizationIdentifier =
   | OrganizationId
@@ -37,7 +40,10 @@ export type OrganizationIdentifier =
   | ProductId
   | ProductPresentationId
   | ProductPriceHistoryId
-  | StockMovementId;
+  | StockMovementId
+  | PurchaseId
+  | PurchaseItemId
+  | PurchaseCorrectionId;
 
 export const asOrganizationId = (value: string): OrganizationId => value as OrganizationId;
 export const asUserId = (value: string): UserId => value as UserId;
@@ -53,3 +59,7 @@ export const asProductPresentationId = (value: string): ProductPresentationId =>
 export const asProductPriceHistoryId = (value: string): ProductPriceHistoryId =>
   value as ProductPriceHistoryId;
 export const asStockMovementId = (value: string): StockMovementId => value as StockMovementId;
+export const asPurchaseId = (value: string): PurchaseId => value as PurchaseId;
+export const asPurchaseItemId = (value: string): PurchaseItemId => value as PurchaseItemId;
+export const asPurchaseCorrectionId = (value: string): PurchaseCorrectionId =>
+  value as PurchaseCorrectionId;

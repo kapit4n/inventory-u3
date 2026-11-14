@@ -31,4 +31,13 @@ export {
 export { createEmployee, listEmployees, updateEmployee } from './employees.js';
 export { createProduct, listProducts, updateProduct } from './products.js';
 export { createProductPrice, listProductPrices } from './product-prices.js';
+export {
+  cancelPurchase,
+  correctPurchase,
+  createPurchase,
+  getPurchase,
+  getPurchaseCorrection,
+  listPurchases,
+  receivePurchase,
+} from './purchases.js';
 export { createSupplier, listSuppliers, updateSupplier } from './suppliers.js';

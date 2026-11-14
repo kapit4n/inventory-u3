@@ -1749,3 +1749,117 @@ product screens, then record M2 as complete.
 Read `AGENTS.md`, `PROJECT_OVERVIEW.md`, `IMPLEMENTATION_PROGRESS.md`,
 `CURRENT_TASK.md`, the M3 roadmap section and BQ-11 before starting M3. M2 is
 complete; do not reopen master-data work unless a regression is found.
+
+## Session 17 — 2026-11-13 — M3 supplier purchases and receiving
+
+### Objective
+
+Implement M3 end to end: register multi-line supplier purchases per branch,
+receive them exactly once into stock, preserve purchase-price history, and allow
+only audited corrections. Finish with browser coverage and honest verification.
+
+### Work completed
+
+- Added the purchase, purchase-item and purchase-correction domain model:
+  branded ids, statuses, totals, integer-thousandth quantities, domain rules and
+  `INVALID_STATE`.
+- Added dual-engine tables and migrations: `purchases`, `purchase_items`,
+  `purchase_corrections` and append-only `stock_movements` in `0007`;
+  `PURCHASE_CORRECTION` in `0008` plus the unique correction key and the SQLite
+  `stock_movements` check-constraint rebuild.
+- Added PostgreSQL and SQLite purchase, correction and stock-movement
+  repositories with branch/organization isolation.
+- Added transactional receiving: a full, one-shot `DRAFT -> RECEIVED` transition
+  with one `RECEIVING` movement per line.
+- Added transactional correction: a required-reason full reversal with actor,
+  before/after totals and one compensating `CORRECTION` movement per receipt
+  movement.
+- Added purchase validation schemas and types, authenticated routes with
+  `inventory:read`/`inventory:write`, reference/unit validation, problem mapping
+  and typed REST-client functions.
+- Added the `/purchases` route, sidebar entry, list, multi-line form,
+  receive/cancel actions, correction dialog and English/Spanish copy.
+- Added domain, repository, route, REST-client, component and Playwright tests.
+- Updated AGENTS.md and the project, workflow, database, backend, testing,
+  roadmap, progress, current-task, known-issues, open-question and decision docs.
+
+### Files changed
+
+- `packages/domain/src/purchase/`, `packages/domain/src/stock/`,
+  `packages/domain/src/shared/`, `packages/domain/src/ports/index.ts`
+- `packages/types/src/identifiers.ts`, `packages/validation/src/purchase/`
+- `database/schema/purchase.ts`, `database/schema/sqlite/purchase.ts`,
+  `database/schema/enums.ts`, both schema/index trees
+- `database/migrations/0007_*` and `0008_*`, `database/migrations-sqlite/0007_*`
+  and `0008_*`, both journals and snapshot files
+- `apps/api/src/application/purchase/`, `apps/api/src/http/routes/purchases.ts`,
+  `apps/api/src/http/problem.ts`, `apps/api/src/app.ts` and both unit-of-work
+  registries
+- PostgreSQL and SQLite purchase/correction/stock-movement repositories
+- `apps/api/test/purchase-receiving.integration.test.ts`,
+  `apps/api/test/purchases.integration.test.ts`
+- `packages/api-client/src/purchases.ts`, `purchases.test.ts`, `index.ts`
+- `packages/app/src/features/purchases/`, `packages/app/src/routes/purchases.tsx`,
+  sidebar, i18n and generated route tree
+- `e2e/web/purchases.spec.ts`
+- Documentation files listed above
+
+### Technical decisions
+
+- Receiving is all-or-nothing and exactly once; partial receiving is not assumed
+  (BQ-15).
+- Purchase quantities are integer thousandths; prices and totals are integer
+  minor units with half-up rounding of the line total.
+- A line unit must equal the product inventory unit until unit conversion is
+  resolved (BQ-10).
+- Received purchase items are the price history; no separate table was added.
+- A correction is a full reversal (`afterTotalMinor = 0`) with a required reason
+  and compensating movements; at most one correction per purchase. Recorded as
+  TD-017.
+- Stock movements are persisted from M3, but balance strategy and the inventory
+  UI remain M4 work. BQ-07 and BQ-08 are still open.
+
+### Validation
+
+- `pnpm run format:check` — PASS after the final Prettier pass.
+- `pnpm run typecheck` — PASS, 12/12 tasks.
+- `pnpm run lint` — PASS, 12/12 tasks and `BOUNDARY GUARD OK`.
+- `pnpm run guard:boundaries` — PASS.
+- `pnpm run test` — PASS, 12/12 tasks; 335 passed and 12 skipped.
+- `TEST_DATABASE_URL= pnpm --filter @inventory-u3/api run test:integration` —
+  PASS, 12 files, 77 passed and 12 skipped.
+- `pnpm run build` — PASS, 5/5 tasks; Vite chunk-size warnings only.
+- `pnpm run test:e2e` — PASS, 32 Chromium tests, including three purchase tests.
+- `pnpm run db:migrate` — PASS, SQLite migrations applied through `0008`.
+- The full check set above was re-run after `pnpm run format` reformatted the
+  touched code and documentation; all results stayed green.
+- The first purchase browser run failed on an ambiguous `$43.75` text match; the
+  assertion was scoped to the correction explanation and the suite passed.
+- The first SQLite integration run exposed an order-dependent assertion on two
+  same-timestamp stock movements; the tests now sort signed quantities before
+  comparing.
+- PostgreSQL cases were skipped because no server is available (SI-06), not
+  passed. The default integration command still needs `TEST_DATABASE_URL=` on
+  this machine.
+
+### Problems found
+
+- Stock movements created in the same transaction share a timestamp, so source
+  listings have no meaningful line order; tests must compare as a set or by a
+  sorted key.
+- `stock_movements.quantity_delta` is a floating number while purchase quantities
+  are exact thousandths. Recorded as TD-11 for M4 to settle with the balance
+  representation.
+
+### Pending work
+
+- Review and commit the M3 closeout changes when authorized.
+- Start M4 branch inventory: decide derived versus cached balances (BQ-07),
+  negative-stock policy (BQ-08), then implement balances, adjustments, waste and
+  reconciliation on the persisted movement ledger.
+
+### Next session
+
+Read `AGENTS.md`, `PROJECT_OVERVIEW.md`, `IMPLEMENTATION_PROGRESS.md`,
+`CURRENT_TASK.md`, the M4 roadmap section and BQ-07/BQ-08 before changing stock
+code. Do not start production, sales or closing work.

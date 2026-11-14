@@ -1,6 +1,6 @@
 # Access Model
 
-> Status: **Access note through M2-T5.** This document defines the confirmed
+> Status: **Access note through M3.** This document defines the confirmed
 > access boundary, the implemented foundation and the future branch-access
 > constraint. It does not implement branch authorization or settle BQ-09.
 
@@ -97,6 +97,19 @@ Catalog master data uses the same boundary:
   role; only administrators can append prices. Price history is immutable and
   organization-wide for now (BQ-06, TD-016).
 
+Purchase registration, receiving, cancellation and correction use the existing
+inventory boundary:
+
+- Purchase reads and correction reads require `inventory:read`; every current
+  role can read them.
+- Create, receive, cancel and correct require `inventory:write`, which
+  `ADMINISTRATOR`, `MANAGER` and `STAFF` carry.
+- Branch and organization ownership is validated server-side; the branch selected
+  in the form is never proof of authorization. This is still organization-wide
+  access, not branch-scoped authorization.
+- Received purchases are corrected through an audited full reversal with a
+  required reason (TD-017). The actor is always the authenticated principal.
+
 ## 3. Business actors and the initial version
 
 | Actor              | Initial application access                         | Notes                                                                                           |
@@ -143,14 +156,14 @@ ownership, which makes branch-scoped filtering possible later.
 
 ## 6. Open questions
 
-| ID    | Question                                                                                      | Status                                                    |
-| ----- | --------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
-| BQ-09 | When do branch users need access, and what may they see?                                      | PENDING; nothing is implemented.                          |
-| BQ-03 | Who may correct confirmed records, and what approval/audit evidence is required?              | PENDING; the stock correction shape exists in the domain. |
-| BQ-21 | Which supplier contact, tax and payment details are required?                                 | PENDING; suppliers are name-only for now (TD-013).        |
-| —     | Does the owner need an application account, or receive reports outside the app?               | PENDING.                                                  |
-| —     | May one user belong to more than one branch, and may they also have organization-wide access? | PENDING.                                                  |
-| —     | Who administers users and passwords beyond the initial operator?                              | PENDING.                                                  |
+| ID    | Question                                                                                         | Status                                                                                                          |
+| ----- | ------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------- |
+| BQ-09 | When do branch users need access, and what may they see?                                         | PENDING; nothing is implemented.                                                                                |
+| BQ-03 | Who may correct confirmed production/checkpoint records, and what approval evidence is required? | PENDING for those records; M3 purchases use `inventory:write` plus a required reason and before/after evidence. |
+| BQ-21 | Which supplier contact, tax and payment details are required?                                    | PENDING; suppliers are name-only for now (TD-013).                                                              |
+| —     | Does the owner need an application account, or receive reports outside the app?                  | PENDING.                                                                                                        |
+| —     | May one user belong to more than one branch, and may they also have organization-wide access?    | PENDING.                                                                                                        |
+| —     | Who administers users and passwords beyond the initial operator?                                 | PENDING.                                                                                                        |
 
 ## 7. Implementation path
 

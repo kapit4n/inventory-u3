@@ -7,4 +7,5 @@ export * from './catalog.js';
 export * from './employee.js';
 export * from './enums.js';
 export * from './organization.js';
+export * from './purchase.js';
 export * from './supplier.js';

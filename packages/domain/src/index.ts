@@ -11,6 +11,7 @@ export * from './employee/index.js';
 export * from './organization/index.js';
 export * from './ports/index.js';
 export * from './product/index.js';
+export * from './purchase/index.js';
 export * from './shared/index.js';
 export * from './stock/index.js';
 export * from './supplier/index.js';

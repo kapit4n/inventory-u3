@@ -4,9 +4,11 @@
 > **IMPLEMENTED** below. The current repository implements the
 > organization/user/session foundation, the `Branch` entity, the product
 > catalog (units, categories, products, presentations, raw/processed kind and
-> average-weight configuration) and the stock movement vocabulary. Prices,
-> estimated/measured weights, persisted stock and transactional records remain a
-> design target, not a description of working software.
+> average-weight configuration), effective-dated selling prices, supplier
+> purchases and receiving, audited purchase corrections, and persisted
+> append-only stock movements. Stock balances, estimated/measured weights,
+> production, sales and closing remain a design target, not a description of
+> working software.
 
 ## 1. Structure of the model
 
@@ -27,42 +29,45 @@ Organization
   └── Employee (person whose work is recorded; may not log in)
 ```
 
-`Organization` and `Branch` are implemented. Everything below the branch is
-proposed.
+`Organization`, `Branch`, the organization-wide catalog and purchase records
+are implemented. Stock balances and the production/sales/closing records below
+the branch remain proposed.
 
 ## 2. Entity inventory
 
 ### Implemented today
 
-| Entity                | Purpose                                         | Evidence                                              |
-| --------------------- | ----------------------------------------------- | ----------------------------------------------------- |
-| Organization          | Tenant boundary: name, timezone, currency       | `packages/domain/src/organization/organization.ts`    |
-| Branch                | Organization-owned physical business location   | `packages/domain/src/branch/branch.ts`                |
-| MeasurementUnit       | Organization-owned code/name for a unit         | `packages/domain/src/product/measurement-unit.ts`     |
-| ProductCategory       | Organization-owned product grouping             | `packages/domain/src/product/product-category.ts`     |
-| Product               | Organization-owned item with explicit units     | `packages/domain/src/product/product.ts`              |
-| ProductPresentation   | Product packaging with average weight           | `packages/domain/src/product/product-presentation.ts` |
-| User                  | Organization-scoped login account               | `packages/domain/src/organization/auth.ts`            |
-| Role                  | `ADMINISTRATOR`, `MANAGER`, `STAFF`             | `packages/domain/src/organization/roles.ts`           |
-| Permission            | Domain permission values checked by the API     | `packages/domain/src/organization/roles.ts`           |
-| Session               | Opaque bearer session, stored as a token hash   | `packages/domain/src/organization/auth.ts`            |
-| Organization settings | Name, timezone, currency update rules           | `packages/domain/src/organization/organization.ts`    |
-| StockMovement         | Append-only stock change concept, not persisted | `packages/domain/src/stock/stock-movement.ts`         |
-| StockBalance          | On-hand read-model shape; strategy is open      | `packages/domain/src/stock/stock-balance.ts`          |
+| Entity                | Purpose                                       | Evidence                                               |
+| --------------------- | --------------------------------------------- | ------------------------------------------------------ |
+| Organization          | Tenant boundary: name, timezone, currency     | `packages/domain/src/organization/organization.ts`     |
+| Branch                | Organization-owned physical business location | `packages/domain/src/branch/branch.ts`                 |
+| MeasurementUnit       | Organization-owned code/name for a unit       | `packages/domain/src/product/measurement-unit.ts`      |
+| ProductCategory       | Organization-owned product grouping           | `packages/domain/src/product/product-category.ts`      |
+| Product               | Organization-owned item with explicit units   | `packages/domain/src/product/product.ts`               |
+| ProductPresentation   | Product packaging with average weight         | `packages/domain/src/product/product-presentation.ts`  |
+| ProductPriceHistory   | Effective-dated selling price per product     | `packages/domain/src/product/product-price-history.ts` |
+| Employee              | Branch-owned preparer identity; no login      | `packages/domain/src/employee/employee.ts`             |
+| Supplier              | Organization-wide provider of deliveries      | `packages/domain/src/supplier/supplier.ts`             |
+| Purchase              | Multi-line supplier delivery for one branch   | `packages/domain/src/purchase/purchase.ts`             |
+| PurchaseItem          | Product, quantity, unit and purchase price    | `packages/domain/src/purchase/purchase.ts`             |
+| PurchaseCorrection    | Audited full reversal of a received purchase  | `packages/domain/src/purchase/purchase-correction.ts`  |
+| StockMovement         | Persisted append-only stock change            | `packages/domain/src/stock/stock-movement.ts`          |
+| User                  | Organization-scoped login account             | `packages/domain/src/organization/auth.ts`             |
+| Role                  | `ADMINISTRATOR`, `MANAGER`, `STAFF`           | `packages/domain/src/organization/roles.ts`            |
+| Permission            | Domain permission values checked by the API   | `packages/domain/src/organization/roles.ts`            |
+| Session               | Opaque bearer session, stored as a token hash | `packages/domain/src/organization/auth.ts`             |
+| Organization settings | Name, timezone, currency update rules         | `packages/domain/src/organization/organization.ts`     |
+| StockBalance          | On-hand read-model shape; strategy is open    | `packages/domain/src/stock/stock-balance.ts`           |
 
-`StockMovement` and `StockBalance` are domain concepts only. There is no stock
-table, repository port or API; M4 owns persistence and balance strategy.
+`StockMovement` is persisted from M3 receiving and corrections. `StockBalance`
+remains a domain read-model shape only: there is no balance table, repository,
+API or screen, and M4 owns the derived-versus-cached decision (BQ-07) and
+negative-stock policy (BQ-08).
 
 ### Proposed for the business milestones
 
 | Entity               | Purpose                                                              | Milestone | Key relationships                                          |
 | -------------------- | -------------------------------------------------------------------- | --------- | ---------------------------------------------------------- |
-| Employee             | Person who prepares products; may not be an application user         | M2        | belongs to Branch                                          |
-| Supplier             | Provider of fruit and vegetables                                     | M2/M3     | delivers purchases to branches                             |
-| ProductPriceHistory  | Effective-dated selling price, per product and context               | M2        | belongs to Product; referenced by sales checkpoints        |
-| Purchase             | Supplier delivery assigned to one branch                             | M3        | belongs to Branch and Supplier; has PurchaseItems          |
-| PurchaseItem         | Product, quantity, unit and purchase price in a purchase             | M3        | belongs to Purchase; references Product                    |
-| StockMovement        | Append-only change to stock for a product in a branch                | M4        | belongs to Branch and Product; references source record    |
 | StockBalance         | Current on-hand quantity per branch/product (derived or cached)      | M4        | belongs to Branch and Product                              |
 | InventoryAdjustment  | Corrective stock change with a reason and audit trail                | M4        | belongs to Branch and Product                              |
 | ProductionBatch      | A branch's production of processed products for a date               | M5        | belongs to Branch; has inputs and outputs                  |
@@ -136,7 +141,8 @@ Rules:
 - A raw product is not forced through tray conversion.
 - A processed product must not silently use a raw product's measurement unit.
 - Unit conversion factors between purchase, inventory and sales units are not
-  implemented yet. Whether they are needed is an open question.
+  implemented yet. Until they are, a purchase line unit must equal the product's
+  inventory unit (BQ-10).
 - Currency and money values use the existing integer-minor-unit convention in
   `packages/types`.
 - Average weight is stored as integer grams (TD-010); no estimated or measured
@@ -177,8 +183,9 @@ transaction rather than joining to current configuration.
 2. Editing a product's average weight or price creates/updates the master record
    only; it does not rewrite history.
 3. Stock corrections are new movements that reference the original (ADR 0040).
-   For sales and production snapshot records, whether a correction is a reversal
-   plus a new record or a versioned amendment is **PENDING** (BQ-03).
+   M3 purchase corrections are audited full reversals with a reason and
+   before/after totals; sales and production correction mechanics remain
+   **PENDING** (BQ-03).
 4. Estimated weight and measured weight are separate concepts and must not be
    stored in the same field without a discriminator.
 

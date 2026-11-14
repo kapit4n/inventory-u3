@@ -50,6 +50,20 @@
       "when": 1794538203649,
       "tag": "0006_sudden_vapor",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1794623559501,
+      "tag": "0007_wise_lucky_pierre",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1794623972808,
+      "tag": "0008_smart_lady_deathstrike",
+      "breakpoints": true
     }
   ]
 }

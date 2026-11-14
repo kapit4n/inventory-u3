@@ -16,6 +16,7 @@ import type {
   ProductCategoryId,
   ProductId,
   ProductPresentationId,
+  PurchaseId,
   SessionId,
   SupplierId,
   UserId,
@@ -31,6 +32,10 @@ import type { ProductCategory } from '../product/product-category.js';
 import type { ProductPresentation } from '../product/product-presentation.js';
 import type { ProductPriceHistory } from '../product/product-price-history.js';
 import type { Product } from '../product/product.js';
+import type { PurchaseCorrection } from '../purchase/purchase-correction.js';
+import type { Purchase, PurchaseReceipt } from '../purchase/purchase.js';
+import type { StockMovement } from '../stock/stock-movement.js';
+import type { StockMovementSource } from '../stock/stock-movement-source.js';
 
 export interface UnitOfWork {
   transaction<T>(work: (repositories: Repositories) => Promise<T>): Promise<T>;
@@ -52,6 +57,9 @@ export interface Repositories {
   readonly products: ProductRepository;
   readonly productPresentations: ProductPresentationRepository;
   readonly productPriceHistory: ProductPriceHistoryRepository;
+  readonly purchases: PurchaseRepository;
+  readonly purchaseCorrections: PurchaseCorrectionRepository;
+  readonly stockMovements: StockMovementRepository;
   readonly users: UserRepository;
   readonly sessions: SessionRepository;
 }
@@ -153,6 +161,47 @@ export interface ProductPriceHistoryRepository {
     productId: ProductId,
   ): Promise<readonly ProductPriceHistory[]>;
   create(productPriceHistory: ProductPriceHistory): Promise<ProductPriceHistory>;
+}
+
+export interface PurchaseRepository {
+  findById(organizationId: OrganizationId, purchaseId: PurchaseId): Promise<Purchase | undefined>;
+  listByOrganization(organizationId: OrganizationId): Promise<readonly Purchase[]>;
+  listByBranch(organizationId: OrganizationId, branchId: BranchId): Promise<readonly Purchase[]>;
+  create(purchase: Purchase): Promise<Purchase>;
+  /** Returns `undefined` when the purchase is not a draft in this organization. */
+  markReceived(
+    organizationId: OrganizationId,
+    purchaseId: PurchaseId,
+    receipt: PurchaseReceipt,
+  ): Promise<Purchase | undefined>;
+  /** Returns `undefined` when the purchase is not a draft in this organization. */
+  markCancelled(
+    organizationId: OrganizationId,
+    purchaseId: PurchaseId,
+    at: IsoDateTime,
+  ): Promise<Purchase | undefined>;
+  /** Returns `undefined` when the purchase is not received in this organization. */
+  markCorrected(
+    organizationId: OrganizationId,
+    purchaseId: PurchaseId,
+    correction: { readonly correctedByUserId: UserId; readonly correctedAt: IsoDateTime },
+  ): Promise<Purchase | undefined>;
+}
+
+export interface PurchaseCorrectionRepository {
+  findByPurchaseId(
+    organizationId: OrganizationId,
+    purchaseId: PurchaseId,
+  ): Promise<PurchaseCorrection | undefined>;
+  create(purchaseCorrection: PurchaseCorrection): Promise<PurchaseCorrection>;
+}
+
+export interface StockMovementRepository {
+  create(stockMovement: StockMovement): Promise<StockMovement>;
+  listBySource(
+    organizationId: OrganizationId,
+    source: StockMovementSource,
+  ): Promise<readonly StockMovement[]>;
 }
 
 export interface UserRepository {

@@ -27,11 +27,14 @@
 
 The technical foundation is **complete** (monorepo, tooling, auth/session,
 dual-engine database, shared React app, web/desktop shells, tests, boundary
-guard). The current phase builds the business domain milestone by milestone: M1
-is complete and M2 master data is in progress, with branch, employee, supplier,
-category, measurement-unit and product management complete. Product management
-lives on `/products` and includes the presentation editor for processed products;
-average-weight and selling-price history is next in M2-T6.
+guard). The current phase builds the business domain milestone by milestone. M1
+and M2 are complete: branch, employee, supplier, category, measurement-unit,
+product and presentation management, average-weight configuration and
+effective-dated selling-price history. Product management lives on `/products`
+and includes the presentation editor for processed products. M3 supplier
+purchases and receiving is complete: multi-line draft purchases, one-shot
+receiving into append-only stock movements, and audited full reversals. M4 branch
+inventory (balances, adjustments, waste and reconciliation) is next.
 
 - Canonical roadmap: `docs/development/IMPLEMENTATION_ROADMAP.md`.
 - Current task and status: `docs/development/CURRENT_TASK.md` and
