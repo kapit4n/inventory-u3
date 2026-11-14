@@ -1,9 +1,8 @@
 # Inventory U3 — Phase 1 Business Foundation Report
 
 > Last updated: 2026-11-13. M1 is committed at `bfdc9cb`, M2-T1 at `814f397`,
-> M2-T2 at `6b50606`, M2-T3 at `5c96eeb`, M2-T4 at `992d6ea` and M2-T5 at
-> `c8526d0`; M2-T6, the sample seed and M2-T7 are complete in the working tree,
-> which completes M2.
+> M2-T2 at `6b50606`, M2-T3 at `5c96eeb`, M2-T4 at `992d6ea`, M2-T5 at
+> `c8526d0` and M2-T6/T7 with the sample seed at `cc70bfc`.
 
 ## 1. Architecture overview
 
@@ -134,6 +133,5 @@ membership, reporting valuation and the WhatsApp report format that blocks M6
 
 ## 13. Recommended next milestone
 
-Commit M2-T6, the sample seed and M2-T7 when authorized. Then start **M3 —
-Supplier Purchases and Receiving** with the purchase and purchase-item domain
-entities and states.
+Start **M3 — Supplier Purchases and Receiving** with the purchase and
+purchase-item domain entities and states. M2 is committed as `cc70bfc`.

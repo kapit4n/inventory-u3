@@ -2,9 +2,9 @@
 
 > Last updated: 2026-11-13.
 >
-> **M2-T7 is COMPLETE in the working tree; M2 is COMPLETE. Commit awaits explicit
-> authorization.** M2-T1 through M2-T6 are also complete. The only deferred M2
-> scope item, raw-to-finished product relationships, moved to M5 by BQ-11.
+> **M2-T7 is COMPLETE and committed as `cc70bfc`; M2 is COMPLETE.** M2-T1
+> through M2-T6 are also complete. The only deferred M2 scope item,
+> raw-to-finished product relationships, moved to M5 by BQ-11.
 
 ## Task identity
 
@@ -13,7 +13,7 @@
 | Milestone    | M2 — Master Data                                             |
 | Task ID      | M2-T7                                                        |
 | Task         | Remaining API routes, validation, problem mapping, UI, tests |
-| Status       | COMPLETED (working tree, commit pending)                     |
+| Status       | COMPLETED (committed as `cc70bfc`)                           |
 | Dependencies | M2-T1 through M2-T6 complete                                 |
 | Blocks       | M3 supplier purchases and receiving                          |
 
@@ -68,10 +68,9 @@ not only in jsdom component tests.
   product, plus the existing 18 specs).
 - No production code changed; the API routes, validation, problem mapping and UI
   already existed from M2-T1 through M2-T6.
-- The working-tree changes are not committed yet.
+- The working-tree changes are committed as `cc70bfc`.
 
 ## Next task
 
-Commit M2-T6, the sample seed and M2-T7 after review if authorized. Then start
-M3 supplier purchases and receiving, beginning with the purchase and
+Start M3 supplier purchases and receiving, beginning with the purchase and
 purchase-item domain entities and states. Do not start M4 stock work first.

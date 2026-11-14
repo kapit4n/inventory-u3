@@ -1740,9 +1740,9 @@ product screens, then record M2 as complete.
 
 ### Pending work
 
-- Run the full workspace verification after the documentation edits.
-- Commit M2-T6, the sample seed and M2-T7 when authorized.
-- Start M3 supplier purchases and receiving after M2 is committed.
+- Full workspace verification after the documentation edits passed, and M2-T6,
+  the sample seed and M2-T7 were committed as `cc70bfc`.
+- Start M3 supplier purchases and receiving.
 
 ### Next session
 

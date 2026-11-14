@@ -1,9 +1,8 @@
 # Inventory U3 — Project Overview
 
 > Last verified: 2026-11-13. M1 is committed at `bfdc9cb`, M2-T1 at `814f397`,
-> M2-T2 at `6b50606`, M2-T3 at `5c96eeb`, M2-T4 at `992d6ea` and M2-T5 at
-> `c8526d0`; M2-T6, the sample seed and M2-T7 are complete in the working tree,
-> which completes M2. See
+> M2-T2 at `6b50606`, M2-T3 at `5c96eeb`, M2-T4 at `992d6ea`, M2-T5 at
+> `c8526d0` and M2-T6/T7 with the sample seed at `cc70bfc`. See
 > [IMPLEMENTATION_PROGRESS](../development/IMPLEMENTATION_PROGRESS.md).
 
 ## Purpose

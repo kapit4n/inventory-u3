@@ -8,15 +8,15 @@
 | Field                  | Value                                                            |
 | ---------------------- | ---------------------------------------------------------------- |
 | Current milestone      | M3 — Supplier Purchases and Receiving (M2 complete)              |
-| Current task           | M2-T7 complete in the working tree; commit pending authorization |
+| Current task           | M2 complete and committed at `cc70bfc`                           |
 | Overall project status | M2 master data complete, including browser coverage              |
 | Completed milestones   | M1 and M2; the foundation prerequisite is also complete          |
 | In-progress milestones | None; M3 is the next milestone                                   |
 | Blocked milestones     | M6 finalization is blocked on BR-013 (WhatsApp reporting format) |
 | Pending milestones     | M3, M4, M5, M6, M7, M8, M9                                       |
-| Last verified commit   | `c8526d0` (M2-T5); M2-T6, the seed and M2-T7 are uncommitted.    |
+| Last verified commit   | `cc70bfc` (M2 complete: price history, seed, browser coverage)   |
 | Last update date       | 2026-11-13                                                       |
-| Next recommended task  | Commit M2, then start M3 purchase and receiving work             |
+| Next recommended task  | Start M3 purchase and receiving work                             |
 
 ### Working tree at the time of this update
 
@@ -29,8 +29,8 @@ never edited or deleted. Prices are organization-wide for now (BQ-06) and the
 basis is snapshotted so later product-kind edits cannot reinterpret history
 (TD-016). Average weight remains presentation master data; historical weight
 snapshots belong to M5/M6 operational records. M2-T4 is committed as `992d6ea`;
-M2-T5 is committed as `c8526d0`; M2-T6, the sample seed and M2-T7 are
-uncommitted.
+M2-T5 is committed as `c8526d0`; M2-T6, the sample seed and M2-T7 are committed
+as `cc70bfc`.
 
 M2-T7 adds Playwright browser coverage for the master-data cards on `/settings`
 (branches, employees, suppliers, categories and units) and for `/products`
@@ -222,9 +222,8 @@ None. M1 is complete.
 
 ### Next action
 
-M1 is complete and committed as `bfdc9cb`. M2 is in progress; M2-T5 is committed
-as `c8526d0` and M2-T6 is complete in the working tree. See
-[CURRENT_TASK.md](./CURRENT_TASK.md).
+M1 is complete and committed as `bfdc9cb`. M2 is complete and committed as
+`cc70bfc`. See [CURRENT_TASK.md](./CURRENT_TASK.md).
 
 ---
 
@@ -377,9 +376,8 @@ entity: BQ-11 leaves production inputs free-form per batch for M5.
 
 ### Next action
 
-M2 is complete in the working tree; M2-T6, the sample seed and M2-T7 await an
-explicit commit. After that, start M3 supplier purchases and receiving. See
-[CURRENT_TASK.md](./CURRENT_TASK.md).
+M2 is complete and committed as `cc70bfc`. Start M3 supplier purchases and
+receiving. See [CURRENT_TASK.md](./CURRENT_TASK.md).
 
 ---
 

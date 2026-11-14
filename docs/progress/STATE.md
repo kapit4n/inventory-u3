@@ -44,12 +44,11 @@
   references describe M1 and M2. The boundary guard checks dependency direction,
   database access, thin shells, domain Node built-ins, schema-table parity and
   migration-journal parity.
-- **Next task:** start M3 supplier purchases and receiving after committing M2.
-  Real branch names wait for BQ-19; real master data replaces the sample seed
-  when confirmed.
+- **Next task:** start M3 supplier purchases and receiving. Real branch names
+  wait for BQ-19; real master data replaces the sample seed when confirmed.
 - **Commits:** M1 closeout `bfdc9cb`; M2-T1 `814f397`; M2-T2 `6b50606`; M2-T3
-  `5c96eeb`; M2-T4 `992d6ea`; M2-T5 `c8526d0`; M2-T6, the sample seed and M2-T7
-  are uncommitted.
+  `5c96eeb`; M2-T4 `992d6ea`; M2-T5 `c8526d0`; M2-T6/T7 with the sample seed
+  `cc70bfc`.
 
 The previous verification records are preserved in
 [SESSION_LOG.md](../development/SESSION_LOG.md) (Sessions 0–16).
