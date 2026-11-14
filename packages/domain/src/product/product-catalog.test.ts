@@ -6,6 +6,7 @@ import {
   asProductCategoryId,
   asProductId,
   asProductPresentationId,
+  asProductPriceHistoryId,
 } from '@inventory-u3/types';
 
 import {
@@ -23,6 +24,11 @@ import {
   createProductPresentation,
   updateProductPresentation,
 } from './product-presentation.js';
+import {
+  PRODUCT_PRICE_BASES,
+  createProductPriceHistory,
+  priceBasisForProductKind,
+} from './product-price-history.js';
 import { PRODUCT_NAME_MAX_LENGTH, createProduct, updateProduct } from './product.js';
 
 const NOW = '2026-11-09T12:00:00.000Z';
@@ -522,6 +528,89 @@ describe('createProductPresentation', () => {
         ),
       ).toThrowError(
         'Product presentation average weight must be a positive whole number of grams',
+      );
+    }
+  });
+});
+
+const PRICE_ID = asProductPriceHistoryId('88888888-8888-4888-8888-888888888888');
+
+describe('product price history', () => {
+  it('derives the price basis from the product kind', () => {
+    expect(priceBasisForProductKind('PROCESSED')).toBe('PER_KILOGRAM');
+    expect(priceBasisForProductKind('RAW')).toBe('PER_SALES_UNIT');
+    expect(() => priceBasisForProductKind('FROZEN' as never)).toThrowError(
+      'Product kind must be RAW or PROCESSED',
+    );
+  });
+
+  it('creates an append-only effective-dated price row', () => {
+    expect(
+      createProductPriceHistory(
+        {
+          id: PRICE_ID,
+          organizationId: ORGANIZATION_ID,
+          productId: PRODUCT_ID,
+          amountMinor: 400,
+          currency: 'USD',
+          priceBasis: 'PER_KILOGRAM',
+          effectiveFrom: '2026-11-15',
+        },
+        NOW,
+      ),
+    ).toEqual({
+      id: PRICE_ID,
+      organizationId: ORGANIZATION_ID,
+      productId: PRODUCT_ID,
+      amountMinor: 400,
+      currency: 'USD',
+      priceBasis: 'PER_KILOGRAM',
+      effectiveFrom: '2026-11-15',
+      createdAt: NOW,
+    });
+  });
+
+  it('accepts zero but rejects invalid amounts, currencies and bases', () => {
+    const base = {
+      id: PRICE_ID,
+      organizationId: ORGANIZATION_ID,
+      productId: PRODUCT_ID,
+      amountMinor: 0,
+      currency: 'USD',
+      priceBasis: 'PER_KILOGRAM' as const,
+      effectiveFrom: '2026-11-15',
+    };
+
+    expect(() => createProductPriceHistory(base, NOW)).not.toThrow();
+
+    for (const amountMinor of [-1, 1.5, Number.NaN]) {
+      expect(() => createProductPriceHistory({ ...base, amountMinor }, NOW)).toThrowError(
+        'Selling price must be a non-negative whole number in minor units',
+      );
+    }
+
+    expect(() => createProductPriceHistory({ ...base, currency: 'usd' }, NOW)).toThrowError(
+      'Selling price currency must be a three-letter code',
+    );
+    expect(() =>
+      createProductPriceHistory({ ...base, priceBasis: 'PER_TRAY' as never }, NOW),
+    ).toThrowError('Selling price basis must be per kilogram or per unit');
+  });
+
+  it('rejects impossible effective dates', () => {
+    const base = {
+      id: PRICE_ID,
+      organizationId: ORGANIZATION_ID,
+      productId: PRODUCT_ID,
+      amountMinor: 400,
+      currency: 'USD',
+      priceBasis: PRODUCT_PRICE_BASES[0],
+      effectiveFrom: '2026-11-15',
+    };
+
+    for (const effectiveFrom of ['2026-02-30', '2026-13-01', '15/11/2026', '']) {
+      expect(() => createProductPriceHistory({ ...base, effectiveFrom }, NOW)).toThrowError(
+        'Selling price effective date must be a valid date',
       );
     }
   });

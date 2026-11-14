@@ -30,4 +30,5 @@ export {
 } from './catalog.js';
 export { createEmployee, listEmployees, updateEmployee } from './employees.js';
 export { createProduct, listProducts, updateProduct } from './products.js';
+export { createProductPrice, listProductPrices } from './product-prices.js';
 export { createSupplier, listSuppliers, updateSupplier } from './suppliers.js';

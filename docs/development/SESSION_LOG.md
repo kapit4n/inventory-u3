@@ -1441,3 +1441,311 @@ editor`.
 Read `AGENTS.md`, `PROJECT_OVERVIEW.md`, `IMPLEMENTATION_PROGRESS.md`,
 `CURRENT_TASK.md`, `IMPLEMENTATION_ROADMAP.md` and the M2-T6 scope before starting
 price and average-weight history.
+
+## Session 14 — 2026-11-12 — M2-T6 effective-dated selling-price history
+
+### Objective
+
+Add average-weight and selling-price history to M2. The existing presentation
+average weight was already complete, so this session implemented the missing
+selling-price history without creating a second weight model.
+
+### Work completed
+
+- Added `ProductPriceHistory`, the two basis values, the product-kind basis rule,
+  calendar-date validation and append-only creation in the domain.
+- Added `ProductPriceHistoryId`, a price-history repository port and
+  `Repositories.productPriceHistory`.
+- Added PostgreSQL and SQLite `product_price_history` tables with an enum/check,
+  integer minor units, captured currency and basis, unique product/effective
+  date and lookup indexes.
+- Generated and applied migrations `0006_sudden_vapor.sql` and
+  `0006_funny_peter_parker.sql`.
+- Added both repositories and wired them into the PostgreSQL unit of work and
+  SQLite repository container.
+- Added price response/create validation and a list envelope carrying the
+  organization's current currency.
+- Added authenticated `GET/POST /api/v1/products/:productId/prices` routes.
+- Added typed REST-client price functions.
+- Added the `/products` price-history dialog, administrator new-price form,
+  exact major-to-minor parsing, currency/basis/status display and bilingual copy.
+- Kept price history readable by every authenticated role; only administrators
+  can append. The actions column is now visible to non-administrators for this
+  read-only action.
+- Added domain, REST-client, SQLite/PostgreSQL repository, route, formatting and
+  component tests.
+- Updated the roadmap, progress, current task, technical decisions, open
+  questions, state and report documents.
+
+### Files changed
+
+Domain, types and validation:
+
+- `packages/domain/src/product/product-price-history.ts`
+- `packages/domain/src/product/index.ts`, `product-catalog.test.ts`
+- `packages/domain/src/ports/index.ts`
+- `packages/types/src/identifiers.ts`
+- `packages/validation/src/catalog/index.ts`
+
+Database:
+
+- `database/schema/catalog.ts`, `database/schema/sqlite/catalog.ts`
+- `database/schema/enums.ts`
+- `database/migrations/0006_sudden_vapor.sql`
+- `database/migrations-sqlite/0006_funny_peter_parker.sql`
+
+API and client:
+
+- `apps/api/src/infrastructure/persistence/repositories/product-price-history-repository.ts`
+- `apps/api/src/infrastructure/persistence/sqlite/repositories/product-price-history-repository.ts`
+- `apps/api/src/infrastructure/persistence/postgres/unit-of-work.ts`
+- `apps/api/src/infrastructure/persistence/sqlite/repositories.ts`
+- `apps/api/src/http/routes/product-price-history.ts`, `apps/api/src/app.ts`
+- `apps/api/test/catalog.integration.test.ts`
+- `apps/api/test/product-catalog-repository.integration.test.ts`
+- `packages/api-client/src/product-prices.ts`, `index.ts`, `product-prices.test.ts`
+
+Application UI and copy:
+
+- `packages/app/src/features/products/price-format.ts`, `price-format.test.ts`
+- `packages/app/src/features/products/components/product-price-dialog.tsx`
+- `packages/app/src/features/products/components/product-price-form-dialog.tsx`
+- `packages/app/src/features/products/components/product-management.tsx`
+- `packages/app/src/features/products/components/product-management.test.tsx`
+- `packages/app/src/features/products/queries/product-prices-query.ts`
+- `packages/app/src/features/products/mutations/use-create-product-price.ts`
+- `packages/app/src/i18n/locales/en/products.ts`
+- `packages/app/src/i18n/locales/es/products.ts`
+
+Documentation:
+
+- `docs/project/TECHNICAL_DECISIONS.md` (TD-016)
+- `docs/development/IMPLEMENTATION_ROADMAP.md`
+- `docs/development/IMPLEMENTATION_PROGRESS.md`
+- `docs/development/CURRENT_TASK.md`
+- `docs/development/SESSION_LOG.md`
+- `docs/progress/STATE.md`, `docs/progress/REPORT.md`
+- `docs/open-questions.md`
+
+### Technical decisions
+
+- Prices are append-only and effective-dated. A change adds a row; history is
+  never rewritten. Effective end is inferred from the next row (TD-016).
+- Prices remain organization-wide until BQ-06 is answered. No branch column is
+  added speculatively.
+- The basis is derived from product kind at creation and captured with the row:
+  `PROCESSED` => `PER_KILOGRAM`, `RAW` => `PER_SALES_UNIT`.
+- Currency is captured from the organization at creation. The list response
+  carries the current currency for the creation form.
+- Amounts are integer minor units. The UI parses major-unit input without floats
+  and formats through `Intl.NumberFormat`.
+- No separate average-weight history table was added. Average weight remains
+  presentation master data; operational records will snapshot weight in M5/M6.
+- No update/delete route or correction audit exists yet; corrections are new
+  effective-dated rows.
+
+### Validation
+
+- `pnpm run typecheck` — PASS, 12/12 tasks.
+- `pnpm run lint` — PASS, 12/12 tasks, `BOUNDARY GUARD OK`.
+- `pnpm run test` — PASS, 12/12 tasks, 292 passed, 10 skipped.
+- `TEST_DATABASE_URL= pnpm --filter @inventory-u3/api run test:integration` —
+  PASS, 10 files, 69 passed, 10 skipped.
+- `pnpm run build` — PASS, 5/5 tasks; only Vite chunk-size warnings.
+- `pnpm run db:migrate` — PASS; SQLite migrations applied through `0006`.
+- `pnpm run db:seed` — PASS; organization and development users only.
+- `pnpm run format:check` — PASS after formatting.
+- Not run: Playwright E2E; PostgreSQL integration cases (no server).
+
+Current test counts: domain 6 files/74 tests, api-client 7/37, app 16/76, API
+14 files/95 passed + 10 skipped, database 1/6, desktop 1/4.
+
+### Problems found
+
+- The first repository-test insertion placed the PostgreSQL case inside the
+  SQLite describe block. Moving it into the `skipIf` PostgreSQL block and adding a
+  category fixture fixed the typecheck.
+- The first read-only UI test hid the action column for staff, even though price
+  reads use `organization:read`. The actions column now shows the price action to
+  every authenticated role while edit and presentation actions remain
+  administrator-only. The final review found the price dialog still offered the
+  New price button to staff; it is now hidden for non-administrators, and the
+  read-only test asserts the dialog remains view-only.
+- Opening `/products` crashed with `ROLE_PERMISSIONS[role]` undefined because a
+  stale stored session had a `user` object without `role`. `readStoredSession`
+  now re-validates the whole value against `loginResponseSchema`, and both
+  password and development sign-in validate the response against the same
+  schema. Invalid sessions are discarded instead of reaching `hasPermission`.
+- Three regression tests cover a missing role, an unknown role and a malformed
+  login response; the app suite is now 16 files/76 tests.
+- PostgreSQL cases skip because no server is available; this is SI-06.
+- The price form follows the existing `create.reset` reference pattern to avoid
+  an unstable effect dependency.
+
+### Pending work
+
+- Review and commit M2-T6 when authorized. Current commit is not created.
+- Continue M2-T7 remaining routes, validation, problem mapping, UI tests and
+  browser coverage.
+- Seed prices, branches, employees, suppliers and catalog rows only when real
+  data is available (BQ-19 and related questions).
+
+### Next session
+
+Read `AGENTS.md`, `PROJECT_OVERVIEW.md`, `IMPLEMENTATION_PROGRESS.md`,
+`CURRENT_TASK.md`, `IMPLEMENTATION_ROADMAP.md` and TD-016 before changing price
+behavior. Confirm BQ-06 before introducing branch-scoped prices, and BQ-10 before
+any unit conversion.
+
+---
+
+## Session 15 — 2026-11-13 — Sample fruit-and-vegetable development seed
+
+### Objective
+
+Populate the development database with illustrative initial data for a fruits
+and vegetables store.
+
+### Work completed
+
+- Added a fixed-id sample catalogue to `database/development-data.ts`: 3
+  branches, 4 employees, 3 suppliers, 6 measurement units, 4 categories, 21
+  products (raw fruit, vegetables, herbs and processed trays), 6 tray
+  presentations and 27 effective-dated price rows.
+- Extended `database/seed.ts` on both engines to insert and restore the sample
+  catalogue idempotently, in foreign-key order.
+- Seeded the local SQLite database and verified the row counts; a second seed run
+  left the counts unchanged.
+- Updated the seed documentation, progress notes, known issues and BQ-19 wording
+  to distinguish illustrative development data from confirmed real master data.
+
+### Files changed
+
+- `database/development-data.ts`
+- `database/seed.ts`
+- `docs/database.md`
+- `docs/development/CURRENT_TASK.md`
+- `docs/development/IMPLEMENTATION_PROGRESS.md`
+- `docs/development/KNOWN_ISSUES.md`
+- `docs/development/SESSION_LOG.md`
+- `docs/open-questions.md`
+
+### Technical decisions
+
+- The sample catalogue is development data, not a product requirement. Real
+  branch, product and price data still replace it when confirmed (BQ-19).
+- Prices use the organization currency (`USD` in development), integer minor
+  units and the kind-derived basis (`PER_SALES_UNIT` for raw products,
+  `PER_KILOGRAM` for processed products).
+- Every seeded row has a fixed UUID and is upserted by id, so the seed remains
+  idempotent.
+
+### Validation
+
+- `pnpm --filter @inventory-u3/database run typecheck` — PASS.
+- `pnpm --filter @inventory-u3/database run lint` — PASS.
+- `pnpm run db:seed` — PASS on SQLite, twice; counts stayed stable at 3 branches,
+  4 employees, 3 suppliers, 6 units, 4 categories, 21 products, 6 presentations
+  and 27 price rows.
+- `prettier --check database/seed.ts database/development-data.ts` — PASS.
+
+### Problems found
+
+- None. The existing schema already supported all seeded master data.
+
+### Pending work
+
+- Replace the illustrative catalogue with real master data when it is confirmed.
+- Review and commit the M2-T6 changes and this seed addition when authorized.
+
+### Next session
+
+Read `AGENTS.md`, `PROJECT_OVERVIEW.md`, `IMPLEMENTATION_PROGRESS.md`,
+`CURRENT_TASK.md` and the open questions before changing seed data. Do not treat
+the sample branch, product or price rows as confirmed business data.
+
+## Session 16 — 2026-11-13 — M2-T7 master-data and product browser coverage
+
+### Objective
+
+Close M2 by adding the missing Playwright coverage for the master-data and
+product screens, then record M2 as complete.
+
+### Work completed
+
+- Added `e2e/web/master-data.spec.ts`: lists every `/settings` card; creates and
+  edits a branch; checks the duplicate-name branch problem message; creates an
+  employee assigned to a branch; creates a supplier, category and unit; and
+  verifies the read-only STAFF view.
+- Added `e2e/web/products.spec.ts`: lists products; opens price history with
+  current and scheduled rows; creates a raw product; edits a processed product;
+  creates a tray presentation; appends an effective-dated price with the exact
+  minor-unit payload; and verifies the read-only STAFF view with prices still
+  visible.
+- Added `e2e/web/fixtures/session.ts` so a spec can override the session role
+  without duplicating the session shape.
+- Updated `e2e/web/settings.spec.ts` and `e2e/web/i18n.spec.ts` to mock the
+  master-data list queries now mounted on `/settings`, keeping the specs free of
+  501 console errors.
+- Updated the roadmap, progress, current-task and known-issues documents; M2 is
+  now COMPLETED.
+
+### Files changed
+
+- `e2e/web/master-data.spec.ts` (new)
+- `e2e/web/products.spec.ts` (new)
+- `e2e/web/fixtures/session.ts` (new)
+- `e2e/web/settings.spec.ts`
+- `e2e/web/i18n.spec.ts`
+- `docs/development/IMPLEMENTATION_ROADMAP.md`
+- `docs/development/IMPLEMENTATION_PROGRESS.md`
+- `docs/development/CURRENT_TASK.md`
+- `docs/development/KNOWN_ISSUES.md`
+- `docs/development/SESSION_LOG.md`
+
+### Technical decisions
+
+- Browser specs assert the requests the page sends via the mock API's
+  `recorded` log; the mocked lists are static, so they do not assert that a
+  newly-created row appears.
+- The raw-to-finished relationship stays out of M2. BQ-11 resolves production
+  inputs as free-form per batch, so there is no recipe/BOM entity to build; M5
+  owns production inputs.
+- No production code changed: the M2-T7 routes, validation, problem mapping and
+  UI already existed from earlier tasks.
+
+### Validation
+
+- `pnpm --filter @inventory-u3/e2e run typecheck` — PASS.
+- `pnpm --filter @inventory-u3/e2e run lint` — PASS.
+- `pnpm run typecheck` — PASS, 12/12 tasks.
+- `pnpm run lint` — PASS, 12/12 tasks and `BOUNDARY GUARD OK`.
+- `pnpm run test` — PASS, 12/12 tasks; 292 passed and 10 skipped.
+- `TEST_DATABASE_URL= pnpm --filter @inventory-u3/api run test:integration` —
+  PASS, 10 files, 69 passed and 10 skipped (PostgreSQL cases skip).
+- `pnpm run build` — PASS, 5/5 tasks; Vite chunk-size warning only.
+- `pnpm run test:e2e` — PASS, 29 Chromium tests.
+- `pnpm run format:check` — PASS.
+- The first browser run found a strict-mode duplicate text match and two
+  `/settings` specs that now needed master-data mocks; both were fixed and the
+  suite passed.
+
+### Problems found
+
+- `getByText('Central Market')` matched both the branch row and the employee
+  branch cell. The specs now scope to the first cell.
+- The expanded `/settings` page mounts five additional queries, so the older
+  settings and i18n specs emitted 501 console errors until their fixtures were
+  extended.
+
+### Pending work
+
+- Run the full workspace verification after the documentation edits.
+- Commit M2-T6, the sample seed and M2-T7 when authorized.
+- Start M3 supplier purchases and receiving after M2 is committed.
+
+### Next session
+
+Read `AGENTS.md`, `PROJECT_OVERVIEW.md`, `IMPLEMENTATION_PROGRESS.md`,
+`CURRENT_TASK.md`, the M3 roadmap section and BQ-11 before starting M3. M2 is
+complete; do not reopen master-data work unless a regression is found.

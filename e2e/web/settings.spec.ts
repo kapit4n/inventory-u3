@@ -21,10 +21,19 @@ const ORGANIZATION = {
   updatedAt: '2026-01-01T00:00:00.000Z',
 };
 
+const EMPTY_MASTER_DATA = {
+  'GET /api/v1/branches': { body: { items: [] } },
+  'GET /api/v1/employees': { body: { items: [] } },
+  'GET /api/v1/suppliers': { body: { items: [] } },
+  'GET /api/v1/product-categories': { body: { items: [] } },
+  'GET /api/v1/measurement-units': { body: { items: [] } },
+};
+
 test.describe('Settings', () => {
   test('prefills the organization identity', async ({ page }) => {
     const errors = watchForConsoleErrors(page);
     await installApi(page, {
+      ...EMPTY_MASTER_DATA,
       'GET /api/v1/organization': { body: ORGANIZATION },
     });
 
@@ -42,6 +51,7 @@ test.describe('Settings', () => {
 
   test('saves the identity and shows the server echo', async ({ page }) => {
     const api = await installApi(page, {
+      ...EMPTY_MASTER_DATA,
       'GET /api/v1/organization': { body: ORGANIZATION },
       'PUT /api/v1/organization': {
         body: { ...ORGANIZATION, name: 'North Warehouse', currency: 'PEN' },
@@ -71,6 +81,7 @@ test.describe('Settings', () => {
 
   test('keeps the draft and names the permission refusal', async ({ page }) => {
     await installApi(page, {
+      ...EMPTY_MASTER_DATA,
       'GET /api/v1/organization': { body: ORGANIZATION },
       'PUT /api/v1/organization': {
         status: 403,

@@ -7,12 +7,14 @@
 
 import { pgEnum } from 'drizzle-orm/pg-core';
 
-import { ORGANIZATION_ROLES, PRODUCT_KINDS } from '@inventory-u3/domain';
+import { ORGANIZATION_ROLES, PRODUCT_KINDS, PRODUCT_PRICE_BASES } from '@inventory-u3/domain';
 
 export const organizationRoleEnum = pgEnum('organization_role', ORGANIZATION_ROLES);
 export const productKindEnum = pgEnum('product_kind', PRODUCT_KINDS);
+export const productPriceBasisEnum = pgEnum('product_price_basis', PRODUCT_PRICE_BASES);
 
 export const DATABASE_ENUM_VALUES = {
   organizationRole: ORGANIZATION_ROLES,
   productKind: PRODUCT_KINDS,
+  productPriceBasis: PRODUCT_PRICE_BASES,
 } as const;

@@ -14,6 +14,7 @@
  */
 
 import type { OrganizationRole } from '@inventory-u3/domain';
+import { loginResponseSchema } from '@inventory-u3/validation';
 
 const STORAGE_KEY = 'inventory-u3-session';
 
@@ -35,9 +36,11 @@ export interface StoredSession {
 /**
  * Read the stored session, if any.
  *
- * Malformed JSON, a missing field or a past expiry all read as "no session": a
- * half-written value from a crashed tab must not put the app into a state where
- * it thinks it is logged in and then fails every request.
+ * The value is re-validated against the login contract: malformed JSON, a
+ * missing field, a role the application does not know or a past expiry all read
+ * as "no session". A half-written value from a crashed tab, or one left behind
+ * by an older build, must not put the app into a state where it thinks it is
+ * logged in and then crashes on an undefined field.
  */
 export function readStoredSession(): StoredSession | undefined {
   if (typeof window === 'undefined') {
@@ -50,19 +53,11 @@ export function readStoredSession(): StoredSession | undefined {
   }
 
   try {
-    const parsed = JSON.parse(raw) as Partial<StoredSession>;
-    if (
-      typeof parsed.token !== 'string' ||
-      typeof parsed.expiresAt !== 'string' ||
-      typeof parsed.user !== 'object' ||
-      parsed.user === null
-    ) {
+    const parsed = loginResponseSchema.safeParse(JSON.parse(raw));
+    if (!parsed.success || parsed.data.expiresAt <= new Date().toISOString()) {
       return undefined;
     }
-    if (parsed.expiresAt <= new Date().toISOString()) {
-      return undefined;
-    }
-    return parsed as StoredSession;
+    return parsed.data;
   } catch {
     return undefined;
   }

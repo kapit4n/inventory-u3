@@ -84,16 +84,18 @@ Supplier master data uses the same organization-wide administration boundary:
 Catalog master data uses the same boundary:
 
 - `GET /api/v1/product-categories`, `GET /api/v1/measurement-units` and product
-  presentation reads require `organization:read`.
-- Category, unit and presentation writes require `organization:manage`, which
-  only `ADMINISTRATOR` carries today.
+  presentation and price reads require `organization:read`.
+- Category, unit, presentation and price writes require `organization:manage`,
+  which only `ADMINISTRATOR` carries today.
 - Categories, units and products are organization-wide. Products reference a
   category and units in the caller's organization. Presentations belong to a
   product; reads and writes verify the product belongs to the caller's
   organization.
 - Catalog rows are deactivated, not deleted, so products and operational rows
   keep their references. The product screen exposes the presentation editor for
-  processed products (TD-015).
+  processed products (TD-015) and a price-history dialog to every authenticated
+  role; only administrators can append prices. Price history is immutable and
+  organization-wide for now (BQ-06, TD-016).
 
 ## 3. Business actors and the initial version
 

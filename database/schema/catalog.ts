@@ -7,12 +7,14 @@
  * boundary behind a join.
  *
  * Products carry the raw/processed kind. Presentations carry the configured
- * average weight per tray as integer grams. Prices and historical snapshots
- * remain for later milestones.
+ * average weight per tray as integer grams. Selling prices are append-only,
+ * effective-dated rows; historical production and sales snapshots remain for
+ * later milestones.
  */
 
 import {
   boolean,
+  date,
   index,
   integer,
   pgTable,
@@ -22,7 +24,7 @@ import {
   uuid,
 } from 'drizzle-orm/pg-core';
 
-import { productKindEnum } from './enums.js';
+import { productKindEnum, productPriceBasisEnum } from './enums.js';
 import { organizations } from './organization.js';
 
 export const measurementUnits = pgTable(
@@ -115,5 +117,42 @@ export const productPresentations = pgTable(
   (table) => [
     uniqueIndex('product_presentations_product_name_uq').on(table.productId, table.name),
     index('product_presentations_product_active_idx').on(table.productId, table.isActive),
+  ],
+);
+
+/**
+ * Selling-price history.
+ *
+ * There is no `updated_at`: a price change is a new row, and the unique key
+ * prevents two prices for the same product starting on the same business date.
+ * The basis is captured with the amount so editing the product kind later
+ * cannot reinterpret an existing price.
+ */
+export const productPriceHistory = pgTable(
+  'product_price_history',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    organizationId: uuid('organization_id')
+      .notNull()
+      .references(() => organizations.id, { onDelete: 'cascade' }),
+    productId: uuid('product_id')
+      .notNull()
+      .references(() => products.id, { onDelete: 'cascade' }),
+    amountMinor: integer('amount_minor').notNull(),
+    currency: text('currency').notNull(),
+    priceBasis: productPriceBasisEnum('price_basis').notNull(),
+    effectiveFrom: date('effective_from', { mode: 'string' }).notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    uniqueIndex('product_price_history_product_effective_uq').on(
+      table.productId,
+      table.effectiveFrom,
+    ),
+    index('product_price_history_organization_product_effective_idx').on(
+      table.organizationId,
+      table.productId,
+      table.effectiveFrom,
+    ),
   ],
 );

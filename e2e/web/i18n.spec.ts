@@ -51,6 +51,11 @@ test.describe('Spanish', () => {
   test('translates the organization settings screen', async ({ page }) => {
     await installApi(page, {
       'GET /api/v1/organization': { body: ORGANIZATION },
+      'GET /api/v1/branches': { body: { items: [] } },
+      'GET /api/v1/employees': { body: { items: [] } },
+      'GET /api/v1/suppliers': { body: { items: [] } },
+      'GET /api/v1/product-categories': { body: { items: [] } },
+      'GET /api/v1/measurement-units': { body: { items: [] } },
     });
 
     await page.goto('/settings');

@@ -111,10 +111,17 @@ stock; it does not own a private copy of the catalog.
   because the documented 0.001 kg precision is exactly one gram. Names are unique
   within a product, `productId` is immutable, and update can change the name,
   weight or active flag.
+- `ProductPriceHistory` is an append-only row belonging to one organization and
+  product. It carries an integer `amountMinor`, the currency captured from the
+  organization, a `PER_KILOGRAM` or `PER_SALES_UNIT` basis captured from the
+  product kind, an ISO `effectiveFrom` date and a creation time. Effective dates
+  are unique per product. `createProductPriceHistory` validates the amount, code,
+  basis and calendar date; there is no update or delete behavior (TD-016).
 - Categories, units and presentations are deactivated rather than deleted so
-  later product and operational references keep their identity.
-- Prices, estimated/measured weights and historical snapshots are not modelled
-  yet. Those are M2/M5/M6 work.
+  later product and operational references keep their identity. Price history is
+  immutable and corrections are new effective-dated rows.
+- Estimated/measured weight snapshots and operational price consumption are not
+  modelled yet. Those are M5/M6 work.
 
 ## Stock concepts
 
@@ -198,6 +205,7 @@ Repositories are declared in `packages/domain/src/ports`:
 - `ProductCategoryRepository`
 - `ProductRepository`
 - `ProductPresentationRepository`
+- `ProductPriceHistoryRepository`
 - `UserRepository`
 - `SessionRepository`
 - `UnitOfWork`

@@ -1,8 +1,9 @@
 # Inventory U3 — Phase 1 Business Foundation Report
 
-> Last updated: 2026-11-12. M1 is committed at `bfdc9cb`, M2-T1 at `814f397`,
+> Last updated: 2026-11-13. M1 is committed at `bfdc9cb`, M2-T1 at `814f397`,
 > M2-T2 at `6b50606`, M2-T3 at `5c96eeb`, M2-T4 at `992d6ea` and M2-T5 at
-> `c8526d0`.
+> `c8526d0`; M2-T6, the sample seed and M2-T7 are complete in the working tree,
+> which completes M2.
 
 ## 1. Architecture overview
 
@@ -30,10 +31,10 @@ domain-purity, schema-parity and migration-parity checks.
 ## 4. Domain boundaries
 
 Implemented domain areas are organization, user, role, session, permissions,
-organization settings, branch, employee, supplier, product catalog, stock
-movement concepts, errors, time and identifiers. Branch, employee, supplier,
-catalog and product master data are persisted through both engines and exposed
-through API and UI. Stock concepts remain domain-only. No inventory balance,
+organization settings, branch, employee, supplier, product catalog, price
+history, stock movement concepts, errors, time and identifiers. Branch, employee,
+supplier, catalog, product and price-history data are persisted through both
+engines and exposed through API and UI. Stock concepts remain domain-only. No inventory balance,
 purchase, production, sales checkpoint or closing entity is implemented.
 
 ## 5. Web/Desktop strategy
@@ -47,22 +48,24 @@ unchanged between web and desktop.
 
 Fastify with Zod validation at every boundary, opaque bearer authentication,
 domain use cases, repository ports, standard problem envelopes and structured
-redacted logs. Branch, employee, supplier, category, unit, product and presentation routes are
-authenticated; writes require the administrator-only `organization:manage`
-permission and reads require `organization:read`. Employee assignments are
+redacted logs. Branch, employee, supplier, category, unit, product, presentation
+and price routes are authenticated; writes require the administrator-only
+`organization:manage` permission and reads require `organization:read`. Employee assignments are
 validated against a branch in the caller's organization; suppliers, categories,
 units and products are organization-wide. Product references are validated
-against the caller's organization, and presentations are nested under a product
-and verify product ownership.
+against the caller's organization, and presentations and prices are nested under
+a product and verify product ownership. Price rows derive basis from product kind
+and currency from the organization and reject duplicate effective dates.
 
 ## 7. Database architecture
 
 SQLite is the default engine; PostgreSQL is retained as the second engine. Both
 have schema trees, generated migrations and repository implementations. Current
 tables are organizations, branches, employees, suppliers, measurement units,
-product categories, products, product presentations, users and sessions. SQLite
-migrations are applied through `0005`; seed data contains only the development
-organization and users because real master data is not confirmed.
+product categories, products, product presentations, product price history, users
+and sessions. SQLite migrations are applied through `0006`; seed data contains
+only the development organization and users because real master data is not
+confirmed.
 
 ## 8. State-management strategy
 
@@ -75,10 +78,11 @@ global API-data store and no giant Zustand store.
 Vitest covers domain rules, REST-client behavior, API route integration,
 dual-engine repository behavior and React components with React Testing Library.
 SQLite integration tests run by default; PostgreSQL cases skip without a
-reachable server. Playwright remains the browser strategy but has no master-data admin flow yet.
-The default suites report 274 passed and 9 skipped; the separately invoked SQLite
-integration command reports 67 passed and 9 skipped. Typecheck, lint, build and
-formatting pass.
+reachable server. Playwright now covers shell, settings, master-data management,
+products, presentations and price history. The default suites report 292 passed
+and 10 skipped; the separately invoked SQLite integration command reports 69
+passed and 10 skipped; the Chromium E2E suite reports 29 passed. Typecheck, lint,
+build and formatting pass.
 
 ## 10. What was actually implemented
 
@@ -100,27 +104,36 @@ validation, category/unit/nested-presentation routes, typed client functions,
 Settings category and unit management and tests. M2-T5 added product update and
 organization-scoped reference validation, both-engine product repositories,
 product routes and typed client, the dedicated `/products` screen and the
-presentation editor for processed products (TD-015).
+presentation editor for processed products (TD-015). M2-T6 added the
+`ProductPriceHistory` entity, append-only dual-engine table and repositories,
+validation, authenticated product-nested price routes, typed client, and the
+`/products` price-history dialog and create form (TD-016). M2-T7 added Playwright
+coverage for master-data create/edit, the duplicate-name problem, read-only
+non-administrator views, product create/edit, tray presentations and
+effective-dated prices, completing M2. The sample seed adds an illustrative
+fruit-and-vegetable catalogue on both engines.
 
 ## 11. What was intentionally NOT implemented
 
 Employee login accounts, branch-scoped authorization, payroll, attendance,
-contact or identity data, supplier contact/tax/payment fields, prices, weight
-snapshots, purchases, receiving, stock tables and balances, production, sales
-checkpoints, daily closing, reporting, offline mode, desktop-local data,
-synchronization, microservices, GraphQL and Redux.
+contact or identity data, supplier contact/tax/payment fields, branch-scoped or
+purchase prices, price update/delete and correction audit, weight snapshots,
+recipe/bill-of-materials entities (BQ-11 defers production inputs to M5),
+purchases, receiving, stock tables and balances, production, sales checkpoints,
+daily closing, reporting, offline mode, desktop-local data, synchronization,
+microservices, GraphQL and Redux.
 
 ## 12. Open architectural questions
 
 See `docs/open-questions.md`. Key questions include employee sharing across
-branches (BQ-20), supplier detail fields (BQ-21), real branch seeding (BQ-19), the
-physical stock model, units
-and conversions, movement-derived versus cached levels, negative stock policy,
-multi-organization membership, reporting valuation and the WhatsApp report format
-that blocks M6 (BR-013).
+branches (BQ-20), supplier detail fields (BQ-21), real branch seeding (BQ-19),
+price scope (BQ-06), units and conversions (BQ-10), the physical stock model,
+movement-derived versus cached levels, negative stock policy, multi-organization
+membership, reporting valuation and the WhatsApp report format that blocks M6
+(BR-013).
 
 ## 13. Recommended next milestone
 
-Continue **M2 — Master Data** with M2-T6 average-weight and selling-price
-configuration with history, following the established domain, dual-engine
-persistence, API, typed-client, UI and test pattern.
+Commit M2-T6, the sample seed and M2-T7 when authorized. Then start **M3 —
+Supplier Purchases and Receiving** with the purchase and purchase-item domain
+entities and states.

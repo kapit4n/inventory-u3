@@ -22,6 +22,7 @@ import {
   type ReactNode,
 } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
+import { loginResponseSchema } from '@inventory-u3/validation';
 
 import { useApiClient } from '../../query/api-client-provider.js';
 import {
@@ -89,12 +90,13 @@ export function SessionProvider({ children }: SessionProviderProps): ReactNode {
 
   const signIn = useCallback(
     async ({ email, password }: SignInCredentials) => {
-      // The response is validated by the client against the login schema, so a
-      // shape change fails here rather than as an undefined token later.
-      const result = await client.post<StoredSession, SignInCredentials>('/auth/login', {
-        email,
-        password,
-      });
+      // The response is validated against the login contract, so a shape change
+      // fails here rather than as an undefined token or role later.
+      const result = await client.post<StoredSession, SignInCredentials>(
+        '/auth/login',
+        { email, password },
+        { schema: loginResponseSchema },
+      );
       acceptSession(result);
     },
     [client, acceptSession],
@@ -102,9 +104,11 @@ export function SessionProvider({ children }: SessionProviderProps): ReactNode {
 
   const signInAs = useCallback(
     async (userId: string) => {
-      const result = await client.post<StoredSession, { userId: string }>('/auth/dev-login', {
-        userId,
-      });
+      const result = await client.post<StoredSession, { userId: string }>(
+        '/auth/dev-login',
+        { userId },
+        { schema: loginResponseSchema },
+      );
       acceptSession(result);
     },
     [client, acceptSession],

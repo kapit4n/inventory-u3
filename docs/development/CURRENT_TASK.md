@@ -1,108 +1,77 @@
 # Current Task
 
-> Last updated: 2026-11-12.
+> Last updated: 2026-11-13.
 >
-> **M2-T5 is COMPLETE and committed as `c8526d0`.** M2-T1 branch, M2-T2 employee,
-> M2-T3 supplier and M2-T4 catalog master data are also complete. This slice adds
-> product list/create/edit for raw and processed products, plus the presentation
-> editor inside the product screen. M2-T4 is committed as `992d6ea`.
+> **M2-T7 is COMPLETE in the working tree; M2 is COMPLETE. Commit awaits explicit
+> authorization.** M2-T1 through M2-T6 are also complete. The only deferred M2
+> scope item, raw-to-finished product relationships, moved to M5 by BQ-11.
 
 ## Task identity
 
-| Field        | Value                                                           |
-| ------------ | --------------------------------------------------------------- |
-| Milestone    | M2 — Master Data                                                |
-| Task ID      | M2-T5                                                           |
-| Task         | Product create/edit/list and product-screen presentation editor |
-| Status       | COMPLETED                                                       |
-| Dependencies | M2-T4 complete; catalog entities, persistence and API exist     |
-| Blocks       | M2-T6 average-weight and selling-price configuration/history    |
+| Field        | Value                                                        |
+| ------------ | ------------------------------------------------------------ |
+| Milestone    | M2 — Master Data                                             |
+| Task ID      | M2-T7                                                        |
+| Task         | Remaining API routes, validation, problem mapping, UI, tests |
+| Status       | COMPLETED (working tree, commit pending)                     |
+| Dependencies | M2-T1 through M2-T6 complete                                 |
+| Blocks       | M3 supplier purchases and receiving                          |
 
 ## Objective
 
-Let an authenticated administrator list, create and edit raw and processed
-products against the organization's categories and measurement units, and manage
-the presentations of a selected processed product from the product screen.
+Close M2 by proving the master-data and product screens work in a real browser,
+not only in jsdom component tests.
 
 ## Scope
 
-- Add product update behavior to the domain and `ProductRepository.update` on the
-  port, SQLite repository and PostgreSQL repository.
-- Validate that the selected category and inventory, sales, purchase and
-  production units exist in the caller's organization.
-- Add product validation schemas and inferred request/response types.
-- Add authenticated `GET/POST/PUT /api/v1/products` routes.
-- Add typed REST-client product functions with response validation.
-- Add a dedicated `/products` screen with list/create/edit/deactivate,
-  read-only behavior for non-administrators and English/Spanish copy.
-- Expose the M2-T4 presentation editor from the product screen for processed
-  products, including create/edit/deactivate.
-- Add domain, dual-engine repository, route, REST-client and component tests.
-- Update the domain, backend, database, testing, access, architecture, decision,
-  progress, roadmap, state, known-issues and session documentation.
+- Add Playwright coverage for `/settings`: branch, employee, supplier, product
+  category and measurement unit list/create/edit flows.
+- Add Playwright coverage for `/products`: product create/edit, tray
+  presentation create, price-history display and effective-dated price create.
+- Cover the duplicate-branch problem mapping and the read-only view for
+  non-administrators.
+- Keep the existing settings and i18n specs working now that `/settings` mounts
+  all six master-data queries.
 
 ## Out of scope
 
-- Selling prices, price history, estimated/measured weight snapshots or unit
-  conversion factors (BQ-06, BQ-10, M2-T6).
-- Raw-to-finished production relationship rules (M5).
-- Hard deletion of products or presentations.
-- Catalog or product seeding; real master data is not confirmed.
-- Branch ownership for products; the catalog remains organization-wide (TD-009).
-- A backend restriction that presentations belong only to processed products.
-  The UI exposes the editor for processed products, but the existing API remains
-  product-scoped for every kind.
-
-## Assumptions and open questions
-
-- **Assumption:** product names are not unique; identity is the product id.
-- **Assumption:** a product may change its `RAW`/`PROCESSED` kind when edited.
-- **Assumption:** category and unit references are validated at the API
-  boundary; inactive references remain visible when editing an existing product.
-- **Assumption:** the product screen belongs in primary navigation rather than
-  Settings because it is an operational catalog workflow.
-- Categories, units and presentations stay deactivated rather than deleted.
-- Unit conversion, price scope and price history remain open (BQ-06, BQ-10).
+- New API routes or validation schemas: the M2 routes already exist and are
+  covered by route and REST-client tests.
+- Raw-to-finished product relationship rules: BQ-11 resolves production inputs
+  as free-form per batch with no recipe/BOM entity; this belongs to M5.
+- Purchase, stock, production, sales, closing or reporting work (M3 onward).
+- Replacing the illustrative sample catalogue with real master data (BQ-19).
 
 ## Acceptance criteria
 
-- [x] Product create and update trim and validate the name and require a known
-      raw/processed kind.
-- [x] Product create and update require a category, inventory unit and sales
-      unit, with optional purchase and production units.
-- [x] Category and unit references must belong to the caller's organization.
-- [x] Every product read and write is scoped to the caller's organization.
-- [x] Both engines implement product list/create/update with matching behavior.
-- [x] Product routes require authentication and the documented permissions.
-- [x] The products screen lists products and lets an administrator create, edit
-      and deactivate them; other roles see it read-only.
-- [x] A processed product can open its presentation list and create, edit or
-      deactivate presentations with an average weight per tray.
-- [x] Tests cover domain rules, both repository methods, routes, REST client and
-      both product UI flows.
-- [x] Typecheck, lint, unit/integration tests, guard, build, migrations, seed and
-      formatting pass.
+- [x] A browser spec drives branch create/edit and the duplicate-name message.
+- [x] A browser spec creates an employee assigned to a branch.
+- [x] A browser spec creates a supplier, a category and a unit.
+- [x] A browser spec lists master data read-only for a STAFF session.
+- [x] A browser spec lists products and opens current/scheduled price history.
+- [x] A browser spec creates a raw product and edits a processed product.
+- [x] A browser spec creates a tray presentation.
+- [x] A browser spec appends an effective-dated selling price and asserts the
+      minor-unit payload.
+- [x] A browser spec keeps products and prices visible but hides writes for a
+      STAFF session.
+- [x] `pnpm --filter @inventory-u3/e2e run typecheck`, lint and
+      `pnpm run test:e2e` pass.
 
 ## Completion record
 
-- M2-T5 is committed as `c8526d0 feat: add product management and presentation
-editor`.
-- M2-T4 is committed as `992d6ea feat: add catalog master data management`; the
-  previously committed M2-T4 documentation saying "uncommitted" was corrected.
-- Verified: typecheck 12/12, lint 12/12 with `BOUNDARY GUARD OK`, unit/component
-  tests 274 passed + 9 skipped, SQLite integration 67 passed + 9 skipped,
-  build 5/5, SQLite migrations through `0005`, seed and formatting.
-- PostgreSQL repository cases were skipped because no server is available.
-- No product, category, unit or presentation seed was added because real master
-  data is unavailable.
-- No new migration was required: the existing `products` table already carries
-  the category, kind, unit and active-state columns and ownership constraints.
-- Product names are not unique. Presentations remain available through the API
-  for any product, but the UI shows the presentation action only for processed
-  products (TD-015).
+- Added `e2e/web/master-data.spec.ts`, `e2e/web/products.spec.ts` and the
+  `e2e/web/fixtures/session.ts` role helper.
+- Updated `e2e/web/settings.spec.ts` and `e2e/web/i18n.spec.ts` to mock the
+  master-data list queries now mounted on `/settings`.
+- Browser verification: 29 Chromium tests passed (6 new master-data, 5 new
+  product, plus the existing 18 specs).
+- No production code changed; the API routes, validation, problem mapping and UI
+  already existed from M2-T1 through M2-T6.
+- The working-tree changes are not committed yet.
 
 ## Next task
 
-M2-T6 average-weight and selling-price configuration with history. Do not add
-prices or weight snapshots before its milestone; do not start M3 purchasing until
-M2 is complete.
+Commit M2-T6, the sample seed and M2-T7 after review if authorized. Then start
+M3 supplier purchases and receiving, beginning with the purchase and
+purchase-item domain entities and states. Do not start M4 stock work first.

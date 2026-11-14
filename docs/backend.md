@@ -54,6 +54,8 @@ Secrets are read from the environment and never logged.
 | GET    | `/api/v1/products/:productId/presentations`                 | `organization:read`   |
 | POST   | `/api/v1/products/:productId/presentations`                 | `organization:manage` |
 | PUT    | `/api/v1/products/:productId/presentations/:presentationId` | `organization:manage` |
+| GET    | `/api/v1/products/:productId/prices`                        | `organization:read`   |
+| POST   | `/api/v1/products/:productId/prices`                        | `organization:manage` |
 
 Branch, employee, supplier, category, unit and product routes are implemented
 with create, list and edit; there is no delete endpoint because all of them are
@@ -64,11 +66,15 @@ validate that the category and every referenced unit belong to the caller's
 organization. Presentation create/list/update is nested under a product, requires
 the product to belong to the caller's organization, and checks that the
 presentation belongs to that product. The product screen hosts the presentation
-editor for processed products (TD-015). Inventory endpoints are intentionally
-absent until their milestone.
+editor for processed products (TD-015). Price create/list is nested under a
+product, verifies product ownership, derives basis from the product kind and
+currency from the organization, rejects duplicate effective dates as a domain
+conflict, and exposes no update or delete route (TD-016). Inventory endpoints are
+intentionally absent until their milestone.
 
 The branch, employee, supplier, category, unit and product collections return
-`{ "items": [...] }`. Duplicate branch names, category names, unit codes and
+`{ "items": [...] }`. Product prices return `{ "items": [...], "currency": "USD" }`
+so the create form knows the current organization currency. Duplicate branch names, category names, unit codes and
 per-product presentation names return a `DOMAIN_RULE_VIOLATION` problem rather
 than a database error. Employee full names, supplier names and product names are
 not unique.
@@ -105,11 +111,11 @@ only; no stock repository exists.
 
 API unit tests cover configuration, problem mapping and authentication.
 Integration tests cover authentication, branch, employee, supplier, category,
-unit, product and presentation route permissions and validation, the organization
-plus branch, employee, supplier, catalog and product repository round-trips on
-SQLite, cross-organization isolation, repository constraints and a migration
-smoke path. The same integration files run against PostgreSQL when
-`TEST_DATABASE_URL` answers and skip otherwise. Domain and validation tests cover
-their invariants. Component tests cover branch, employee, supplier, category,
-unit, product and presentation management; browser tests mock the API through
-Playwright.
+unit, product, presentation and product-price route permissions and validation,
+the organization plus branch, employee, supplier, catalog, product and price
+repository round-trips on SQLite, cross-organization isolation, repository
+constraints and a migration smoke path. The same integration files run against
+PostgreSQL when `TEST_DATABASE_URL` answers and skip otherwise. Domain and
+validation tests cover their invariants. Component tests cover branch, employee,
+supplier, category, unit, product, presentation and price-history management;
+browser tests mock the API through Playwright.

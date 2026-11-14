@@ -70,6 +70,24 @@ describe('LoginPage', () => {
     });
   });
 
+  it('refuses a session response without a valid user role', async () => {
+    const invalidBody = {
+      ...successBody,
+      user: { ...successBody.user, role: undefined },
+    };
+    const fetchImplementation = vi.fn(async () =>
+      Promise.resolve(new Response(JSON.stringify(invalidBody), { status: 200 })),
+    ) as unknown as typeof fetch;
+
+    renderLogin(fetchImplementation);
+    fillAndSubmit('admin@inventory.test', 'secret');
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'The email or password is incorrect.',
+    );
+    expect(window.localStorage.getItem('inventory-u3-session')).toBeNull();
+  });
+
   it('shows one message for a refused login', async () => {
     const fetchImplementation = vi.fn(async () =>
       Promise.resolve(

@@ -406,6 +406,77 @@ describe('catalog routes (SQLite)', () => {
     expect(response.json().error.code).toBe('NOT_FOUND');
   });
 
+  it('records append-only, effective-dated product prices', async () => {
+    const admin = await tokenFor('admin@inventory.test');
+    const staff = await tokenFor('staff@inventory.test');
+
+    const empty = await app.inject({
+      method: 'GET',
+      url: `/api/v1/products/${productId}/prices`,
+      headers: auth(admin),
+    });
+    expect(empty.statusCode).toBe(200);
+    expect(empty.json()).toEqual({ items: [], currency: 'USD' });
+
+    const later = await app.inject({
+      method: 'POST',
+      url: `/api/v1/products/${productId}/prices`,
+      headers: auth(admin),
+      payload: { amountMinor: 450, effectiveFrom: '2026-12-01' },
+    });
+    expect(later.statusCode).toBe(201);
+    expect(later.json()).toMatchObject({
+      productId,
+      amountMinor: 450,
+      currency: 'USD',
+      priceBasis: 'PER_KILOGRAM',
+      effectiveFrom: '2026-12-01',
+    });
+
+    const earlier = await app.inject({
+      method: 'POST',
+      url: `/api/v1/products/${productId}/prices`,
+      headers: auth(admin),
+      payload: { amountMinor: 400, effectiveFrom: '2026-11-10' },
+    });
+    expect(earlier.statusCode).toBe(201);
+
+    const listed = await app.inject({
+      method: 'GET',
+      url: `/api/v1/products/${productId}/prices`,
+      headers: auth(admin),
+    });
+    expect(listed.statusCode).toBe(200);
+    expect(listed.json().currency).toBe('USD');
+    expect(
+      listed.json().items.map((price: { effectiveFrom: string }) => price.effectiveFrom),
+    ).toEqual(['2026-12-01', '2026-11-10']);
+
+    const duplicate = await app.inject({
+      method: 'POST',
+      url: `/api/v1/products/${productId}/prices`,
+      headers: auth(admin),
+      payload: { amountMinor: 475, effectiveFrom: '2026-12-01' },
+    });
+    expect(duplicate.statusCode).toBe(409);
+    expect(duplicate.json().error.code).toBe('DOMAIN_RULE_VIOLATION');
+
+    const forbidden = await app.inject({
+      method: 'POST',
+      url: `/api/v1/products/${productId}/prices`,
+      headers: auth(staff),
+      payload: { amountMinor: 475, effectiveFrom: '2027-01-01' },
+    });
+    expect(forbidden.statusCode).toBe(403);
+
+    const unknown = await app.inject({
+      method: 'GET',
+      url: `/api/v1/products/${randomUUID()}/prices`,
+      headers: auth(admin),
+    });
+    expect(unknown.statusCode).toBe(404);
+  });
+
   it('creates, lists and updates raw and processed products', async () => {
     const reader = await tokenFor('staff@inventory.test');
     const token = await tokenFor('admin@inventory.test');

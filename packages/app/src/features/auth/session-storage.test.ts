@@ -45,6 +45,22 @@ describe('session storage', () => {
     expect(readStoredSession()).toBeUndefined();
   });
 
+  it('reads a value missing the user role as no session', () => {
+    window.localStorage.setItem(
+      'inventory-u3-session',
+      JSON.stringify({ ...session, user: { ...session.user, role: undefined } }),
+    );
+    expect(readStoredSession()).toBeUndefined();
+  });
+
+  it('reads an unknown user role as no session', () => {
+    window.localStorage.setItem(
+      'inventory-u3-session',
+      JSON.stringify({ ...session, user: { ...session.user, role: 'OWNER' } }),
+    );
+    expect(readStoredSession()).toBeUndefined();
+  });
+
   it('reads an expired session as no session', () => {
     window.localStorage.setItem(
       'inventory-u3-session',

@@ -92,4 +92,43 @@ export const products = {
     'No se pudo conectar con la API. Revisa la conexión e inténtalo de nuevo.',
   'products.presentations.form.failure.duplicate':
     'Ya existe una presentación con ese nombre para este producto.',
+  'products.actions.prices': 'Precios',
+  'products.prices.title': 'Precios de venta de {product}',
+  'products.prices.description':
+    'Los cambios de precio se guardan como historial. Agregar un precio afecta solo las ventas desde su fecha de vigencia.',
+  'products.prices.new': 'Nuevo precio',
+  'products.prices.loading': 'Cargando precios…',
+  'products.prices.loadFailure': 'No se pudieron cargar los precios.',
+  'products.prices.empty': 'Todavía no hay precio de venta.',
+  'products.prices.emptyDescription':
+    'Registra el primer precio y la fecha desde la que se aplica.',
+  'products.prices.column.price': 'Precio',
+  'products.prices.column.basis': 'Base',
+  'products.prices.column.effectiveFrom': 'Vigente desde',
+  'products.prices.column.status': 'Estado',
+  'products.prices.column.recordedAt': 'Registrado',
+  'products.prices.basis.perKilogram': 'Por kilogramo',
+  'products.prices.basis.perSalesUnit': 'Por unidad de venta',
+  'products.prices.status.current': 'Actual',
+  'products.prices.status.scheduled': 'Programado',
+  'products.prices.status.past': 'Anterior',
+  'products.prices.form.title': 'Nuevo precio de venta',
+  'products.prices.form.description':
+    'Esto agrega un precio al historial. Los precios existentes nunca se reescriben.',
+  'products.prices.form.amount': 'Precio ({currency})',
+  'products.prices.form.amountHintProcessed':
+    'Para un producto procesado este monto es por kilogramo.',
+  'products.prices.form.amountHintRaw': 'Para un producto crudo este monto es por unidad de venta.',
+  'products.prices.form.amountRequired': 'Ingresa un precio válido no negativo.',
+  'products.prices.form.effectiveFrom': 'Vigente desde',
+  'products.prices.form.effectiveFromRequired': 'Elige una fecha de vigencia válida.',
+  'products.prices.form.save': 'Registrar precio',
+  'products.prices.form.saving': 'Guardando…',
+  'products.prices.form.failure': 'No se pudo registrar el precio.',
+  'products.prices.form.failure.validation': 'Revisa el precio y la fecha de vigencia.',
+  'products.prices.form.failure.forbidden': 'Solo un administrador puede registrar precios.',
+  'products.prices.form.failure.network':
+    'No se pudo conectar con la API. Revisa la conexión e inténtalo de nuevo.',
+  'products.prices.form.failure.duplicate':
+    'Ya existe un precio con esa fecha de vigencia para este producto.',
 } as const;

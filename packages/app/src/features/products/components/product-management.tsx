@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { hasPermission } from '@inventory-u3/domain';
 import type { ProductResponse } from '@inventory-u3/validation';
-import { AlertCircle, Layers, Loader2, Pencil, Plus } from 'lucide-react';
+import { AlertCircle, DollarSign, Layers, Loader2, Pencil, Plus } from 'lucide-react';
 import {
   Button,
   Card,
@@ -25,6 +25,7 @@ import { useProductCategories } from '../../product-categories/queries/product-c
 import { useProducts } from '../queries/products-query.js';
 import { ProductFormDialog } from './product-form-dialog.js';
 import { ProductPresentationDialog } from './product-presentation-dialog.js';
+import { ProductPriceDialog } from './product-price-dialog.js';
 
 export function ProductManagement() {
   const { t } = useTranslation();
@@ -35,6 +36,7 @@ export function ProductManagement() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<ProductResponse | undefined>();
   const [presentationProduct, setPresentationProduct] = useState<ProductResponse | undefined>();
+  const [priceProduct, setPriceProduct] = useState<ProductResponse | undefined>();
   const canManage = user ? hasPermission(user.role, 'organization:manage') : false;
 
   const categories = categoriesQuery.data ?? [];
@@ -141,9 +143,7 @@ export function ProductManagement() {
                 <TableHead>{t('products.column.inventoryUnit')}</TableHead>
                 <TableHead>{t('products.column.salesUnit')}</TableHead>
                 <TableHead>{t('products.column.status')}</TableHead>
-                {canManage ? (
-                  <TableHead className="text-right">{t('products.column.actions')}</TableHead>
-                ) : null}
+                <TableHead className="text-right">{t('products.column.actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -176,34 +176,46 @@ export function ProductManagement() {
                         : t('products.status.inactive')}
                     </span>
                   </TableCell>
-                  {canManage ? (
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-1">
-                        {product.kind === 'PROCESSED' ? (
+                  <TableCell className="text-right">
+                    <div className="flex justify-end gap-1">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setPriceProduct(product)}
+                        aria-label={`${t('products.actions.prices')} ${product.name}`}
+                      >
+                        <DollarSign aria-hidden className="size-4" />
+                        {t('products.actions.prices')}
+                      </Button>
+                      {canManage ? (
+                        <>
+                          {product.kind === 'PROCESSED' ? (
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setPresentationProduct(product)}
+                              aria-label={`${t('products.actions.presentations')} ${product.name}`}
+                            >
+                              <Layers aria-hidden className="size-4" />
+                              {t('products.actions.presentations')}
+                            </Button>
+                          ) : null}
                           <Button
                             type="button"
                             variant="ghost"
                             size="sm"
-                            onClick={() => setPresentationProduct(product)}
-                            aria-label={`${t('products.actions.presentations')} ${product.name}`}
+                            onClick={() => openEdit(product)}
+                            aria-label={`${t('products.edit')} ${product.name}`}
                           >
-                            <Layers aria-hidden className="size-4" />
-                            {t('products.actions.presentations')}
+                            <Pencil aria-hidden className="size-4" />
+                            {t('products.edit')}
                           </Button>
-                        ) : null}
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => openEdit(product)}
-                          aria-label={`${t('products.edit')} ${product.name}`}
-                        >
-                          <Pencil aria-hidden className="size-4" />
-                          {t('products.edit')}
-                        </Button>
-                      </div>
-                    </TableCell>
-                  ) : null}
+                        </>
+                      ) : null}
+                    </div>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -232,6 +244,19 @@ export function ProductManagement() {
             }
           }}
           product={presentationProduct}
+        />
+      ) : null}
+
+      {priceProduct ? (
+        <ProductPriceDialog
+          open
+          onOpenChange={(open) => {
+            if (!open) {
+              setPriceProduct(undefined);
+            }
+          }}
+          product={priceProduct}
+          canManage={canManage}
         />
       ) : null}
     </Card>

@@ -119,7 +119,7 @@ engine (ADR 0025).
   SQLite paths against the repository root.
 - Current tables: `organizations`, `branches`, `employees`, `suppliers`,
   `measurement_units`, `product_categories`, `products`,
-  `product_presentations`, `users`, `sessions`.
+  `product_presentations`, `product_price_history`, `users`, `sessions`.
 
 The `branches`, `employees` and `suppliers` tables and the four catalog tables are
 implemented on both engines. Catalog and supplier master data are
@@ -130,8 +130,10 @@ organization ownership only and are also deactivated (TD-013). Category names an
 unit codes are unique per organization, and presentation names are unique per
 product (TD-014). `products.kind` distinguishes raw from processed products, and
 `product_presentations.average_weight_grams` stores the configured weight exactly
-(TD-010). Prices, estimated/measured weight snapshots, stock, production and sales
-tables do not exist yet. The domain contains the append-only stock movement
+(TD-010). `product_price_history` stores append-only effective-dated integer
+amounts with captured currency and kind-derived basis, unique per product and
+effective date (TD-016). Estimated/measured weight snapshots, stock, production
+and sales tables do not exist yet. The domain contains the append-only stock movement
 vocabulary and a balance shape, but no stock port or table (ADR 0040). Every
 future operational row must carry organization and branch ownership.
 
@@ -147,9 +149,10 @@ future operational row must carry organization and branch ownership.
   capabilities. Features never import Tauri.
 - Current routes: `/` (redirect), `/dashboard`, `/products`, `/inventory`
   (placeholder), `/settings`.
-- The `/products` screen contains product list/create/edit and, for processed
-  products, the presentation editor. There are no purchase, production, sales
-  checkpoint, closing or report screens.
+- The `/products` screen contains product list/create/edit, the presentation
+  editor for processed products, and an append-only selling-price history dialog
+  readable by every role and writable by administrators. There are no purchase,
+  production, sales checkpoint, closing or report screens.
 
 ## 8. Desktop
 
@@ -170,10 +173,10 @@ desktop shell does not open a database; it talks to the API over HTTP.
 PostgreSQL integration tests require `TEST_DATABASE_URL` and are skipped on this
 machine because no PostgreSQL server is available. The current integration files
 cover authentication, organization, branch, employee, supplier and catalog
-repository round-trips, branch, employee, supplier, category, unit, product and
-presentation route permissions and validation, cross-organization isolation,
-repository constraints and a migration smoke path. No stock or workflow API
-exists yet.
+repository round-trips, branch, employee, supplier, category, unit, product,
+presentation and price route permissions and validation, cross-organization
+isolation, repository constraints and a migration smoke path. No stock or
+workflow API exists yet.
 
 ## 10. Guardrails and quality gates
 
@@ -191,10 +194,10 @@ exists yet.
 
 The existing foundation is reusable. Branch, employee, supplier, category,
 measurement-unit and product entities, their dual-engine persistence, API routes
-and UI now exist, as do presentation API, typed-client and product-screen editor
-support. The following are not designed or built:
+and UI now exist, as do presentation and price-history API, typed-client and
+product-screen support. The following are not designed or built:
 
-1. Product price history and estimated/measured weight snapshots.
+1. Estimated/measured weight snapshots and operational price consumption.
 2. Persisted stock ledger, balance strategy and reconciliation.
 3. Purchase receiving and auditable correction model.
 4. Production batch inputs/outputs and snapshot fields.

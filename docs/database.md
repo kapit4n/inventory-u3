@@ -31,18 +31,19 @@ database/schema/              PostgreSQL Drizzle schema
 
 The current tables are:
 
-| Table                   | Ownership                | Purpose                                                  |
-| ----------------------- | ------------------------ | -------------------------------------------------------- |
-| `organizations`         | tenant root              | Name, timezone, currency and active flag                 |
-| `branches`              | organization             | Physical location with independent inventory             |
-| `employees`             | organization and branch  | Person whose production work is recorded; no login       |
-| `suppliers`             | organization             | Provider referenced by purchases; no login               |
-| `measurement_units`     | organization             | Configurable unit code, name and active flag             |
-| `product_categories`    | organization             | Catalog grouping with a name and active flag             |
-| `products`              | organization             | Category, raw/processed kind and inventory/sales units   |
-| `product_presentations` | organization and product | Presentation name and configured average weight in grams |
-| `users`                 | organization             | Email, password hash, role and active flag               |
-| `sessions`              | organization and user    | Hashed opaque token, issue/expiry and revocation         |
+| Table                   | Ownership                | Purpose                                                     |
+| ----------------------- | ------------------------ | ----------------------------------------------------------- |
+| `organizations`         | tenant root              | Name, timezone, currency and active flag                    |
+| `branches`              | organization             | Physical location with independent inventory                |
+| `employees`             | organization and branch  | Person whose production work is recorded; no login          |
+| `suppliers`             | organization             | Provider referenced by purchases; no login                  |
+| `measurement_units`     | organization             | Configurable unit code, name and active flag                |
+| `product_categories`    | organization             | Catalog grouping with a name and active flag                |
+| `products`              | organization             | Category, raw/processed kind and inventory/sales units      |
+| `product_presentations` | organization and product | Presentation name and configured average weight in grams    |
+| `product_price_history` | organization and product | Effective-dated selling price, currency, kind-derived basis |
+| `users`                 | organization             | Email, password hash, role and active flag                  |
+| `sessions`              | organization and user    | Hashed opaque token, issue/expiry and revocation            |
 
 Branch, employee, supplier and catalog tables carry `organization_id`.
 Employees also carry `branch_id`; suppliers and catalog master data are
@@ -51,7 +52,10 @@ private supplier or catalog copies. Every operational table must carry both
 `organization_id` and `branch_id` (ADR 0039). Products carry a required `kind`
 (`RAW` or `PROCESSED`; PostgreSQL enum and SQLite `CHECK`) and presentations carry
 a non-null `average_weight_grams`, validated as a positive integer by the domain
-(TD-010).
+(TD-010). Price history carries `amount_minor`, `currency`, `price_basis`,
+`effective_from` and `created_at`, with a unique product/effective-date key and a
+lookup index; it is append-only and organization-wide until BQ-06 is answered
+(TD-016).
 
 ## Migrations
 
@@ -60,15 +64,13 @@ database/migrations/          PostgreSQL migrations + journal
 database/migrations-sqlite/   SQLite migrations + journal
 ```
 
-Both journals currently contain six entries, `0000` through `0005`; `0002` adds
+Both journals currently contain seven entries, `0000` through `0006`; `0002` adds
 branches and the catalog, `0003` adds product kind and average weight, `0004`
-adds employees with organization and branch references, and `0005` adds
-organization-wide suppliers. M2-T4 did not change the schema: the catalog tables
-already carry the organization and product ownership and the unique constraints
-used by category names, unit codes and per-product presentation names. M2-T5 also
-did not change the schema: `products` already carries the category, kind, unit,
-active-state and ownership columns needed by product management and presentation
-editing.
+adds employees with organization and branch references, `0005` adds
+organization-wide suppliers, and `0006` adds effective-dated product price
+history on both engines. M2-T4 and M2-T5 did not change the schema because the
+catalog and product tables already carried the needed ownership, unique keys and
+active-state columns.
 Generate both engines when the schema changes:
 
 ```bash
@@ -93,11 +95,23 @@ empty, or write an explicit data migration and test it on a populated database.
 
 ## Seed data
 
-`database/development-data.ts` contains the fixed organization id and development
-users. `database/seed.ts` writes the organization and users using the same
-password hashing implementation the API uses. Branches, employees, suppliers and
-catalog rows are not seeded yet; branch creation waits on the three branch names
-(BQ-19) and employee and supplier creation wait on real master data.
+`database/development-data.ts` contains the fixed organization id, development
+users and a sample fruit-and-vegetable catalogue. `database/seed.ts` writes them
+using the same password hashing implementation the API uses. Every row uses a
+fixed id, so the seed is idempotent and restores the sample data on each run.
+
+Seeded master data:
+
+| Area          | Rows                                                                                                          |
+| ------------- | ------------------------------------------------------------------------------------------------------------- |
+| Branches      | 3 (`Mercado Central`, `Sucursal Palermo`, `Sucursal Belgrano`)                                                |
+| Employees     | 4, assigned to the seeded branches                                                                            |
+| Suppliers     | 3                                                                                                             |
+| Units         | 6 (`kg`, `unit`, `tray`, `box`, `bunch`, `bag`)                                                               |
+| Categories    | 4 (`Frutas`, `Verduras`, `Frutas y verduras preparadas`, `Hierbas aromáticas`)                                |
+| Products      | 21 raw and processed fruit, vegetable and herb products                                                       |
+| Presentations | 6 trays for the processed products                                                                            |
+| Price history | 27 effective-dated selling-price rows (current prices from `2026-11-01`, some earlier rows from `2026-06-01`) |
 
 Development users:
 
@@ -108,9 +122,9 @@ Development users:
 | `staff@inventory.test`   | `STAFF`         |
 
 The development password is `inventory-dev` and is not a production secret.
-No branch, employee, supplier, category, unit, product or presentation seed has
-been added; catalog and product values are real business master data that has not been
-confirmed.
+The catalogue is illustrative development data, not confirmed business master
+data: BQ-19 still asks for the real branch names and the real product and price
+master data must replace these rows when available.
 
 ## Rules
 

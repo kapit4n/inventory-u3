@@ -2,7 +2,8 @@
 
 > Canonical business roadmap. It supersedes the generic item/stock sequence in
 > the old [`docs/roadmap.md`](../roadmap.md), which now points here.
-> Last reviewed: 2026-11-12 after M2-T5 (product management, committed).
+> Last reviewed: 2026-11-13 after M2-T7 (master-data browser coverage), which
+> completes M2.
 
 Status values are used exactly as follows:
 
@@ -127,14 +128,19 @@ identity, the raw/processed + average-weight configuration, the stock movement
 vocabulary and the access-model note are real. Stock persistence, prices and
 transactional records do not exist yet; the balance is a type only while BQ-07
 and BQ-08 remain open. The access note does not add branch authorization. The
-three development branches are intentionally not seeded until their names are
-confirmed (BQ-19); that is M2 work, not an M1 gap.
+three development branches were intentionally not seeded at M1 closeout until
+their names were confirmed (BQ-19); that was M2 work, not an M1 gap. A later
+session added an illustrative fruit-and-vegetable sample seed; the real branch
+names are still open.
 
 ---
 
 ## M2 — Master Data
 
-**Status: IN_PROGRESS (M2-T1 branches, M2-T2 employees, M2-T3 suppliers, M2-T4 catalog master data and M2-T5 products complete).**
+**Status: COMPLETED (M2-T1 through M2-T7 complete).** The raw-to-finished
+product relationship is deferred to M5: BQ-11 resolves production inputs as
+free-form per batch, with no recipe or bill-of-materials entity in the domain
+model.
 
 ### Objective
 
@@ -151,7 +157,9 @@ Let the operator maintain the master data every later workflow depends on.
 - Product presentations.
 - Average weight per tray configuration.
 - Selling prices per kilogram/unit.
-- Raw-to-finished product relationship rules needed by production.
+- Raw-to-finished product relationship rules needed by production. Deferred to
+  M5: production inputs are free-form per batch and no recipe entity exists
+  (BQ-11).
 
 ### Dependencies
 
@@ -159,15 +167,15 @@ M1 (domain and persistence foundation).
 
 ### Tasks
 
-| ID    | Task                                                            | Status      |
-| ----- | --------------------------------------------------------------- | ----------- |
-| M2-T1 | Branch list/create/edit, permissions and branch selector        | COMPLETED   |
-| M2-T2 | Employee master data and branch assignment                      | COMPLETED   |
-| M2-T3 | Supplier master data                                            | COMPLETED   |
-| M2-T4 | Category, unit and presentation master data                     | COMPLETED   |
-| M2-T5 | Product create/edit/list for raw and processed products         | COMPLETED   |
-| M2-T6 | Average weight and selling-price configuration with history     | NOT_STARTED |
-| M2-T7 | Remaining API routes, validation, problem mapping, UI and tests | NOT_STARTED |
+| ID    | Task                                                            | Status    |
+| ----- | --------------------------------------------------------------- | --------- |
+| M2-T1 | Branch list/create/edit, permissions and branch selector        | COMPLETED |
+| M2-T2 | Employee master data and branch assignment                      | COMPLETED |
+| M2-T3 | Supplier master data                                            | COMPLETED |
+| M2-T4 | Category, unit and presentation master data                     | COMPLETED |
+| M2-T5 | Product create/edit/list for raw and processed products         | COMPLETED |
+| M2-T6 | Average weight and selling-price configuration with history     | COMPLETED |
+| M2-T7 | Remaining API routes, validation, problem mapping, UI and tests | COMPLETED |
 
 ### Acceptance criteria
 
@@ -176,14 +184,15 @@ M1 (domain and persistence foundation).
 - [x] Operator can create, list and edit categories and units.
 - [x] Operator can create, list and edit products.
 - [x] Every record is organization-scoped; branch-owned records carry a branch.
-- [ ] A processed product can have a presentation, average weight per tray and
-      selling price per kilogram (selling price is M2-T6).
+- [x] A processed product can have a presentation, average weight per tray and
+      selling price per kilogram.
 - [x] A raw product does not require tray configuration.
-- [ ] Price changes are effective-dated or otherwise historically preserved.
+- [x] Price changes are effective-dated and historically preserved.
 - [x] No master-data screen contains business logic beyond form validation.
 - [x] Both engines implement the same repository methods.
-- [ ] Unit, integration and browser tests cover the main flows (browser coverage
-      remains outstanding).
+- [x] Unit, integration and browser tests cover the main flows (master-data
+      create/edit, products, presentations and price history have Playwright
+      specs).
 
 ### Expected database changes
 
@@ -681,7 +690,7 @@ been executed." A passing unit suite is not a backup/restore drill.
 | ----------------------- | ----------- | -------------------------------------------------------------------------- |
 | Foundation prerequisite | COMPLETED   | Foundation code, migrations, tests and recorded verification               |
 | M1                      | COMPLETED   | Branch, catalog, measurement, stock and access note; docs and guard closed |
-| M2                      | IN_PROGRESS | Branch, employee, supplier, catalog and product master data complete       |
+| M2                      | COMPLETED   | Master data, product presentations, price history and browser coverage     |
 | M3                      | NOT_STARTED | No purchase/receiving tables or screens                                    |
 | M4                      | NOT_STARTED | No stock tables or screens; inventory route is a placeholder               |
 | M5                      | NOT_STARTED | No production tables or screens                                            |

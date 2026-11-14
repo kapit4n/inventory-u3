@@ -9,6 +9,7 @@
 import type {
   BranchId,
   EmployeeId,
+  IsoDate,
   IsoDateTime,
   MeasurementUnitId,
   OrganizationId,
@@ -28,6 +29,7 @@ import type { Organization, OrganizationSettingsUpdate } from '../organization/o
 import type { MeasurementUnit } from '../product/measurement-unit.js';
 import type { ProductCategory } from '../product/product-category.js';
 import type { ProductPresentation } from '../product/product-presentation.js';
+import type { ProductPriceHistory } from '../product/product-price-history.js';
 import type { Product } from '../product/product.js';
 
 export interface UnitOfWork {
@@ -49,6 +51,7 @@ export interface Repositories {
   readonly productCategories: ProductCategoryRepository;
   readonly products: ProductRepository;
   readonly productPresentations: ProductPresentationRepository;
+  readonly productPriceHistory: ProductPriceHistoryRepository;
   readonly users: UserRepository;
   readonly sessions: SessionRepository;
 }
@@ -136,6 +139,20 @@ export interface ProductPresentationRepository {
   create(productPresentation: ProductPresentation): Promise<ProductPresentation>;
   /** Returns `undefined` when the presentation does not belong to the organization. */
   update(productPresentation: ProductPresentation): Promise<ProductPresentation | undefined>;
+}
+
+export interface ProductPriceHistoryRepository {
+  findByProductAndEffectiveFrom(
+    organizationId: OrganizationId,
+    productId: ProductId,
+    effectiveFrom: IsoDate,
+  ): Promise<ProductPriceHistory | undefined>;
+  /** Newest effective date first. */
+  listByProduct(
+    organizationId: OrganizationId,
+    productId: ProductId,
+  ): Promise<readonly ProductPriceHistory[]>;
+  create(productPriceHistory: ProductPriceHistory): Promise<ProductPriceHistory>;
 }
 
 export interface UserRepository {

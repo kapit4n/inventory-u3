@@ -11,6 +11,7 @@ const ORGANIZATION_ID = '11111111-1111-4111-8111-111111111111';
 const CATEGORY_ID = '22222222-2222-4222-8222-222222222222';
 const KILOGRAM_ID = '33333333-3333-4333-8333-333333333333';
 const PRODUCT_ID = '44444444-4444-4444-8444-444444444444';
+const PRICE_ID = '66666666-6666-4666-8666-666666666666';
 
 const CATEGORY = {
   id: CATEGORY_ID,
@@ -42,6 +43,17 @@ const PRODUCT = {
   isActive: true,
   createdAt: '2026-11-09T12:00:00.000Z',
   updatedAt: '2026-11-09T12:00:00.000Z',
+};
+
+const PRICE = {
+  id: PRICE_ID,
+  organizationId: ORGANIZATION_ID,
+  productId: PRODUCT_ID,
+  amountMinor: 400,
+  currency: 'USD',
+  priceBasis: 'PER_KILOGRAM',
+  effectiveFrom: '2020-01-01',
+  createdAt: '2026-11-09T12:00:00.000Z',
 };
 
 type FetchMock = Mock<typeof fetch>;
@@ -97,10 +109,29 @@ function renderProducts(role: 'ADMINISTRATOR' | 'STAFF', fetchImplementation: ty
 
 function productApiMock(): FetchMock {
   const products = [PRODUCT];
+  const prices = [PRICE];
 
   return vi.fn<typeof fetch>(async (input, init) => {
     const url = String(input);
     const path = new URL(url).pathname;
+
+    if (path.endsWith(`/products/${PRODUCT_ID}/prices`)) {
+      if (init?.method === 'POST') {
+        const body = JSON.parse(String(init.body)) as {
+          amountMinor: number;
+          effectiveFrom: string;
+        };
+        const created = {
+          ...PRICE,
+          id: '77777777-7777-4777-8777-777777777777',
+          ...body,
+          createdAt: '2026-11-12T12:00:00.000Z',
+        };
+        prices.push(created);
+        return jsonResponse(created, 201);
+      }
+      return jsonResponse({ items: prices, currency: 'USD' });
+    }
 
     if (init?.method === 'POST' && path.endsWith('/products')) {
       const body = JSON.parse(String(init.body)) as typeof PRODUCT;
@@ -155,6 +186,7 @@ describe('ProductManagement', () => {
     expect(await screen.findByText('Watermelon')).toBeInTheDocument();
     expect(screen.getByText('Fruit')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /presentations watermelon/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /prices watermelon/i })).toBeInTheDocument();
 
     fireEvent.click(screen.getByTestId('product-new'));
     fireEvent.change(screen.getByTestId('product-name'), {
@@ -183,6 +215,37 @@ describe('ProductManagement', () => {
     });
 
     expect(await screen.findByText('Pineapple')).toBeInTheDocument();
+  });
+
+  it('lists price history and records a new effective-dated price', async () => {
+    const fetchImplementation = productApiMock();
+    renderProducts('ADMINISTRATOR', fetchImplementation);
+
+    fireEvent.click(await screen.findByRole('button', { name: /prices watermelon/i }));
+    expect(await screen.findByText('Selling prices for Watermelon')).toBeInTheDocument();
+    expect(await screen.findByText('$4.00')).toBeInTheDocument();
+    expect(screen.getByText('Per kilogram')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('product-price-new'));
+    fireEvent.change(await screen.findByTestId('product-price-amount'), {
+      target: { value: '5.25' },
+    });
+    fireEvent.change(screen.getByTestId('product-price-effective-from'), {
+      target: { value: '2030-01-01' },
+    });
+    fireEvent.click(screen.getByTestId('product-price-save'));
+
+    await waitFor(() => {
+      expect(fetchImplementation).toHaveBeenCalledWith(
+        `http://api.test/api/v1/products/${PRODUCT_ID}/prices`,
+        expect.objectContaining({
+          method: 'POST',
+          body: JSON.stringify({ amountMinor: 525, effectiveFrom: '2030-01-01' }),
+        }),
+      );
+    });
+
+    expect(await screen.findByText('$5.25')).toBeInTheDocument();
   });
 
   it('lets an administrator rename and deactivate a product', async () => {
@@ -224,6 +287,11 @@ describe('ProductManagement', () => {
     expect(screen.queryByTestId('product-new')).toBeNull();
     expect(screen.queryByRole('button', { name: /edit watermelon/i })).toBeNull();
     expect(screen.queryByRole('button', { name: /presentations watermelon/i })).toBeNull();
+
+    fireEvent.click(screen.getByRole('button', { name: /prices watermelon/i }));
+    expect(await screen.findByText('Selling prices for Watermelon')).toBeInTheDocument();
+    expect(await screen.findByText('$4.00')).toBeInTheDocument();
+    expect(screen.queryByTestId('product-price-new')).toBeNull();
   });
 });
 

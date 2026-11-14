@@ -24,6 +24,7 @@ import {
   createProduct,
   createProductCategory,
   createProductPresentation,
+  createProductPriceHistory,
   updateMeasurementUnit,
   updateProduct,
   updateProductCategory,
@@ -35,21 +36,25 @@ import {
   asProductCategoryId,
   asProductId,
   asProductPresentationId,
+  asProductPriceHistoryId,
   type MeasurementUnitId,
   type OrganizationId,
   type ProductCategoryId,
   type ProductId,
   type ProductPresentationId,
+  type ProductPriceHistoryId,
 } from '@inventory-u3/types';
 
 import { DrizzleMeasurementUnitRepository } from '../src/infrastructure/persistence/repositories/measurement-unit-repository.js';
 import { DrizzleProductCategoryRepository } from '../src/infrastructure/persistence/repositories/product-category-repository.js';
 import { DrizzleProductPresentationRepository } from '../src/infrastructure/persistence/repositories/product-presentation-repository.js';
+import { DrizzleProductPriceHistoryRepository } from '../src/infrastructure/persistence/repositories/product-price-history-repository.js';
 import { DrizzleProductRepository } from '../src/infrastructure/persistence/repositories/product-repository.js';
 import { createPostgresConnection } from '../src/infrastructure/persistence/postgres/connection.js';
 import { SQLiteMeasurementUnitRepository } from '../src/infrastructure/persistence/sqlite/repositories/measurement-unit-repository.js';
 import { SQLiteProductCategoryRepository } from '../src/infrastructure/persistence/sqlite/repositories/product-category-repository.js';
 import { SQLiteProductPresentationRepository } from '../src/infrastructure/persistence/sqlite/repositories/product-presentation-repository.js';
+import { SQLiteProductPriceHistoryRepository } from '../src/infrastructure/persistence/sqlite/repositories/product-price-history-repository.js';
 import { SQLiteProductRepository } from '../src/infrastructure/persistence/sqlite/repositories/product-repository.js';
 import { createSqliteConnection } from '../src/infrastructure/persistence/sqlite/connection.js';
 
@@ -360,6 +365,101 @@ describe('product catalog repositories (SQLite)', () => {
     ]);
   });
 
+  it('persists price history newest-first and isolates it by organization', async () => {
+    const tag = suffix();
+    const priceHistory = new SQLiteProductPriceHistoryRepository(connection.db);
+    const kilogram = await measurementUnits.create(
+      createMeasurementUnit(
+        {
+          id: asMeasurementUnitId(randomUUID()),
+          organizationId: ORGANIZATION_A,
+          code: `price-kg-${tag}`,
+          name: 'Kilogram',
+        },
+        NOW,
+      ),
+    );
+    const fruit = await productCategories.create(
+      createProductCategory(
+        {
+          id: asProductCategoryId(randomUUID()),
+          organizationId: ORGANIZATION_A,
+          name: `Price history category ${tag}`,
+        },
+        NOW,
+      ),
+    );
+    const product = await products.create(
+      createProduct(
+        {
+          id: asProductId(randomUUID()),
+          organizationId: ORGANIZATION_A,
+          categoryId: fruit.id,
+          name: `Price history product ${tag}`,
+          kind: 'RAW',
+          inventoryUnitId: kilogram.id,
+          salesUnitId: kilogram.id,
+        },
+        NOW,
+      ),
+    );
+
+    const later = await priceHistory.create(
+      createProductPriceHistory(
+        {
+          id: asProductPriceHistoryId(randomUUID()),
+          organizationId: ORGANIZATION_A,
+          productId: product.id,
+          amountMinor: 450,
+          currency: 'USD',
+          priceBasis: 'PER_SALES_UNIT',
+          effectiveFrom: '2026-12-01',
+        },
+        NOW,
+      ),
+    );
+    await priceHistory.create(
+      createProductPriceHistory(
+        {
+          id: asProductPriceHistoryId(randomUUID()),
+          organizationId: ORGANIZATION_A,
+          productId: product.id,
+          amountMinor: 400,
+          currency: 'USD',
+          priceBasis: 'PER_SALES_UNIT',
+          effectiveFrom: '2026-11-10',
+        },
+        NOW,
+      ),
+    );
+
+    await expect(
+      priceHistory.findByProductAndEffectiveFrom(ORGANIZATION_A, product.id, '2026-12-01'),
+    ).resolves.toEqual(later);
+    await expect(priceHistory.listByProduct(ORGANIZATION_A, product.id)).resolves.toEqual([
+      later,
+      expect.objectContaining({ amountMinor: 400, effectiveFrom: '2026-11-10' }),
+    ]);
+    await expect(priceHistory.listByProduct(ORGANIZATION_B, product.id)).resolves.toEqual([]);
+
+    await expect(
+      priceHistory.create(
+        createProductPriceHistory(
+          {
+            id: asProductPriceHistoryId(randomUUID()),
+            organizationId: ORGANIZATION_A,
+            productId: product.id,
+            amountMinor: 475,
+            currency: 'USD',
+            priceBasis: 'PER_SALES_UNIT',
+            effectiveFrom: '2026-12-01',
+          },
+          NOW,
+        ),
+      ),
+    ).rejects.toThrow();
+  });
+
   it('updates catalog rows and finds them by their unique business key', async () => {
     const tag = suffix();
     const kilogram = await measurementUnits.create(
@@ -489,6 +589,7 @@ describe.skipIf(!postgresUrl)('product catalog repositories (PostgreSQL)', () =>
   const categoryIds: ProductCategoryId[] = [];
   const productIds: ProductId[] = [];
   const presentationIds: ProductPresentationId[] = [];
+  const priceIds: ProductPriceHistoryId[] = [];
 
   beforeAll(async () => {
     organizationA = asOrganizationId(randomUUID());
@@ -519,6 +620,11 @@ describe.skipIf(!postgresUrl)('product catalog repositories (PostgreSQL)', () =>
 
   afterAll(async () => {
     if (connection) {
+      if (priceIds.length > 0) {
+        await connection.db
+          .delete(pgSchema.productPriceHistory)
+          .where(inArray(pgSchema.productPriceHistory.id, priceIds));
+      }
       if (presentationIds.length > 0) {
         await connection.db
           .delete(pgSchema.productPresentations)
@@ -670,6 +776,95 @@ describe.skipIf(!postgresUrl)('product catalog repositories (PostgreSQL)', () =>
     await expect(productPresentations.listByProduct(organizationB, watermelon.id)).resolves.toEqual(
       [],
     );
+  });
+
+  it('persists price history on PostgreSQL and isolates it by organization', async () => {
+    const measurementUnits = new DrizzleMeasurementUnitRepository(connection.db);
+    const productCategories = new DrizzleProductCategoryRepository(connection.db);
+    const products = new DrizzleProductRepository(connection.db);
+    const priceHistory = new DrizzleProductPriceHistoryRepository(connection.db);
+    const tag = suffix();
+
+    const fruit = await productCategories.create(
+      createProductCategory(
+        {
+          id: asProductCategoryId(randomUUID()),
+          organizationId: organizationA,
+          name: `Price history category ${tag}`,
+        },
+        NOW,
+      ),
+    );
+    categoryIds.push(fruit.id);
+
+    const kilogram = await measurementUnits.create(
+      createMeasurementUnit(
+        {
+          id: asMeasurementUnitId(randomUUID()),
+          organizationId: organizationA,
+          code: `price-kg-${tag}`,
+          name: 'Kilogram',
+        },
+        NOW,
+      ),
+    );
+    unitIds.push(kilogram.id);
+
+    const product = await products.create(
+      createProduct(
+        {
+          id: asProductId(randomUUID()),
+          organizationId: organizationA,
+          categoryId: fruit.id,
+          name: `Price history product ${tag}`,
+          kind: 'PROCESSED',
+          inventoryUnitId: kilogram.id,
+          salesUnitId: kilogram.id,
+        },
+        NOW,
+      ),
+    );
+    productIds.push(product.id);
+
+    const later = await priceHistory.create(
+      createProductPriceHistory(
+        {
+          id: asProductPriceHistoryId(randomUUID()),
+          organizationId: organizationA,
+          productId: product.id,
+          amountMinor: 450,
+          currency: 'USD',
+          priceBasis: 'PER_KILOGRAM',
+          effectiveFrom: '2026-12-01',
+        },
+        NOW,
+      ),
+    );
+    priceIds.push(later.id);
+    const earlier = await priceHistory.create(
+      createProductPriceHistory(
+        {
+          id: asProductPriceHistoryId(randomUUID()),
+          organizationId: organizationA,
+          productId: product.id,
+          amountMinor: 400,
+          currency: 'USD',
+          priceBasis: 'PER_KILOGRAM',
+          effectiveFrom: '2026-11-10',
+        },
+        NOW,
+      ),
+    );
+    priceIds.push(earlier.id);
+
+    await expect(
+      priceHistory.findByProductAndEffectiveFrom(organizationA, product.id, '2026-12-01'),
+    ).resolves.toEqual(later);
+    await expect(priceHistory.listByProduct(organizationA, product.id)).resolves.toEqual([
+      later,
+      earlier,
+    ]);
+    await expect(priceHistory.listByProduct(organizationB, product.id)).resolves.toEqual([]);
   });
 
   it('updates catalog rows and finds them by their unique business key', async () => {

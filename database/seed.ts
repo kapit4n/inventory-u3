@@ -15,10 +15,18 @@ import type { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
 import * as pgSchema from '@inventory-u3/database/schema';
 import * as sqliteSchema from '@inventory-u3/database/schema/sqlite';
 import {
+  DEVELOPMENT_BRANCHES,
   DEVELOPMENT_CURRENCY,
+  DEVELOPMENT_EMPLOYEES,
+  DEVELOPMENT_MEASUREMENT_UNITS,
   DEVELOPMENT_ORGANIZATION_ID,
   DEVELOPMENT_ORGANIZATION_NAME,
   DEVELOPMENT_PASSWORD,
+  DEVELOPMENT_PRODUCT_CATEGORIES,
+  DEVELOPMENT_PRODUCT_PRESENTATIONS,
+  DEVELOPMENT_PRODUCT_PRICES,
+  DEVELOPMENT_PRODUCTS,
+  DEVELOPMENT_SUPPLIERS,
   DEVELOPMENT_TIMEZONE,
   DEVELOPMENT_USERS,
 } from './development-data.js';
@@ -57,8 +65,20 @@ async function hashPassword(password: string): Promise<string> {
 }
 
 async function seedPostgres(db: PostgresJsDatabase<typeof pgSchema>): Promise<void> {
-  const { organizations, users } = pgSchema;
+  const {
+    branches,
+    employees,
+    measurementUnits,
+    organizations,
+    productCategories,
+    productPresentations,
+    productPriceHistory,
+    products,
+    suppliers,
+    users,
+  } = pgSchema;
   const passwordHash = await hashPassword(DEVELOPMENT_PASSWORD);
+  const now = new Date();
 
   await db
     .insert(organizations)
@@ -104,11 +124,181 @@ async function seedPostgres(db: PostgresJsDatabase<typeof pgSchema>): Promise<vo
         },
       });
   }
+
+  for (const unit of DEVELOPMENT_MEASUREMENT_UNITS) {
+    await db
+      .insert(measurementUnits)
+      .values({
+        id: unit.id,
+        organizationId: DEVELOPMENT_ORGANIZATION_ID,
+        code: unit.code,
+        name: unit.name,
+        isActive: true,
+      })
+      .onConflictDoUpdate({
+        target: measurementUnits.id,
+        set: { code: unit.code, name: unit.name, isActive: true, updatedAt: now },
+      });
+  }
+
+  for (const category of DEVELOPMENT_PRODUCT_CATEGORIES) {
+    await db
+      .insert(productCategories)
+      .values({
+        id: category.id,
+        organizationId: DEVELOPMENT_ORGANIZATION_ID,
+        name: category.name,
+        isActive: true,
+      })
+      .onConflictDoUpdate({
+        target: productCategories.id,
+        set: { name: category.name, isActive: true, updatedAt: now },
+      });
+  }
+
+  for (const branch of DEVELOPMENT_BRANCHES) {
+    await db
+      .insert(branches)
+      .values({
+        id: branch.id,
+        organizationId: DEVELOPMENT_ORGANIZATION_ID,
+        name: branch.name,
+        isActive: true,
+      })
+      .onConflictDoUpdate({
+        target: branches.id,
+        set: { name: branch.name, isActive: true, updatedAt: now },
+      });
+  }
+
+  for (const supplier of DEVELOPMENT_SUPPLIERS) {
+    await db
+      .insert(suppliers)
+      .values({
+        id: supplier.id,
+        organizationId: DEVELOPMENT_ORGANIZATION_ID,
+        name: supplier.name,
+        isActive: true,
+      })
+      .onConflictDoUpdate({
+        target: suppliers.id,
+        set: { name: supplier.name, isActive: true, updatedAt: now },
+      });
+  }
+
+  for (const employee of DEVELOPMENT_EMPLOYEES) {
+    await db
+      .insert(employees)
+      .values({
+        id: employee.id,
+        organizationId: DEVELOPMENT_ORGANIZATION_ID,
+        branchId: employee.branchId,
+        fullName: employee.fullName,
+        isActive: true,
+      })
+      .onConflictDoUpdate({
+        target: employees.id,
+        set: {
+          branchId: employee.branchId,
+          fullName: employee.fullName,
+          isActive: true,
+          updatedAt: now,
+        },
+      });
+  }
+
+  for (const product of DEVELOPMENT_PRODUCTS) {
+    await db
+      .insert(products)
+      .values({
+        id: product.id,
+        organizationId: DEVELOPMENT_ORGANIZATION_ID,
+        categoryId: product.categoryId,
+        name: product.name,
+        kind: product.kind,
+        inventoryUnitId: product.inventoryUnitId,
+        salesUnitId: product.salesUnitId,
+        purchaseUnitId: product.purchaseUnitId,
+        productionUnitId: product.productionUnitId,
+        isActive: true,
+      })
+      .onConflictDoUpdate({
+        target: products.id,
+        set: {
+          categoryId: product.categoryId,
+          name: product.name,
+          kind: product.kind,
+          inventoryUnitId: product.inventoryUnitId,
+          salesUnitId: product.salesUnitId,
+          purchaseUnitId: product.purchaseUnitId,
+          productionUnitId: product.productionUnitId,
+          isActive: true,
+          updatedAt: now,
+        },
+      });
+  }
+
+  for (const presentation of DEVELOPMENT_PRODUCT_PRESENTATIONS) {
+    await db
+      .insert(productPresentations)
+      .values({
+        id: presentation.id,
+        organizationId: DEVELOPMENT_ORGANIZATION_ID,
+        productId: presentation.productId,
+        name: presentation.name,
+        averageWeightGrams: presentation.averageWeightGrams,
+        isActive: true,
+      })
+      .onConflictDoUpdate({
+        target: productPresentations.id,
+        set: {
+          name: presentation.name,
+          averageWeightGrams: presentation.averageWeightGrams,
+          isActive: true,
+          updatedAt: now,
+        },
+      });
+  }
+
+  for (const price of DEVELOPMENT_PRODUCT_PRICES) {
+    await db
+      .insert(productPriceHistory)
+      .values({
+        id: price.id,
+        organizationId: DEVELOPMENT_ORGANIZATION_ID,
+        productId: price.productId,
+        amountMinor: price.amountMinor,
+        currency,
+        priceBasis: price.priceBasis,
+        effectiveFrom: price.effectiveFrom,
+      })
+      .onConflictDoUpdate({
+        target: productPriceHistory.id,
+        set: {
+          amountMinor: price.amountMinor,
+          currency,
+          priceBasis: price.priceBasis,
+          effectiveFrom: price.effectiveFrom,
+        },
+      });
+  }
 }
 
 async function seedSqlite(db: BetterSQLite3Database<typeof sqliteSchema>): Promise<void> {
-  const { organizations, users } = sqliteSchema;
+  const {
+    branches,
+    employees,
+    measurementUnits,
+    organizations,
+    productCategories,
+    productPresentations,
+    productPriceHistory,
+    products,
+    suppliers,
+    users,
+  } = sqliteSchema;
   const passwordHash = await hashPassword(DEVELOPMENT_PASSWORD);
+  const now = new Date();
 
   await db
     .insert(organizations)
@@ -151,6 +341,164 @@ async function seedSqlite(db: BetterSQLite3Database<typeof sqliteSchema>): Promi
           role: user.role,
           isActive: true,
           updatedAt: new Date(),
+        },
+      });
+  }
+
+  for (const unit of DEVELOPMENT_MEASUREMENT_UNITS) {
+    await db
+      .insert(measurementUnits)
+      .values({
+        id: unit.id,
+        organizationId: DEVELOPMENT_ORGANIZATION_ID,
+        code: unit.code,
+        name: unit.name,
+        isActive: true,
+      })
+      .onConflictDoUpdate({
+        target: measurementUnits.id,
+        set: { code: unit.code, name: unit.name, isActive: true, updatedAt: now },
+      });
+  }
+
+  for (const category of DEVELOPMENT_PRODUCT_CATEGORIES) {
+    await db
+      .insert(productCategories)
+      .values({
+        id: category.id,
+        organizationId: DEVELOPMENT_ORGANIZATION_ID,
+        name: category.name,
+        isActive: true,
+      })
+      .onConflictDoUpdate({
+        target: productCategories.id,
+        set: { name: category.name, isActive: true, updatedAt: now },
+      });
+  }
+
+  for (const branch of DEVELOPMENT_BRANCHES) {
+    await db
+      .insert(branches)
+      .values({
+        id: branch.id,
+        organizationId: DEVELOPMENT_ORGANIZATION_ID,
+        name: branch.name,
+        isActive: true,
+      })
+      .onConflictDoUpdate({
+        target: branches.id,
+        set: { name: branch.name, isActive: true, updatedAt: now },
+      });
+  }
+
+  for (const supplier of DEVELOPMENT_SUPPLIERS) {
+    await db
+      .insert(suppliers)
+      .values({
+        id: supplier.id,
+        organizationId: DEVELOPMENT_ORGANIZATION_ID,
+        name: supplier.name,
+        isActive: true,
+      })
+      .onConflictDoUpdate({
+        target: suppliers.id,
+        set: { name: supplier.name, isActive: true, updatedAt: now },
+      });
+  }
+
+  for (const employee of DEVELOPMENT_EMPLOYEES) {
+    await db
+      .insert(employees)
+      .values({
+        id: employee.id,
+        organizationId: DEVELOPMENT_ORGANIZATION_ID,
+        branchId: employee.branchId,
+        fullName: employee.fullName,
+        isActive: true,
+      })
+      .onConflictDoUpdate({
+        target: employees.id,
+        set: {
+          branchId: employee.branchId,
+          fullName: employee.fullName,
+          isActive: true,
+          updatedAt: now,
+        },
+      });
+  }
+
+  for (const product of DEVELOPMENT_PRODUCTS) {
+    await db
+      .insert(products)
+      .values({
+        id: product.id,
+        organizationId: DEVELOPMENT_ORGANIZATION_ID,
+        categoryId: product.categoryId,
+        name: product.name,
+        kind: product.kind,
+        inventoryUnitId: product.inventoryUnitId,
+        salesUnitId: product.salesUnitId,
+        purchaseUnitId: product.purchaseUnitId,
+        productionUnitId: product.productionUnitId,
+        isActive: true,
+      })
+      .onConflictDoUpdate({
+        target: products.id,
+        set: {
+          categoryId: product.categoryId,
+          name: product.name,
+          kind: product.kind,
+          inventoryUnitId: product.inventoryUnitId,
+          salesUnitId: product.salesUnitId,
+          purchaseUnitId: product.purchaseUnitId,
+          productionUnitId: product.productionUnitId,
+          isActive: true,
+          updatedAt: now,
+        },
+      });
+  }
+
+  for (const presentation of DEVELOPMENT_PRODUCT_PRESENTATIONS) {
+    await db
+      .insert(productPresentations)
+      .values({
+        id: presentation.id,
+        organizationId: DEVELOPMENT_ORGANIZATION_ID,
+        productId: presentation.productId,
+        name: presentation.name,
+        averageWeightGrams: presentation.averageWeightGrams,
+        isActive: true,
+      })
+      .onConflictDoUpdate({
+        target: productPresentations.id,
+        set: {
+          name: presentation.name,
+          averageWeightGrams: presentation.averageWeightGrams,
+          isActive: true,
+          updatedAt: now,
+        },
+      });
+  }
+
+  for (const price of DEVELOPMENT_PRODUCT_PRICES) {
+    await db
+      .insert(productPriceHistory)
+      .values({
+        id: price.id,
+        organizationId: DEVELOPMENT_ORGANIZATION_ID,
+        productId: price.productId,
+        amountMinor: price.amountMinor,
+        currency,
+        priceBasis: price.priceBasis,
+        effectiveFrom: price.effectiveFrom,
+      })
+      .onConflictDoUpdate({
+        target: productPriceHistory.id,
+        set: {
+          amountMinor: price.amountMinor,
+          currency,
+          priceBasis: price.priceBasis,
+          effectiveFrom: price.effectiveFrom,
         },
       });
   }

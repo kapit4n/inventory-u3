@@ -11,7 +11,7 @@
 
 import { index, integer, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
 
-import { PRODUCT_KINDS } from '@inventory-u3/domain';
+import { PRODUCT_KINDS, PRODUCT_PRICE_BASES } from '@inventory-u3/domain';
 
 import { nowDefault, uuidDefault } from './defaults.js';
 import { enumCheck } from './enum-check.js';
@@ -108,5 +108,35 @@ export const productPresentations = sqliteTable(
   (table) => [
     uniqueIndex('product_presentations_product_name_uq').on(table.productId, table.name),
     index('product_presentations_product_active_idx').on(table.productId, table.isActive),
+  ],
+);
+
+export const productPriceHistory = sqliteTable(
+  'product_price_history',
+  {
+    id: text('id').primaryKey().default(uuidDefault),
+    organizationId: text('organization_id')
+      .notNull()
+      .references(() => organizations.id, { onDelete: 'cascade' }),
+    productId: text('product_id')
+      .notNull()
+      .references(() => products.id, { onDelete: 'cascade' }),
+    amountMinor: integer('amount_minor').notNull(),
+    currency: text('currency').notNull(),
+    priceBasis: text('price_basis', { enum: PRODUCT_PRICE_BASES }).notNull(),
+    effectiveFrom: text('effective_from').notNull(),
+    createdAt: integer('created_at', { mode: 'timestamp_ms' }).notNull().default(nowDefault),
+  },
+  (table) => [
+    uniqueIndex('product_price_history_product_effective_uq').on(
+      table.productId,
+      table.effectiveFrom,
+    ),
+    index('product_price_history_organization_product_effective_idx').on(
+      table.organizationId,
+      table.productId,
+      table.effectiveFrom,
+    ),
+    enumCheck('product_price_history_basis_in_values', 'price_basis', PRODUCT_PRICE_BASES),
   ],
 );

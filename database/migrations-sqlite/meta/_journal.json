@@ -43,6 +43,13 @@
       "when": 1794262839673,
       "tag": "0005_deep_chamber",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1794538204746,
+      "tag": "0006_funny_peter_parker",
+      "breakpoints": true
     }
   ]
 }

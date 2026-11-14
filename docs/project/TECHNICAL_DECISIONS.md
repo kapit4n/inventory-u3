@@ -363,3 +363,37 @@ averageWeightPerTray` and `estimatedValue = estimatedKg × sellingPricePerKg`.
   only the UI action is limited to processed products. Inactive categories and
   units remain selectable when editing a product that already references them.
   No schema, migration or seed is required by this decision.
+
+### TD-016 — Selling prices are append-only, effective-dated snapshots
+
+- **Date:** 2026-11-12
+- **Status:** ACCEPTED for M2-T6; branch scope remains open (BQ-06).
+- **Context:** M2-T6 needs a selling price for raw products per sales unit and for
+  processed products per kilogram, while preserving every past price for later
+  sales checkpoints and closing cost calculations. The business has not confirmed
+  whether prices are organization-wide or branch-specific (BQ-06), and unit
+  conversion remains unresolved (BQ-10).
+- **Decision:** Store `product_price_history` rows with organization, product,
+  integer `amountMinor`, captured currency, captured price basis, ISO effective
+  date and creation time. A price change appends a new row; existing rows are
+  never updated or deleted. Effective end is inferred from the next row. The
+  basis is derived from the product kind at creation (`PROCESSED` =
+  `PER_KILOGRAM`, `RAW` = `PER_SALES_UNIT`) and then stored so later kind changes
+  cannot reinterpret history. Currency is captured from the organization at
+  creation. Effective date is unique per product. Reads use `organization:read`;
+  writes use `organization:manage`.
+- **Alternatives considered:** Overwrite one current price on the product;
+  rejected because past sales and closing records would lose their price.
+  Store effective-to as well as effective-from; rejected because it duplicates
+  information and permits overlapping intervals. Read the current product kind
+  when displaying an old price; rejected because editing a product from raw to
+  processed would silently change the meaning of its history. Make prices
+  branch-specific now; deferred because BQ-06 is unanswered, and the
+  organization product id can be extended with a scope later. Convert units in
+  the price row; rejected while BQ-10 is unresolved.
+- **Consequences:** M6/M7 can select the price in effect on a business date and
+  retain the exact basis and currency used. Corrections are new effective-dated
+  rows, not edits. If BQ-06 confirms branch-specific prices, a scope column and
+  migration must be added explicitly rather than changing existing history.
+  Average weight remains presentation master data; historical weight snapshots
+  belong to later production/sales records (BR-018, BR-019).

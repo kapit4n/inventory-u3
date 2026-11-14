@@ -1,6 +1,11 @@
 import { z } from 'zod';
 
-import { isoDateTimeSchema, uuidSchema } from '../common/index.js';
+import {
+  currencyCodeSchema,
+  isoDateSchema,
+  isoDateTimeSchema,
+  uuidSchema,
+} from '../common/index.js';
 
 const measurementUnitCodeSchema = z.string().trim().min(1).max(32);
 const measurementUnitNameSchema = z.string().trim().min(1).max(80);
@@ -9,6 +14,8 @@ const productNameSchema = z.string().trim().min(1).max(160);
 const productKindSchema = z.enum(['RAW', 'PROCESSED']);
 const productPresentationNameSchema = z.string().trim().min(1).max(120);
 const averageWeightGramsSchema = z.number().int().positive().max(Number.MAX_SAFE_INTEGER);
+const productPriceBasisSchema = z.enum(['PER_KILOGRAM', 'PER_SALES_UNIT']);
+const priceAmountMinorSchema = z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER);
 
 export const measurementUnitSchema = z.object({
   id: uuidSchema,
@@ -135,6 +142,27 @@ export const updateProductPresentationSchema = z.object({
   isActive: z.boolean(),
 });
 
+export const productPriceHistorySchema = z.object({
+  id: uuidSchema,
+  organizationId: uuidSchema,
+  productId: uuidSchema,
+  amountMinor: priceAmountMinorSchema,
+  currency: currencyCodeSchema,
+  priceBasis: productPriceBasisSchema,
+  effectiveFrom: isoDateSchema,
+  createdAt: isoDateTimeSchema,
+});
+
+export const productPriceHistoryListResponseSchema = z.object({
+  items: z.array(productPriceHistorySchema),
+  currency: currencyCodeSchema,
+});
+
+export const createProductPriceHistorySchema = z.object({
+  amountMinor: priceAmountMinorSchema,
+  effectiveFrom: isoDateSchema,
+});
+
 export const productIdParamsSchema = z.object({
   productId: uuidSchema,
 });
@@ -160,3 +188,6 @@ export type ProductPresentationResponse = z.infer<typeof productPresentationSche
 export type ProductPresentationListResponse = z.infer<typeof productPresentationListResponseSchema>;
 export type CreateProductPresentationBody = z.infer<typeof createProductPresentationSchema>;
 export type UpdateProductPresentationBody = z.infer<typeof updateProductPresentationSchema>;
+export type ProductPriceHistoryResponse = z.infer<typeof productPriceHistorySchema>;
+export type ProductPriceHistoryListResponse = z.infer<typeof productPriceHistoryListResponseSchema>;
+export type CreateProductPriceHistoryBody = z.infer<typeof createProductPriceHistorySchema>;

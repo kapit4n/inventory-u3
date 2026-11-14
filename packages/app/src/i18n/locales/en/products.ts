@@ -90,4 +90,42 @@ export const products = {
     'The API could not be reached. Check the connection and try again.',
   'products.presentations.form.failure.duplicate':
     'A presentation with that name already exists for this product.',
+  'products.actions.prices': 'Prices',
+  'products.prices.title': 'Selling prices for {product}',
+  'products.prices.description':
+    'Price changes are kept as history. Adding a price affects only sales from its effective date onwards.',
+  'products.prices.new': 'New price',
+  'products.prices.loading': 'Loading prices…',
+  'products.prices.loadFailure': 'Prices could not be loaded.',
+  'products.prices.empty': 'No selling price yet.',
+  'products.prices.emptyDescription': 'Record the first price and the date from which it applies.',
+  'products.prices.column.price': 'Price',
+  'products.prices.column.basis': 'Basis',
+  'products.prices.column.effectiveFrom': 'Effective from',
+  'products.prices.column.status': 'Status',
+  'products.prices.column.recordedAt': 'Recorded',
+  'products.prices.basis.perKilogram': 'Per kilogram',
+  'products.prices.basis.perSalesUnit': 'Per sales unit',
+  'products.prices.status.current': 'Current',
+  'products.prices.status.scheduled': 'Scheduled',
+  'products.prices.status.past': 'Past',
+  'products.prices.form.title': 'New selling price',
+  'products.prices.form.description':
+    'This appends a price to the history. Existing prices are never rewritten.',
+  'products.prices.form.amount': 'Price ({currency})',
+  'products.prices.form.amountHintProcessed':
+    'For a processed product this amount is per kilogram.',
+  'products.prices.form.amountHintRaw': 'For a raw product this amount is per sales unit.',
+  'products.prices.form.amountRequired': 'Enter a valid non-negative price.',
+  'products.prices.form.effectiveFrom': 'Effective from',
+  'products.prices.form.effectiveFromRequired': 'Choose a valid effective date.',
+  'products.prices.form.save': 'Record price',
+  'products.prices.form.saving': 'Saving…',
+  'products.prices.form.failure': 'The price could not be recorded.',
+  'products.prices.form.failure.validation': 'Check the price and effective date.',
+  'products.prices.form.failure.forbidden': 'Only an administrator can record prices.',
+  'products.prices.form.failure.network':
+    'The API could not be reached. Check the connection and try again.',
+  'products.prices.form.failure.duplicate':
+    'A price with that effective date already exists for this product.',
 } as const;

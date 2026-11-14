@@ -7,6 +7,7 @@ import { DrizzleMeasurementUnitRepository } from '../repositories/measurement-un
 import { DrizzleOrganizationRepository } from '../repositories/organization-repository.js';
 import { DrizzleProductCategoryRepository } from '../repositories/product-category-repository.js';
 import { DrizzleProductPresentationRepository } from '../repositories/product-presentation-repository.js';
+import { DrizzleProductPriceHistoryRepository } from '../repositories/product-price-history-repository.js';
 import { DrizzleProductRepository } from '../repositories/product-repository.js';
 import { DrizzleSessionRepository } from '../repositories/session-repository.js';
 import { DrizzleSupplierRepository } from '../repositories/supplier-repository.js';
@@ -22,6 +23,7 @@ export function repositoriesFor(db: InventoryDatabase): Repositories {
     productCategories: new DrizzleProductCategoryRepository(db),
     products: new DrizzleProductRepository(db),
     productPresentations: new DrizzleProductPresentationRepository(db),
+    productPriceHistory: new DrizzleProductPriceHistoryRepository(db),
     users: new DrizzleUserRepository(db),
     sessions: new DrizzleSessionRepository(db),
   };
