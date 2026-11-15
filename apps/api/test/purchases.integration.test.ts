@@ -158,8 +158,8 @@ describe('purchase routes (SQLite)', () => {
 
     const movements = await stockMovementsFor(purchase.id);
     expect(movements).toHaveLength(2);
-    expect(movements.map((movement) => movement.quantityDelta).sort((a, b) => a - b)).toEqual([
-      1.5, 12.5,
+    expect(movements.map((movement) => movement.quantityDeltaMilli).sort((a, b) => a - b)).toEqual([
+      1_500, 12_500,
     ]);
     expect(movements.every((movement) => movement.reason === 'RECEIVING')).toBe(true);
     expect(movements.every((movement) => movement.sourceType === 'PURCHASE_RECEIPT')).toBe(true);
@@ -262,8 +262,8 @@ describe('purchase routes (SQLite)', () => {
     expect(reversals).toHaveLength(2);
     expect(reversals.every((movement) => movement.reason === 'CORRECTION')).toBe(true);
     expect(reversals.every((movement) => movement.sourceType === 'PURCHASE_CORRECTION')).toBe(true);
-    expect(reversals.map((movement) => movement.quantityDelta).sort((a, b) => a - b)).toEqual([
-      -12.5, -1.5,
+    expect(reversals.map((movement) => movement.quantityDeltaMilli).sort((a, b) => a - b)).toEqual([
+      -12_500, -1_500,
     ]);
     expect(new Set(reversals.map((movement) => movement.correctsMovementId))).toEqual(
       new Set(originals.map((movement) => movement.id)),

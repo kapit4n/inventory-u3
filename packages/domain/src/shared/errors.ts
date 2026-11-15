@@ -10,6 +10,8 @@ export type DomainErrorCode =
   | 'NOT_FOUND'
   | 'DUPLICATED_RECORD'
   | 'INVALID_STATE'
+  /** The operation would leave a branch/product stock balance below zero. */
+  | 'INSUFFICIENT_STOCK'
   /**
    * The caller is not (or is no longer) authenticated.
    *

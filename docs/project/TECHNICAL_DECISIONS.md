@@ -439,3 +439,41 @@ averageWeightPerTray` and `estimatedValue = estimatedKg × sellingPricePerKg`.
   purchases. If partial receiving, taxes, freight, unit conversion or a
   branch-shared delivery is confirmed, each requires an explicit schema,
   workflow and migration change rather than reinterpretation of existing rows.
+
+### TD-018 — Branch stock is a derived exact ledger; adjustments, waste and reconciliation are audited
+
+- **Date:** 2026-11-15
+- **Status:** ACCEPTED and implemented in M4; unit conversion, transfers,
+  negative-stock overrides and cost valuation remain open (BQ-10, BQ-12, BQ-04).
+- **Context:** M3 receiving and purchase corrections already append stock
+  movements, but M4 must expose branch stock, adjust it, record waste and
+  reconcile physical counts. BQ-07 and BQ-08 needed a decision before a table
+  shape or UI could be built. Purchase quantities are exact integer thousandths,
+  while `stock_movements.quantity_delta` was still floating point (TD-11).
+- **Decision:** Balances are derived by summing append-only movements, scoped by
+  organization and branch. Movement quantities use integer thousandths
+  (`quantity_delta_milli`), and M3 rows are converted in migration `0009`. There
+  is no balance cache table in M4. Manual adjustments, waste and reconciliation
+  create ordinary stock movements with reason `ADJUSTMENT` or `WASTE`; each has
+  its own entity row with actor, required reason, occurrence time and optional
+  note. Waste stores a positive quantity and posts a negative movement. A
+  reconciliation stores the expected and counted quantities plus an adjustment
+  kind; it posts a movement only when the difference is non-zero. Any operation
+  that would leave a negative balance is refused with `INSUFFICIENT_STOCK`; M4
+  provides no override. Negative quantities and zero manual adjustments are
+  invalid. Inactive branches and products are rejected for new inventory
+  operations. Reads use `inventory:read`; all writes use `inventory:write`.
+- **Alternatives considered:** Maintain a `stock_balances` cache; rejected
+  because it creates a second source of truth before performance requires it.
+  Allow negative stock with a warning; rejected because it hides receiving
+  mistakes and makes closing unreconcilable. Record reconciliation only as a
+  movement; rejected because the count evidence would be lost. Keep floating
+  quantities; rejected because exact thousandths already exist and drift is
+  unacceptable in the ledger. Give waste its own signed quantity; rejected
+  because the direction is always negative and a positive entry is less
+  error-prone.
+- **Consequences:** Balance reads aggregate movements with a composite index on
+  organization, branch and product. Purchase corrections must check the derived
+  balance before posting compensating movements. A zero balance does not imply
+  that no movements exist. A future cache or negative-stock override needs an
+  explicit decision and migration rather than reinterpreting these rows.

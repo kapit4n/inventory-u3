@@ -207,7 +207,7 @@ Master-data screens reachable from Settings or a new Administration area,
 including list/create/edit forms. Branches, employees, suppliers, categories and
 units are managed in Settings. Products use a dedicated `/products` route, and
 processed products open the presentation editor from the product screen (TD-015).
-Inventory route remains a placeholder until M4.
+The inventory route was delivered in M4 with derived balances, adjustments, waste and reconciliation.
 
 ### Tests required
 
@@ -295,7 +295,7 @@ corrections are full reversals with a required reason and compensating movements
 
 ## M4 — Branch Inventory
 
-**Status: NOT_STARTED**
+**Status: COMPLETED (awaiting commit)**
 
 ### Objective
 
@@ -328,18 +328,19 @@ M1, M2 and the stock effects of M3.
 
 ### Acceptance criteria
 
-- [ ] Stock is independent per branch and cannot leak between branches.
-- [ ] Every stock change is traceable to a movement, reason and actor.
-- [ ] Adjustments and waste are distinct from sales.
-- [ ] A reconciliation produces an auditable adjustment.
-- [ ] Negative stock is refused unless an explicit, documented override exists.
-- [ ] Raw and finished products are handled according to their configured units.
-- [ ] Both engines pass the same inventory tests.
+- [x] Stock is independent per branch and cannot leak between branches.
+- [x] Every stock change is traceable to a movement, reason and actor.
+- [x] Adjustments and waste are distinct from sales.
+- [x] A reconciliation produces an auditable adjustment.
+- [x] Negative stock is refused unless an explicit, documented override exists.
+- [x] Raw and finished products are handled according to their configured units.
+- [x] Both engines pass the same inventory tests.
 
 ### Expected database changes
 
-`stock_movements`, `stock_balances` (or a documented derived strategy),
-`inventory_adjustments`, waste records. Both engines.
+`stock_movements` with integer-thousandth deltas, `stock_adjustments` and
+`inventory_waste`. Balances are derived; no `stock_balances` table exists
+(ADR 0041). Both engines.
 
 ### Expected UI changes
 
@@ -353,8 +354,12 @@ isolation, full receive → produce → sell → reconcile integration, browser 
 
 ### Notes
 
-The choice between a derived balance and a maintained cache must be recorded as a
-decision before implementation.
+Balances are derived from the append-only ledger and negative stock is always
+refused (ADR 0041, TD-018). Migration `0009` converts existing movement rows to
+exact thousandths. Domain, dual-engine integration, REST-client, component and
+Playwright coverage pass; the SQLite migration was verified against the existing
+local database. PostgreSQL cases skip without a server (SI-06). See
+`docs/workflows/INVENTORY_WORKFLOW.md`.
 
 ---
 
@@ -693,15 +698,15 @@ been executed." A passing unit suite is not a backup/restore drill.
 
 ## Status summary
 
-| Milestone               | Status      | Evidence                                                                          |
-| ----------------------- | ----------- | --------------------------------------------------------------------------------- |
-| Foundation prerequisite | COMPLETED   | Foundation code, migrations, tests and recorded verification                      |
-| M1                      | COMPLETED   | Branch, catalog, measurement, stock and access note; docs and guard closed        |
-| M2                      | COMPLETED   | Master data, product presentations, price history and browser coverage            |
-| M3                      | COMPLETED   | Purchases, receiving, audited corrections, dual-engine tests and browser coverage |
-| M4                      | NOT_STARTED | No stock tables or screens; inventory route is a placeholder                      |
-| M5                      | NOT_STARTED | No production tables or screens                                                   |
-| M6                      | NOT_STARTED | No checkpoint tables or screens; BR-013 pending                                   |
-| M7                      | NOT_STARTED | No closing tables or screens                                                      |
-| M8                      | NOT_STARTED | Dashboard is static foundation content; no reports                                |
-| M9                      | NOT_STARTED | No CI, branch permissions, audit log or backup drill                              |
+| Milestone               | Status      | Evidence                                                                                         |
+| ----------------------- | ----------- | ------------------------------------------------------------------------------------------------ |
+| Foundation prerequisite | COMPLETED   | Foundation code, migrations, tests and recorded verification                                     |
+| M1                      | COMPLETED   | Branch, catalog, measurement, stock and access note; docs and guard closed                       |
+| M2                      | COMPLETED   | Master data, product presentations, price history and browser coverage                           |
+| M3                      | COMPLETED   | Purchases, receiving, audited corrections, dual-engine tests and browser coverage                |
+| M4                      | COMPLETED   | Derived balances, adjustments, waste, reconciliation, dual-engine tests, UI and browser coverage |
+| M5                      | NOT_STARTED | No production tables or screens                                                                  |
+| M6                      | NOT_STARTED | No checkpoint tables or screens; BR-013 pending                                                  |
+| M7                      | NOT_STARTED | No closing tables or screens                                                                     |
+| M8                      | NOT_STARTED | Dashboard is static foundation content; no reports                                               |
+| M9                      | NOT_STARTED | No CI, branch permissions, audit log or backup drill                                             |

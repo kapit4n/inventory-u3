@@ -15,6 +15,7 @@ database/schema/              PostgreSQL Drizzle schema
   catalog.ts
   employee.ts
   enums.ts
+  inventory.ts
   organization.ts
   purchase.ts
   supplier.ts
@@ -25,6 +26,7 @@ database/schema/              PostgreSQL Drizzle schema
     employee.ts
     defaults.ts
     enum-check.ts
+    inventory.ts
     organization.ts
     purchase.ts
     supplier.ts
@@ -48,6 +50,8 @@ The current tables are:
 | `purchase_items`        | organization and purchase | Immutable product, quantity, unit and purchase price        |
 | `purchase_corrections`  | organization and purchase | Audited full reversal with reason and before/after totals   |
 | `stock_movements`       | organization and branch   | Append-only stock change with reason and source             |
+| `stock_adjustments`     | organization and branch   | Audited manual adjustment or physical-count reconciliation  |
+| `inventory_waste`       | organization and branch   | Audited positive waste quantity with reason                 |
 | `users`                 | organization              | Email, password hash, role and active flag                  |
 | `sessions`              | organization and user     | Hashed opaque token, issue/expiry and revocation            |
 
@@ -69,13 +73,21 @@ actor/timestamp fields for creation, receiving and correction. Items carry
 `quantity_milli`, `unit_price_minor`, `line_total_minor` and a 1-based `position`;
 they are immutable after creation. `purchase_corrections` has a unique
 organization/purchase key, so a purchase has at most one correction (TD-017).
-`stock_movements` is append-only and stores a signed non-zero `quantity_delta`,
-reason, optional source type/id, optional `corrects_movement_id`, occurrence and
-recording timestamps, actor and note (ADR 0040). Receiving writes `RECEIVING`
+`stock_movements` is append-only and stores a signed non-zero
+`quantity_delta_milli`, reason, optional source type/id, optional
+`corrects_movement_id`, occurrence and recording timestamps, actor and note
+(ADR 0040). Quantities are exact integer thousandths; balance is derived by
+summing movements per organization, branch and product, and no
+`stock_balances` table exists (ADR 0041, TD-018). Receiving writes `RECEIVING`
 movements sourced by `PURCHASE_RECEIPT`; correction writes `CORRECTION` movements
-sourced by `PURCHASE_CORRECTION`. The movement quantity remains a floating
-number (`double precision`/`real`) while integer thousandths are used on purchase
-lines; M4 owns balance and precision decisions.
+sourced by `PURCHASE_CORRECTION`; manual adjustments and reconciliation write
+`ADJUSTMENT`; waste writes `WASTE`.
+
+`stock_adjustments` stores `kind` (`MANUAL` or `RECONCILIATION`), a signed
+`quantity_delta_milli`, optional `expected_quantity_milli` and
+`counted_quantity_milli`, reason, note and actor/time fields. `inventory_waste`
+stores a positive `quantity_milli`, reason, note and actor/time fields. Both have
+organization/branch/occurred and organization/product indexes.
 
 ## Migrations
 
@@ -84,16 +96,19 @@ database/migrations/          PostgreSQL migrations + journal
 database/migrations-sqlite/   SQLite migrations + journal
 ```
 
-Both journals currently contain nine entries, `0000` through `0008`; `0002` adds
+Both journals currently contain ten entries, `0000` through `0009`; `0002` adds
 branches and the catalog, `0003` adds product kind and average weight, `0004`
 adds employees with organization and branch references, `0005` adds
 organization-wide suppliers, `0006` adds effective-dated product price history,
-`0007` adds purchases, purchase items, corrections and stock movements, and
-`0008` adds the `PURCHASE_CORRECTION` source type plus the unique
-organization/purchase correction index. M2-T4 and M2-T5 did not change the schema
+`0007` adds purchases, purchase items, corrections and stock movements, `0008`
+adds the `PURCHASE_CORRECTION` source type plus the unique
+organization/purchase correction index, and `0009` converts movement quantities
+to integer thousandths, adds `stock_adjustments` and `inventory_waste`, and adds
+the branch/product movement index. M2-T4 and M2-T5 did not change the schema
 because the catalog and product tables already carried the needed ownership,
 unique keys and active-state columns. The SQLite `0008` migration rebuilds
-`stock_movements` to extend its source-type `CHECK` constraint.
+`stock_movements` to extend its source-type `CHECK` constraint; `0009` rebuilds
+it again to convert quantities and rename the column.
 Generate both engines when the schema changes:
 
 ```bash

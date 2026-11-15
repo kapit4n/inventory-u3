@@ -46,19 +46,19 @@ These are roadmap work, not defects. See
 
 ## 4. Technical debt
 
-| ID    | Debt                                                                                                                                                                                                                       | Impact                                                                                                                           |
-| ----- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| TD-01 | Unused dependencies in `packages/app`: `@fullcalendar/*`, `luxon`, `date-fns`, `zustand`, `@tanstack/react-table`. Some are planned, none are imported today.                                                              | Larger install, misleading stack signals, supply-chain surface.                                                                  |
-| TD-02 | `docs/architecture.md`, `docs/domain.md` and the new `docs/project/` set overlap. The new documents are canonical summaries; the old ones hold detail.                                                                     | Risk of drift if one is updated without the other.                                                                               |
-| TD-03 | The existing ADRs are undated.                                                                                                                                                                                             | Harder to reconstruct decision chronology; new decisions record dates.                                                           |
-| TD-04 | The foundation-era roadmap and state files had to be reconciled with the business roadmap.                                                                                                                                 | A reader could follow an old link; pointers are now in place.                                                                    |
-| TD-05 | Password/session security is deliberately simple: bearer token in `localStorage`, in-process rate limiting.                                                                                                                | Acceptable for the foundation, not a production security posture.                                                                |
-| TD-06 | PostgreSQL integration tests cannot run on this machine.                                                                                                                                                                   | Engine parity is not continuously verified here.                                                                                 |
-| TD-07 | The desktop shell was not rebuilt in the latest verification session.                                                                                                                                                      | Rust/Tauri drift would not be caught by unit tests.                                                                              |
-| TD-08 | No database backup/restore procedure exists.                                                                                                                                                                               | Operational risk once real data is entered.                                                                                      |
-| TD-09 | The boundary guard compares schema table names and journal entry counts, not columns, indexes, foreign keys or migration contents. The guard script has no permanent spec.                                                 | Integration tests remain the authority for engine parity; guard drift is possible.                                               |
-| TD-10 | Duplicate-key handling for branches, categories, unit codes and per-product presentation names checks with a lookup before insert/update. A concurrent write can still hit the database unique constraint after the check. | Concurrent writes could surface as an unmapped 500 instead of the normal 409 conflict.                                           |
-| TD-11 | Purchase quantities use exact integer thousandths, but `stock_movements.quantity_delta` is a floating number (`double precision`/`real`) converted at receiving.                                                           | Unusual quantities could lose precision in the ledger; M4 must decide the balance quantity representation before building on it. |
+| ID    | Debt                                                                                                                                                                                                                       | Impact                                                                                 |
+| ----- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| TD-01 | Unused dependencies in `packages/app`: `@fullcalendar/*`, `luxon`, `date-fns`, `zustand`, `@tanstack/react-table`. Some are planned, none are imported today.                                                              | Larger install, misleading stack signals, supply-chain surface.                        |
+| TD-02 | `docs/architecture.md`, `docs/domain.md` and the new `docs/project/` set overlap. The new documents are canonical summaries; the old ones hold detail.                                                                     | Risk of drift if one is updated without the other.                                     |
+| TD-03 | The existing ADRs are undated.                                                                                                                                                                                             | Harder to reconstruct decision chronology; new decisions record dates.                 |
+| TD-04 | The foundation-era roadmap and state files had to be reconciled with the business roadmap.                                                                                                                                 | A reader could follow an old link; pointers are now in place.                          |
+| TD-05 | Password/session security is deliberately simple: bearer token in `localStorage`, in-process rate limiting.                                                                                                                | Acceptable for the foundation, not a production security posture.                      |
+| TD-06 | PostgreSQL integration tests cannot run on this machine.                                                                                                                                                                   | Engine parity is not continuously verified here.                                       |
+| TD-07 | The desktop shell was not rebuilt in the latest verification session.                                                                                                                                                      | Rust/Tauri drift would not be caught by unit tests.                                    |
+| TD-08 | No database backup/restore procedure exists.                                                                                                                                                                               | Operational risk once real data is entered.                                            |
+| TD-09 | The boundary guard compares schema table names and journal entry counts, not columns, indexes, foreign keys or migration contents. The guard script has no permanent spec.                                                 | Integration tests remain the authority for engine parity; guard drift is possible.     |
+| TD-10 | Duplicate-key handling for branches, categories, unit codes and per-product presentation names checks with a lookup before insert/update. A concurrent write can still hit the database unique constraint after the check. | Concurrent writes could surface as an unmapped 500 instead of the normal 409 conflict. |
+| TD-11 | Resolved in M4: stock movements use exact integer thousandths (`quantity_delta_milli`) and existing rows are converted in migration `0009` (TD-018).                                                                       | Closed.                                                                                |
 
 ## 5. Missing tests
 
@@ -86,25 +86,25 @@ These are roadmap work, not defects. See
 These are copied from the source of truth in
 [open-questions.md](../open-questions.md). Do not resolve them unilaterally.
 
-| ID    | Question                                                                               | Needed by |
-| ----- | -------------------------------------------------------------------------------------- | --------- |
-| BQ-01 | What exact fields/format do branch employees report through WhatsApp? (BR-013)         | M6        |
-| BQ-02 | Are the 12:00/20:00 checkpoints fixed, configurable or typical?                        | M6        |
-| BQ-04 | What is the estimated cost basis for daily closing?                                    | M7        |
-| BQ-05 | Is raw-material consumption always recorded, or only when reliable?                    | M5        |
-| BQ-06 | Are product prices and average weights organization-wide or branch-specific?           | M2        |
-| BQ-07 | Are inventory weights derived from a movement ledger or maintained as a balance cache? | M4        |
-| BQ-08 | Are negative stock levels ever allowed?                                                | M4        |
-| BQ-09 | When do branch employees/users need application access, and what may they see?         | M9        |
-| BQ-10 | Are unit conversions between purchase, inventory, production and sales units required? | M2        |
-| BQ-11 | Is there a recipe/bill of materials, or are production inputs free-form per batch?     | M5        |
-| BQ-12 | Are transfers between branches in scope?                                               | Future    |
-| BQ-19 | What are the names/codes of the three real branches?                                   | M2        |
-| BQ-20 | Are employees shared across branches, or does each employee belong to one branch?      | M2/M5     |
-| BQ-13 | Is one supplier delivery shared across branches, or a separate purchase per branch?    | M3        |
-| BQ-14 | Are purchase prices tax-inclusive, and are taxes/freight part of cost?                 | M3/M7     |
-| BQ-15 | Is partial receiving allowed?                                                          | M3        |
-| BQ-21 | Which supplier contact, tax and payment details are required beyond the name?          | M3        |
+| ID    | Question                                                                               | Needed by                                    |
+| ----- | -------------------------------------------------------------------------------------- | -------------------------------------------- |
+| BQ-01 | What exact fields/format do branch employees report through WhatsApp? (BR-013)         | M6                                           |
+| BQ-02 | Are the 12:00/20:00 checkpoints fixed, configurable or typical?                        | M6                                           |
+| BQ-04 | What is the estimated cost basis for daily closing?                                    | M7                                           |
+| BQ-05 | Is raw-material consumption always recorded, or only when reliable?                    | M5                                           |
+| BQ-06 | Are product prices and average weights organization-wide or branch-specific?           | M2                                           |
+| BQ-07 | Are inventory weights derived from a movement ledger or maintained as a balance cache? | Resolved: derived ledger (ADR 0041, TD-018). |
+| BQ-08 | Are negative stock levels ever allowed?                                                | Resolved: refused (ADR 0041, TD-018).        |
+| BQ-09 | When do branch employees/users need application access, and what may they see?         | M9                                           |
+| BQ-10 | Are unit conversions between purchase, inventory, production and sales units required? | M2                                           |
+| BQ-11 | Is there a recipe/bill of materials, or are production inputs free-form per batch?     | M5                                           |
+| BQ-12 | Are transfers between branches in scope?                                               | Future                                       |
+| BQ-19 | What are the names/codes of the three real branches?                                   | M2                                           |
+| BQ-20 | Are employees shared across branches, or does each employee belong to one branch?      | M2/M5                                        |
+| BQ-13 | Is one supplier delivery shared across branches, or a separate purchase per branch?    | M3                                           |
+| BQ-14 | Are purchase prices tax-inclusive, and are taxes/freight part of cost?                 | M3/M7                                        |
+| BQ-15 | Is partial receiving allowed?                                                          | M3                                           |
+| BQ-21 | Which supplier contact, tax and payment details are required beyond the name?          | M3                                           |
 
 ## 7. Architecture risks
 
@@ -116,7 +116,7 @@ These are copied from the source of truth in
 | R-04 | Historical snapshots get recomputed by a later "fix".                                      | Explicit immutability tests; snapshot fields in the model.                     |
 | R-05 | Cost/profit reporting is treated as exact when it is estimated.                            | Label estimates in UI and reports; confirm cost basis.                         |
 | R-06 | Business logic leaks into React components under schedule pressure.                        | Boundary guard; domain-first tasks.                                            |
-| R-07 | The static dashboard/inventory placeholders are mistaken for implemented features.         | This documentation and honest status labels.                                   |
+| R-07 | The static dashboard placeholder is mistaken for an implemented feature.                   | This documentation and honest status labels.                                   |
 
 ## 8. Workarounds
 

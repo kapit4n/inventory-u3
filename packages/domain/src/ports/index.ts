@@ -9,6 +9,7 @@
 import type {
   BranchId,
   EmployeeId,
+  InventoryWasteId,
   IsoDate,
   IsoDateTime,
   MeasurementUnitId,
@@ -17,6 +18,7 @@ import type {
   ProductId,
   ProductPresentationId,
   PurchaseId,
+  StockAdjustmentId,
   SessionId,
   SupplierId,
   UserId,
@@ -34,6 +36,9 @@ import type { ProductPriceHistory } from '../product/product-price-history.js';
 import type { Product } from '../product/product.js';
 import type { PurchaseCorrection } from '../purchase/purchase-correction.js';
 import type { Purchase, PurchaseReceipt } from '../purchase/purchase.js';
+import type { InventoryWaste } from '../stock/inventory-waste.js';
+import type { StockAdjustment } from '../stock/stock-adjustment.js';
+import type { StockBalance } from '../stock/stock-balance.js';
 import type { StockMovement } from '../stock/stock-movement.js';
 import type { StockMovementSource } from '../stock/stock-movement-source.js';
 
@@ -60,6 +65,8 @@ export interface Repositories {
   readonly purchases: PurchaseRepository;
   readonly purchaseCorrections: PurchaseCorrectionRepository;
   readonly stockMovements: StockMovementRepository;
+  readonly stockAdjustments: StockAdjustmentRepository;
+  readonly inventoryWaste: InventoryWasteRepository;
   readonly users: UserRepository;
   readonly sessions: SessionRepository;
 }
@@ -202,6 +209,47 @@ export interface StockMovementRepository {
     organizationId: OrganizationId,
     source: StockMovementSource,
   ): Promise<readonly StockMovement[]>;
+  /** Newest movement first. */
+  listByBranchAndProduct(
+    organizationId: OrganizationId,
+    branchId: BranchId,
+    productId: ProductId,
+  ): Promise<readonly StockMovement[]>;
+  /** Derived sum of every movement for one branch/product; zero when none exist. */
+  getBalanceMilli(
+    organizationId: OrganizationId,
+    branchId: BranchId,
+    productId: ProductId,
+  ): Promise<number>;
+  /** One row per product that has at least one movement in the branch. */
+  listBalancesByBranch(
+    organizationId: OrganizationId,
+    branchId: BranchId,
+  ): Promise<readonly StockBalance[]>;
+}
+
+export interface StockAdjustmentRepository {
+  findById(
+    organizationId: OrganizationId,
+    stockAdjustmentId: StockAdjustmentId,
+  ): Promise<StockAdjustment | undefined>;
+  listByBranch(
+    organizationId: OrganizationId,
+    branchId: BranchId,
+  ): Promise<readonly StockAdjustment[]>;
+  create(stockAdjustment: StockAdjustment): Promise<StockAdjustment>;
+}
+
+export interface InventoryWasteRepository {
+  findById(
+    organizationId: OrganizationId,
+    inventoryWasteId: InventoryWasteId,
+  ): Promise<InventoryWaste | undefined>;
+  listByBranch(
+    organizationId: OrganizationId,
+    branchId: BranchId,
+  ): Promise<readonly InventoryWaste[]>;
+  create(inventoryWaste: InventoryWaste): Promise<InventoryWaste>;
 }
 
 export interface UserRepository {

@@ -1864,3 +1864,127 @@ audited corrections`; no M3 work remains pending.
 Read `AGENTS.md`, `PROJECT_OVERVIEW.md`, `IMPLEMENTATION_PROGRESS.md`,
 `CURRENT_TASK.md`, the M4 roadmap section and BQ-07/BQ-08 before changing stock
 code. Do not start production, sales or closing work.
+
+## Session 18 — 2026-11-15 — M4 branch inventory
+
+### Objective
+
+Implement M4 end to end on top of the M3 movement ledger: derived branch
+balances, exact quantities, adjustments, waste, reconciliation, negative-stock
+refusal, API/client/UI, dual-engine tests, browser coverage, migration validation
+and continuity documentation.
+
+### Work completed
+
+- Accepted ADR 0041 / TD-018: balances derive from movements, quantities are
+  exact integer thousandths, negative stock is always refused, and no balance
+  cache table exists.
+- Added `StockAdjustment` and `InventoryWaste` domain entities, factories and
+  rules; added `assertStockDoesNotGoNegative` and `INSUFFICIENT_STOCK`.
+- Migrated both engines from decimal movement quantities to
+  `quantity_delta_milli`, added `stock_adjustments`, `inventory_waste` and the
+  branch/product index, and generated migrations `0009` in both trees.
+- Added PostgreSQL and SQLite movement timeline/balance queries, adjustment and
+  waste repositories, and application use cases for adjustment, waste and
+  reconciliation.
+- Updated purchase receiving and correction for milli quantities and
+  negative-balance checks.
+- Added authenticated inventory read/write routes, validation schemas and typed
+  REST-client functions.
+- Replaced the `/inventory` placeholder with the branch stock table, movement
+  history, adjustment/waste/count dialogs, empty states, permissions and
+  bilingual copy.
+- Added domain, route, dual-engine lifecycle, REST-client, component and
+  Playwright inventory coverage.
+- Fixed the time-dependent delivery-date assertion in the purchases component
+  test by deriving today from the frozen clock helper.
+- Updated the dashboard i18n and smoke browser tests for the real inventory page
+  and supplied inventory fixtures so the Spanish spec never reaches the network.
+- Updated AGENTS, project overview, roadmap, progress, current-task, session-log,
+  report, workflow and decision documentation.
+
+### Files changed
+
+- `packages/types/src/identifiers.ts`, `packages/domain/src/shared/errors.ts`
+- `packages/domain/src/stock/*`, `packages/domain/src/ports/index.ts`
+- `database/schema/purchase.ts`, `inventory.ts`, `enums.ts`, both SQLite schema
+  trees and both index exports
+- `database/migrations/0009_*` and `database/migrations-sqlite/0009_*`, both
+  journals and snapshots
+- PostgreSQL and SQLite movement, adjustment and waste repositories; both
+  repository registries
+- `apps/api/src/application/inventory/`, `apps/api/src/application/purchase/`,
+  `apps/api/src/http/routes/inventory.ts`, `apps/api/src/http/problem.ts`,
+  `apps/api/src/app.ts`
+- `packages/validation/src/inventory/`, `packages/api-client/src/inventory.ts`
+- `packages/app/src/features/inventory/*`, i18n inventory catalogues
+- `apps/api/test/inventory.integration.test.ts`,
+  `apps/api/test/purchase-receiving.integration.test.ts`,
+  `packages/api-client/src/inventory.test.ts`,
+  `packages/app/src/features/inventory/components/inventory-page.test.tsx`,
+  `e2e/web/inventory.spec.ts`
+- `e2e/web/i18n.spec.ts`, `e2e/web/smoke.spec.ts` and the purchases component test
+- Documentation files listed above
+
+### Technical decisions
+
+- Derived balances are the M4 source of truth; a cache can be introduced later
+  only as a projection if reads require it.
+- Stock quantities are exact integer thousandths, matching purchase quantities.
+- Manual adjustments may be negative but not zero; waste is stored positive and
+  posted negative; reconciliation may count zero.
+- A reconciliation stores expected and counted quantities and writes a movement
+  only for a non-zero difference.
+- Opening stock is a positive manual adjustment.
+- Negative stock has no override; any future override requires a separate audited
+  decision and schema.
+- HTTP maps domain stock refusals to `409 DOMAIN_RULE_VIOLATION`; quantity details
+  remain in the error payload.
+
+### Validation
+
+- `pnpm run format:check` — PASS after the final Prettier pass.
+- `pnpm run typecheck` — PASS, 12/12 tasks.
+- `pnpm run lint` — PASS, 12/12 tasks and `BOUNDARY GUARD OK`.
+- `pnpm run guard:boundaries` — PASS.
+- `pnpm run test` — PASS, 12/12 tasks; 361 passed and 13 skipped.
+- `TEST_DATABASE_URL= pnpm --filter @inventory-u3/api run test:integration` —
+  PASS, 13 files, 82 passed and 13 skipped.
+- `pnpm run build` — PASS, 5/5 tasks; Vite chunk-size warnings only.
+- `pnpm run test:e2e` — PASS, 36 Chromium tests, including four inventory specs.
+- `pnpm run db:migrate` — PASS, SQLite migrations applied through `0009`.
+- Migration `0009` was validated against the existing local database: 6
+  `RECEIVING` movements total `118500`, 2 `CORRECTION` movements total `-45000`,
+  net `73500`; both new tables and the new index exist.
+- PostgreSQL cases were skipped because no server is available (SI-06), not
+  passed.
+- The first inventory component run exposed an immediate balance assertion while
+  the balance query was still pending, and an error fixture missing the required
+  `requestId`; both tests were corrected. The first full E2E run exposed the old
+  placeholder smoke assertion and an i18n spec that reached the real network; the
+  smoke expectation and inventory fixtures were updated. The full suites then
+  passed.
+
+### Problems found
+
+- The component test initially read the balance before the query resolved; it now
+  waits for the value.
+- API error fixtures must include `requestId` or the client treats the response
+  as a generic internal error.
+- The smoke and i18n browser specs still assumed the M4 placeholder and needed
+  real inventory fixtures; they now exercise the implemented screen.
+- No PostgreSQL server is available, so the PostgreSQL half of the integration
+  files remains skipped (SI-06).
+
+### Pending work
+
+- M4 is complete but not committed; commit only with explicit authorization.
+- Start M5 production after the M4 commit: batches, preparer/operator, tray
+  counts, average-weight snapshots, optional raw inputs, finished outputs and
+  waste, all writing to the M4 ledger.
+
+### Next session
+
+Read `AGENTS.md`, `PROJECT_OVERVIEW.md`, `IMPLEMENTATION_PROGRESS.md`,
+`CURRENT_TASK.md`, the M5 roadmap section and BQ-11/BQ-12 before changing
+production code. Do not start sales checkpoints or closing work.

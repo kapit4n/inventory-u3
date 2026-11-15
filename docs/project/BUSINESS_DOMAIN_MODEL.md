@@ -57,19 +57,20 @@ the branch remain proposed.
 | Permission            | Domain permission values checked by the API   | `packages/domain/src/organization/roles.ts`            |
 | Session               | Opaque bearer session, stored as a token hash | `packages/domain/src/organization/auth.ts`             |
 | Organization settings | Name, timezone, currency update rules         | `packages/domain/src/organization/organization.ts`     |
-| StockBalance          | On-hand read-model shape; strategy is open    | `packages/domain/src/stock/stock-balance.ts`           |
+| StockBalance          | Derived on-hand read model, never stored      | `packages/domain/src/stock/stock-balance.ts`           |
 
-`StockMovement` is persisted from M3 receiving and corrections. `StockBalance`
-remains a domain read-model shape only: there is no balance table, repository,
-API or screen, and M4 owns the derived-versus-cached decision (BQ-07) and
-negative-stock policy (BQ-08).
+`StockMovement` is persisted from M3 receiving, corrections and M4 adjustments,
+waste and reconciliation. `StockBalance` is a derived read model summed from
+those movements; there is deliberately no balance table (ADR 0041). Negative
+stock is refused and there is no override (BQ-08 resolved). Manual adjustments,
+inventory waste and physical-count reconciliation are implemented and audited.
 
 ### Proposed for the business milestones
 
 | Entity               | Purpose                                                              | Milestone | Key relationships                                          |
 | -------------------- | -------------------------------------------------------------------- | --------- | ---------------------------------------------------------- |
-| StockBalance         | Current on-hand quantity per branch/product (derived or cached)      | M4        | belongs to Branch and Product                              |
-| InventoryAdjustment  | Corrective stock change with a reason and audit trail                | M4        | belongs to Branch and Product                              |
+| StockBalance         | Derived current quantity per branch/product; never stored            | M4 done   | belongs to Branch and Product                              |
+| InventoryAdjustment  | Manual adjustment or reconciliation with audit evidence              | M4 done   | belongs to Branch and Product                              |
 | ProductionBatch      | A branch's production of processed products for a date               | M5        | belongs to Branch; has inputs and outputs                  |
 | ProductionInput      | Raw product consumed by a production batch                           | M5        | belongs to ProductionBatch; references Product             |
 | ProductionOutput     | Finished product and tray count produced by a batch                  | M5        | belongs to ProductionBatch; references ProductPresentation |

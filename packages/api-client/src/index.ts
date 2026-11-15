@@ -29,6 +29,13 @@ export {
   updateProductPresentation,
 } from './catalog.js';
 export { createEmployee, listEmployees, updateEmployee } from './employees.js';
+export {
+  adjustStock,
+  listStockBalances,
+  listStockMovements,
+  reconcileStock,
+  recordInventoryWaste,
+} from './inventory.js';
 export { createProduct, listProducts, updateProduct } from './products.js';
 export { createProductPrice, listProductPrices } from './product-prices.js';
 export {

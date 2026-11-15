@@ -1,7 +1,8 @@
-import { and, eq } from 'drizzle-orm';
+import { and, eq, sql } from 'drizzle-orm';
 
 import { stockMovements } from '@inventory-u3/database/schema/sqlite';
 import type {
+  StockBalance,
   StockMovement,
   StockMovementRepository,
   StockMovementSource,
@@ -12,7 +13,9 @@ import {
   asProductId,
   asStockMovementId,
   asUserId,
+  type BranchId,
   type OrganizationId,
+  type ProductId,
 } from '@inventory-u3/types';
 
 import type { SqliteDatabase } from '../connection.js';
@@ -30,7 +33,7 @@ export class SQLiteStockMovementRepository implements StockMovementRepository {
         organizationId: stockMovement.organizationId,
         branchId: stockMovement.branchId,
         productId: stockMovement.productId,
-        quantityDelta: stockMovement.quantityDelta,
+        quantityDeltaMilli: stockMovement.quantityDeltaMilli,
         reason: stockMovement.reason,
         sourceType: stockMovement.source?.type ?? null,
         sourceId: stockMovement.source?.id ?? null,
@@ -67,6 +70,82 @@ export class SQLiteStockMovementRepository implements StockMovementRepository {
 
     return rows.map(toStockMovement);
   }
+
+  async listByBranchAndProduct(
+    organizationId: OrganizationId,
+    branchId: BranchId,
+    productId: ProductId,
+  ): Promise<readonly StockMovement[]> {
+    const rows = await this.db
+      .select()
+      .from(stockMovements)
+      .where(
+        and(
+          eq(stockMovements.organizationId, organizationId),
+          eq(stockMovements.branchId, branchId),
+          eq(stockMovements.productId, productId),
+        ),
+      )
+      .orderBy(
+        sql`${stockMovements.occurredAt} desc`,
+        sql`${stockMovements.recordedAt} desc`,
+        sql`${stockMovements.id} desc`,
+      );
+
+    return rows.map(toStockMovement);
+  }
+
+  async getBalanceMilli(
+    organizationId: OrganizationId,
+    branchId: BranchId,
+    productId: ProductId,
+  ): Promise<number> {
+    const [row] = await this.db
+      .select({
+        total: sql<number>`coalesce(sum(${stockMovements.quantityDeltaMilli}), 0)`.mapWith(Number),
+      })
+      .from(stockMovements)
+      .where(
+        and(
+          eq(stockMovements.organizationId, organizationId),
+          eq(stockMovements.branchId, branchId),
+          eq(stockMovements.productId, productId),
+        ),
+      );
+
+    return row?.total ?? 0;
+  }
+
+  async listBalancesByBranch(
+    organizationId: OrganizationId,
+    branchId: BranchId,
+  ): Promise<readonly StockBalance[]> {
+    const rows = await this.db
+      .select({
+        branchId: stockMovements.branchId,
+        productId: stockMovements.productId,
+        quantityOnHandMilli:
+          sql<number>`coalesce(sum(${stockMovements.quantityDeltaMilli}), 0)`.mapWith(Number),
+        updatedAt: sql<Date>`max(${stockMovements.recordedAt})`,
+      })
+      .from(stockMovements)
+      .where(
+        and(
+          eq(stockMovements.organizationId, organizationId),
+          eq(stockMovements.branchId, branchId),
+        ),
+      )
+      .groupBy(stockMovements.branchId, stockMovements.productId)
+      .orderBy(stockMovements.productId);
+
+    return rows.map((row) => ({
+      organizationId,
+      branchId: asBranchId(row.branchId),
+      productId: asProductId(row.productId),
+      quantityOnHandMilli: row.quantityOnHandMilli,
+      updatedAt: new Date(row.updatedAt).toISOString(),
+    }));
+  }
 }
 
 function toStockMovement(row: StockMovementRow): StockMovement {
@@ -75,7 +154,7 @@ function toStockMovement(row: StockMovementRow): StockMovement {
     organizationId: asOrganizationId(row.organizationId),
     branchId: asBranchId(row.branchId),
     productId: asProductId(row.productId),
-    quantityDelta: row.quantityDelta,
+    quantityDeltaMilli: row.quantityDeltaMilli,
     reason: row.reason,
     ...(row.sourceType === null || row.sourceId === null
       ? {}

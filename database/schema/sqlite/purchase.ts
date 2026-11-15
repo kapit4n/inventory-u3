@@ -1,7 +1,6 @@
 import {
   index,
   integer,
-  real,
   sqliteTable,
   text,
   uniqueIndex,
@@ -134,7 +133,7 @@ export const stockMovements = sqliteTable(
     productId: text('product_id')
       .notNull()
       .references(() => products.id, { onDelete: 'restrict' }),
-    quantityDelta: real('quantity_delta').notNull(),
+    quantityDeltaMilli: integer('quantity_delta_milli').notNull(),
     reason: text('reason', { enum: STOCK_MOVEMENT_REASONS }).notNull(),
     sourceType: text('source_type', { enum: STOCK_MOVEMENT_SOURCE_TYPES }),
     sourceId: text('source_id'),
@@ -160,6 +159,11 @@ export const stockMovements = sqliteTable(
       table.organizationId,
       table.productId,
       table.occurredAt,
+    ),
+    index('stock_movements_organization_branch_product_idx').on(
+      table.organizationId,
+      table.branchId,
+      table.productId,
     ),
     enumCheck('stock_movements_reason_in_values', 'reason', STOCK_MOVEMENT_REASONS),
     enumCheck('stock_movements_source_type_in_values', 'source_type', STOCK_MOVEMENT_SOURCE_TYPES),

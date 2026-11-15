@@ -21,6 +21,7 @@ import { registerBranchRoutes } from './http/routes/branches.js';
 import { registerEmployeeRoutes } from './http/routes/employees.js';
 import { registerDevAuthRoutes } from './http/routes/dev-auth.js';
 import { registerHealthRoutes } from './http/routes/health.js';
+import { registerInventoryRoutes } from './http/routes/inventory.js';
 import { registerMeasurementUnitRoutes } from './http/routes/measurement-units.js';
 import { registerOrganizationRoutes } from './http/routes/organization.js';
 import { registerProductCategoryRoutes } from './http/routes/product-categories.js';
@@ -147,6 +148,14 @@ export async function buildServer(env: EnvSource = process.env): Promise<Invento
     productPriceHistory: connection.repositories.productPriceHistory,
     products: connection.repositories.products,
     organizations: connection.repositories.organizations,
+    clock: systemClock,
+    ids: uuidGenerator,
+  });
+
+  await registerInventoryRoutes(app, {
+    stockMovements: connection.repositories.stockMovements,
+    branches: connection.repositories.branches,
+    unitOfWork: connection.unitOfWork,
     clock: systemClock,
     ids: uuidGenerator,
   });

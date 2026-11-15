@@ -1,9 +1,9 @@
 # Inventory Workflow
 
-> Implementation status: **MOVEMENT LEDGER PERSISTED; BALANCES PENDING.** M3
-> writes append-only stock movements from purchase receiving and corrections.
-> The balance shape is still conceptual and `/inventory` remains a placeholder;
-> balances, adjustments, waste and reconciliation are the design target for M4.
+> Implementation status: **IMPLEMENTED IN M4.** Branch balances are derived from
+> the append-only stock movement ledger. Manual adjustments, waste and
+> reconciliation are persisted on both engines and available on `/inventory`.
+> Production and sales movements remain M5/M6 work.
 
 ## 1. Scope
 
@@ -16,8 +16,8 @@ Inventory is the per-branch record of what a branch has on hand. It covers:
 - damaged and discarded products;
 - reconciliation of physical counts.
 
-Individual sales transactions are out of scope (BR-009). Sales enter the
-inventory only through aggregate sales checkpoints (M6).
+Individual sales transactions are out of scope (BR-009). Sales enter inventory
+only through aggregate sales checkpoints (M6).
 
 ## 2. Core rules
 
@@ -25,131 +25,166 @@ inventory only through aggregate sales checkpoints (M6).
 2. Every stock-affecting record identifies its branch (BR-023).
 3. A movement is append-only: correcting a movement does not erase history
    (ADR 0040).
-4. Stock quantity is expressed in the product's configured inventory unit.
+4. Stock quantity is an exact integer in thousandths of the product's configured
+   inventory unit. The database stores `quantity_delta_milli`; `12500` means
+   `12.5` units.
 5. A stock movement reason names its source category: purchase receiving,
-   production output, sales checkpoint, adjustment, waste or correction
-   (transfer is future). A source-record reference is optional until that record
-   type exists.
-6. The system must not let stock go negative by default. Whether an override is
-   ever allowed is an open question.
+   production output, production input, sales checkpoint, adjustment, waste or
+   correction. Transfers between branches are not implemented.
+6. The system refuses any operation that would leave a negative balance. There is
+   no override in M4 (ADR 0041, TD-018).
 7. Raw and finished products are distinct products; one does not silently consume
    the other's balance.
+8. A zero balance is a valid derived result, not evidence that no movements
+   exist.
 
-## 3. Proposed record model
+## 3. Record model
 
 ```text
-StockMovement (implemented and persisted; written by M3 receiving/correction)
+StockMovement (persisted)
   id
   organizationId
   branchId
   productId
-  quantityDelta        (signed, in inventory unit)
-  reason               (RECEIVING | PRODUCTION_OUTPUT | PRODUCTION_INPUT |
-                        SALES_CHECKPOINT | ADJUSTMENT | WASTE | CORRECTION)
-  sourceType / sourceId   (optional)
-  correctsMovementId      (only on CORRECTION)
+  quantityDeltaMilli     (signed, non-zero, exact thousandths)
+  reason                 (RECEIVING | PRODUCTION_OUTPUT | PRODUCTION_INPUT |
+                          SALES_CHECKPOINT | ADJUSTMENT | WASTE | CORRECTION)
+  sourceType / sourceId  (optional)
+  correctsMovementId     (only on CORRECTION)
   occurredAt
   recordedAt
   recordedByUserId
   note
 
-StockBalance (type only in M1-T4; no factory or table)
+StockBalance (derived, never stored)
   organizationId
   branchId
   productId
-  quantityOnHand
-  updatedAt
+  quantityOnHandMilli    (sum of quantityDeltaMilli)
+  updatedAt              (latest movement time)
+
+StockAdjustment (persisted audit row)
+  kind                   (MANUAL | RECONCILIATION)
+  quantityDeltaMilli      (manual adjustment; reconciliation difference)
+  expectedQuantityMilli   (reconciliation hand count)
+  countedQuantityMilli    (reconciliation counted quantity)
+  reason / note
+  occurredAt / recordedAt / recordedByUserId
+
+InventoryWaste (persisted audit row)
+  quantityMilli           (positive quantity)
+  reason / note
+  occurredAt / recordedAt / recordedByUserId
 ```
 
-Whether `StockBalance` is a maintained cache or a derived view is **PENDING**.
-The movement ledger is the source of truth either way. A cached balance may only
-be updated inside the same transaction as the movement that changes it.
+Balances are aggregated from movements scoped by organization and branch. There
+is no balance cache table (ADR 0041). Adjustment and waste rows keep the audit
+evidence; the movement is the stock effect.
 
-The implemented domain enforces a signed, finite, non-zero quantity, a known
-reason and a known source type. A correction must reference a different
-movement; a non-correction must not carry a correction reference. Created
-movements and source references are frozen at runtime. No reversal arithmetic,
-negative-stock policy or approval rule is implemented.
-
-## 4. Proposed flows
+## 4. Flows
 
 ### Initial stock
 
-- A branch starts with zero stock or with an opening balance recorded as an
-  audited adjustment. The choice is **PENDING**.
+A branch starts at zero. Opening stock is recorded as a positive `MANUAL`
+adjustment with a required reason. The adjustment row and its `ADJUSTMENT`
+movement are written in one transaction.
 
 ### Receiving
 
-- A confirmed supplier purchase creates positive movements for its lines.
-- Stock is not updated when a purchase is only registered; it updates on
-  confirmed receiving (see [PURCHASE_WORKFLOW.md](./PURCHASE_WORKFLOW.md)).
+- A confirmed supplier purchase appends one positive `RECEIVING` movement per
+  line.
+- Registering or cancelling a draft has no stock effect.
+- A received purchase is corrected through an audited full reversal that appends
+  compensating `CORRECTION` movements and refuses to make any product negative.
+
+### Manual adjustment
+
+- The operator enters a signed, non-zero quantity, a reason and an optional note.
+- The resulting balance must be zero or positive.
+- The adjustment stores actor and timestamps and appends an `ADJUSTMENT` movement.
 
 ### Production
 
-- Raw inputs consumed create negative movements.
-- Finished outputs create positive movements.
+- Raw inputs will create negative movements and finished outputs positive
+  movements (M5).
 - If raw consumption is not reliably reported, the batch must say so rather than
   inventing quantities. See [PRODUCTION_WORKFLOW.md](./PRODUCTION_WORKFLOW.md).
 
 ### Sales
 
-- A confirmed sales checkpoint creates negative movements aggregated per product.
+- A confirmed sales checkpoint will create negative movements aggregated per
+  product (M6).
 - Processed products may be recorded in trays with an estimated-kilogram
   snapshot; the inventory unit and the sold unit must be reconciled explicitly.
 - See [SALES_CHECKPOINT_WORKFLOW.md](./SALES_CHECKPOINT_WORKFLOW.md).
 
 ### Waste, damage and loss
 
-- Recorded as movements with a reason, not as silent reductions.
-- Must be distinguishable from sales in reports.
-- Who may record waste and whether evidence is required are open questions.
+- The operator enters a positive quantity, a reason and an optional note.
+- The audit row stores the positive quantity; the ledger receives a negative
+  `WASTE` movement.
+- The resulting balance must be zero or positive.
 
-### Adjustments and reconciliation
+### Reconciliation
 
-- A physical count compares counted quantity with expected quantity.
-- The difference is stored as an adjustment with a reason and actor.
-- A reconciliation must not overwrite prior movements.
-- Whether adjustments need approval is **PENDING**.
+- The operator enters the counted quantity, a reason and an optional note.
+- The system stores the expected and counted quantities.
+- A non-zero difference appends an `ADJUSTMENT` movement and a
+  `RECONCILIATION` adjustment row; a zero difference stores the audit row only.
+- Prior movements are never overwritten.
 
-## 5. Validation rules (proposed)
+## 5. Validation rules
 
-- A movement quantity must be non-zero.
-- The product must belong to the organization; the branch must too.
-- The movement reason must be from a controlled list.
-- A source record must exist and belong to the same branch when `sourceId` is
-  present.
-- Negative resulting stock is refused unless an explicit override is authorized
-  (open question).
-- A correction must reference the record it corrects and preserve the original.
+- Movement and adjustment quantities are integers; manual adjustments must be
+  non-zero. Waste quantities must be positive. Counted quantities may be zero.
+- The product and branch must belong to the organization and be active.
+- The reason is required, trimmed and at most 500 characters; the optional note
+  is at most 500 characters.
+- The movement reason is from the controlled list.
+- A correction must reference the movement it corrects and preserve the original.
 - A non-correction movement must not carry a correction reference.
 - A movement cannot correct itself.
+- Negative resulting stock is always refused with `INSUFFICIENT_STOCK`.
+- Inventory reads are branch-scoped; a query for branch A never returns branch B
+  movements.
 
-## 6. UI expectations (M4)
+## 6. UI
 
-- Branch picker; the operator chooses the branch before viewing stock.
-- Stock list by product with unit and on-hand quantity.
-- Item movement timeline.
-- Adjustment/waste form with reason.
-- Reconciliation screen that shows expected vs counted vs difference.
-- Clear empty state when a branch has no stock records.
+`/inventory` provides:
 
-## 7. Tests required
+- a required active-branch picker;
+- a stock list for every active product, including zero-stock products;
+- unit, on-hand quantity, last movement time and role-aware actions;
+- a per-product movement timeline with reason, signed quantity and source;
+- adjustment, waste and reconciliation dialogs with validation and clear failure
+  copy;
+- an empty-state banner when the selected branch has no movements;
+- read-only behavior for roles without `inventory:write`.
 
-- Domain rules for movement signs, reasons and non-negative stock.
-- Repository tests for both engines.
-- Branch isolation: a query for branch A never returns branch B rows.
-- Reconciliation produces the expected adjustment.
-- Integration test for a full receive → produce → sell → reconcile cycle.
-- Browser test for the stock list and adjustment flow.
+## 7. Tests
 
-## 8. Dependencies and open questions
+- Domain tests cover quantity signs, reasons, sources, adjustment/waste rules and
+  negative-balance refusal.
+- Route tests cover balances, histories, adjustments, waste, reconciliation,
+  zero-difference counts, insufficient stock, validation, inactive targets and
+  branch/product isolation.
+- Dual-engine integration tests cover the full receive → adjust → waste →
+  reconcile lifecycle.
+- REST-client tests cover URLs, payloads and response validation.
+- Component tests cover the stock table, history, adjustment flow and refusal
+  copy.
+- Playwright covers balance/history rendering and the adjustment, waste and
+  reconciliation payloads in Chromium.
 
-Depends on M1 (branch/products/units) and M3 (confirmed receiving).
+## 8. Dependencies and resolved questions
 
-Open:
+Depends on M1 (branch/products/units), M2 (catalog) and M3 (confirmed receiving).
 
-1. Derived balance or maintained cache?
-2. Are negative balances ever allowed?
-3. Does initial stock use an opening adjustment?
-4. Are transfers between branches in scope? (Currently not in M1–M9.)
-5. What precision does each inventory unit require?
+Resolved in M4:
+
+1. Balances are derived from the ledger; there is no cache table (ADR 0041).
+2. Negative balances are never allowed and there is no override.
+3. Initial stock uses an opening manual adjustment.
+4. Transfers between branches are out of scope.
+5. Quantities use up to three decimal places, stored as exact integer
+   thousandths.

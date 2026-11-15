@@ -4,6 +4,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 
 import { ApiClientProvider } from '../../../query/api-client-provider.js';
+import { todayIsoDate } from '../../products/price-format.js';
 import { SessionProvider } from '../../auth/session-provider.js';
 import { PurchasesPage } from './purchases-page.js';
 
@@ -270,7 +271,7 @@ describe('PurchasesPage', () => {
       expect(JSON.parse(String(post?.[1]?.body))).toEqual({
         branchId: BRANCH_ID,
         supplierId: SUPPLIER_ID,
-        deliveryDate: '2026-11-13',
+        deliveryDate: todayIsoDate(),
         note: 'Morning delivery',
         items: [
           {

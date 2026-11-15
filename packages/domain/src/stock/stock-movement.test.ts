@@ -29,7 +29,7 @@ function createMovement(overrides: Partial<NewStockMovement> = {}) {
       organizationId: ORGANIZATION_ID,
       branchId: BRANCH_ID,
       productId: PRODUCT_ID,
-      quantityDelta: 12.5,
+      quantityDeltaMilli: 12_500,
       reason: 'RECEIVING',
       occurredAt: OCCURRED_AT,
       recordedByUserId: USER_ID,
@@ -51,7 +51,7 @@ describe('createStockMovement', () => {
       organizationId: ORGANIZATION_ID,
       branchId: BRANCH_ID,
       productId: PRODUCT_ID,
-      quantityDelta: 12.5,
+      quantityDeltaMilli: 12_500,
       reason: 'RECEIVING',
       source: { type: 'PURCHASE_RECEIPT', id: 'receipt-1' },
       occurredAt: OCCURRED_AT,
@@ -71,16 +71,16 @@ describe('createStockMovement', () => {
   });
 
   it('accepts a negative quantity for consumption or loss', () => {
-    const movement = createMovement({ quantityDelta: -3.25, reason: 'WASTE' });
+    const movement = createMovement({ quantityDeltaMilli: -3_250, reason: 'WASTE' });
 
-    expect(movement.quantityDelta).toBe(-3.25);
+    expect(movement.quantityDeltaMilli).toBe(-3_250);
   });
 
-  it.each([0, -0, Number.NaN, Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY])(
+  it.each([0, -0, 1.5, Number.NaN, Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY])(
     'rejects the invalid quantity %s',
-    (quantityDelta) => {
-      expect(() => createMovement({ quantityDelta })).toThrowError(
-        'Stock movement quantity must be a finite non-zero number',
+    (quantityDeltaMilli) => {
+      expect(() => createMovement({ quantityDeltaMilli })).toThrowError(
+        'Stock movement quantity must be a non-zero integer in thousandths',
       );
     },
   );
@@ -94,7 +94,7 @@ describe('createStockMovement', () => {
   it('accepts a correction that references a different movement', () => {
     const correction = createMovement({
       id: CORRECTION_ID,
-      quantityDelta: -12.5,
+      quantityDeltaMilli: -12_500,
       reason: 'CORRECTION',
       correctsMovementId: MOVEMENT_ID,
     });
@@ -143,9 +143,9 @@ describe('createStockMovement', () => {
     expect(Object.isFrozen(movement.source)).toBe(true);
 
     expect(() => {
-      (movement as unknown as { quantityDelta: number }).quantityDelta = 99;
+      (movement as unknown as { quantityDeltaMilli: number }).quantityDeltaMilli = 99;
     }).toThrow(TypeError);
-    expect(movement.quantityDelta).toBe(12.5);
+    expect(movement.quantityDeltaMilli).toBe(12_500);
   });
 
   it('exposes creation but no update or delete API', () => {

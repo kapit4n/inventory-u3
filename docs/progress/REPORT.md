@@ -1,8 +1,9 @@
 # Inventory U3 — Phase 1 Business Foundation Report
 
-> Last updated: 2026-11-13. M1 is committed at `bfdc9cb`, M2-T1 at `814f397`,
+> Last updated: 2026-11-15. M1 is committed at `bfdc9cb`, M2-T1 at `814f397`,
 > M2-T2 at `6b50606`, M2-T3 at `5c96eeb`, M2-T4 at `992d6ea`, M2-T5 at
-> `c8526d0`, M2-T6/T7 with the sample seed at `cc70bfc` and M3 at `13b8fcd`.
+> `c8526d0`, M2-T6/T7 with the sample seed at `cc70bfc`, M3 at `13b8fcd` and its
+> documentation closeout at `c86c6c5`. M4 is complete and awaiting commit.
 
 ## 1. Architecture overview
 
@@ -31,11 +32,12 @@ domain-purity, schema-parity and migration-parity checks.
 
 Implemented domain areas are organization, user, role, session, permissions,
 organization settings, branch, employee, supplier, product catalog, price
-history, purchase, purchase item, purchase correction, stock movement concepts,
-errors, time and identifiers. Branch, employee, supplier, catalog, product,
-price-history, purchase and stock-movement data are persisted through both
-engines and exposed through API and UI. No inventory balance, production, sales
-checkpoint or closing entity is implemented.
+history, purchase, purchase item, purchase correction, stock movement, derived
+stock balance, stock adjustment and inventory waste, errors, time and
+identifiers. Branch, employee, supplier, catalog, product, price-history,
+purchase, movement, adjustment and waste data are persisted through both engines
+and exposed through API and UI. Balances are derived from movements, not stored.
+No production, sales checkpoint or closing entity is implemented.
 
 ## 5. Web/Desktop strategy
 
@@ -51,8 +53,9 @@ domain use cases, repository ports, standard problem envelopes and structured
 redacted logs. Branch, employee, supplier, category, unit, product, presentation
 and price routes are authenticated; writes require the administrator-only
 `organization:manage` permission and reads require `organization:read`. Purchase
-routes require `inventory:read`/`inventory:write`; receiving and correction are
-transactional application use cases. Employee assignments are validated against a
+and inventory routes require `inventory:read`/`inventory:write`; receiving,
+correction, adjustment, waste and reconciliation are transactional application
+use cases. Employee assignments are validated against a
 branch in the caller's organization; suppliers, categories, units and products
 are organization-wide. Product references are validated against the caller's
 organization, and presentations and prices are nested under a product and verify
@@ -67,9 +70,11 @@ SQLite is the default engine; PostgreSQL is retained as the second engine. Both
 have schema trees, generated migrations and repository implementations. Current
 tables are organizations, branches, employees, suppliers, measurement units,
 product categories, products, product presentations, product price history,
-purchases, purchase items, purchase corrections, stock movements, users and
-sessions. SQLite migrations are applied through `0008`; the sample seed contains
-the development organization, users and illustrative master data.
+purchases, purchase items, purchase corrections, stock movements,
+`stock_adjustments`, `inventory_waste`, users and sessions. Movement quantities
+are exact integer thousandths. Balances are derived; there is no
+`stock_balances` table. SQLite migrations are applied through `0009`; the sample
+seed contains the development organization, users and illustrative master data.
 
 ## 8. State-management strategy
 
@@ -83,10 +88,11 @@ Vitest covers domain rules, REST-client behavior, API route integration,
 dual-engine repository behavior and React components with React Testing Library.
 SQLite integration tests run by default; PostgreSQL cases skip without a
 reachable server. Playwright covers the shell, settings, master-data management,
-products, presentations, price history and purchases. The default suites report
-335 passed and 12 skipped; the separately invoked SQLite integration command
-reports 77 passed and 12 skipped; the Chromium E2E suite reports 32 passed.
-Typecheck, lint, build and formatting pass.
+products, presentations, price history, purchases and branch inventory. The
+default suites report 361 passed and 13 skipped; the separately invoked SQLite
+integration command reports 82 passed and 13 skipped; the Chromium E2E suite
+reports 36 passed. Typecheck, lint, build and formatting pass. Migration `0009`
+was verified against the existing local database.
 
 ## 10. What was actually implemented
 
@@ -121,29 +127,34 @@ movements, cancellation, and audited full-reversal corrections with a required
 reason and before/after totals. It includes dual-engine purchase, correction and
 stock-movement repositories, authenticated purchase routes, typed client
 functions, the `/purchases` UI and domain, repository, route, client, component
-and Playwright coverage (TD-017).
+and Playwright coverage (TD-017). M4 added derived branch balances from the
+append-only exact-thousandth ledger, domain rules for adjustments, waste and
+reconciliation, negative-stock refusal, dual-engine repositories and migration
+`0009`, authenticated inventory routes and typed client, the `/inventory` stock
+table with movement history and action dialogs, and domain, route, dual-engine,
+client, component and Playwright coverage (ADR 0041, TD-018).
 
 ## 11. What was intentionally NOT implemented
 
 Employee login accounts, branch-scoped authorization, payroll, attendance,
 contact or identity data, supplier contact/tax/payment fields, branch-scoped
 prices, price update/delete, weight snapshots, recipe/bill-of-materials entities
-(BQ-11 defers production inputs to M5), stock balances and adjustments,
-production, sales checkpoints, daily closing, reporting, offline mode,
-desktop-local data, synchronization, microservices, GraphQL and Redux.
+(BQ-11 defers production inputs to M5), cached stock balances, negative-stock
+overrides, branch transfers, production, sales checkpoints, daily closing,
+reporting, offline mode, desktop-local data, synchronization, microservices,
+GraphQL and Redux.
 
 ## 12. Open architectural questions
 
 See `docs/open-questions.md`. Key questions include employee sharing across
 branches (BQ-20), supplier detail fields (BQ-21), real branch seeding (BQ-19),
-price scope (BQ-06), units and conversions (BQ-10), the physical stock model,
-movement-derived versus cached levels, negative stock policy, multi-organization
+price scope (BQ-06), units and conversions (BQ-10), multi-organization
 membership, reporting valuation and the WhatsApp report format that blocks M6
-(BR-013).
+(BR-013). Derived balances and the negative-stock policy were resolved in M4
+(ADR 0041).
 
 ## 13. Recommended next milestone
 
-Start **M4 — Branch Inventory**: decide derived versus cached stock levels
-(BQ-07) and the negative-stock policy (BQ-08), then implement balances,
-adjustments, waste and reconciliation on the persisted movement ledger. M3 is
-committed as `13b8fcd`.
+Commit M4 when authorized, then start **M5 — Production**: branch batches with
+preparer and operator identity, tray counts, average-weight snapshots, optional
+raw inputs, finished outputs and waste, all writing to the M4 movement ledger.

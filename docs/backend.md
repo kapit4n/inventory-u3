@@ -83,8 +83,9 @@ currency. Receiving, cancellation and correction run through transactional use
 cases in `apps/api/src/application/purchase/`; receiving is a one-shot
 `DRAFT -> RECEIVED` transition with one stock movement per line, and correction
 is an audited full reversal (TD-017). The purchase list accepts an optional
-`branchId` filter. Inventory balance, adjustment and reconciliation endpoints are
-intentionally absent until M4.
+`branchId` filter. Inventory routes expose derived branch balances, product
+movement history, manual adjustments, waste and reconciliation; all reads are
+branch-scoped and negative balances are refused (ADR 0041).
 
 The branch, employee, supplier, category, unit, product and purchase collections
 return `{ "items": [...] }`. Product prices return
@@ -118,11 +119,12 @@ database URL answers.
 
 Implemented repository ports: organization, branch, employee, supplier,
 measurement unit, product category, product, product presentation, product price
-history, purchase, purchase correction, stock movement, user and session. The
-branch, employee, supplier, catalog, product, purchase, correction and
-stock-movement ports are exercised through integration tests on both engines.
-Stock movements are written by M3 receiving and corrections; balance calculation,
-adjustment, waste and stock queries remain M4 work.
+history, purchase, purchase correction, stock movement, stock adjustment,
+inventory waste, user and session. The branch, employee, supplier, catalog,
+product, purchase, correction, movement, adjustment and waste ports are
+exercised through integration tests on both engines. Stock balances are derived
+from movements; no balance cache repository exists (ADR 0041). Inventory routes
+cover balances, movement history, adjustments, waste and reconciliation.
 
 ## Testing
 
@@ -134,5 +136,5 @@ repository round-trips on SQLite, cross-organization isolation, repository
 constraints and a migration smoke path. The same integration files run against
 PostgreSQL when `TEST_DATABASE_URL` answers and skip otherwise. Domain and
 validation tests cover their invariants. Component tests cover branch, employee,
-supplier, category, unit, product, presentation and price-history management;
-browser tests mock the API through Playwright.
+supplier, category, unit, product, presentation, price-history, purchase and
+branch-inventory management; browser tests mock the API through Playwright.

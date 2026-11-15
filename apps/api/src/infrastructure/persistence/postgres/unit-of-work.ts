@@ -3,6 +3,7 @@ import type { Repositories, UnitOfWork } from '@inventory-u3/domain';
 import type { InventoryDatabase } from './connection.js';
 import { DrizzleBranchRepository } from '../repositories/branch-repository.js';
 import { DrizzleEmployeeRepository } from '../repositories/employee-repository.js';
+import { DrizzleInventoryWasteRepository } from '../repositories/inventory-waste-repository.js';
 import { DrizzleMeasurementUnitRepository } from '../repositories/measurement-unit-repository.js';
 import { DrizzleOrganizationRepository } from '../repositories/organization-repository.js';
 import { DrizzleProductCategoryRepository } from '../repositories/product-category-repository.js';
@@ -12,6 +13,7 @@ import { DrizzleProductRepository } from '../repositories/product-repository.js'
 import { DrizzlePurchaseCorrectionRepository } from '../repositories/purchase-correction-repository.js';
 import { DrizzlePurchaseRepository } from '../repositories/purchase-repository.js';
 import { DrizzleSessionRepository } from '../repositories/session-repository.js';
+import { DrizzleStockAdjustmentRepository } from '../repositories/stock-adjustment-repository.js';
 import { DrizzleStockMovementRepository } from '../repositories/stock-movement-repository.js';
 import { DrizzleSupplierRepository } from '../repositories/supplier-repository.js';
 import { DrizzleUserRepository } from '../repositories/user-repository.js';
@@ -30,6 +32,8 @@ export function repositoriesFor(db: InventoryDatabase): Repositories {
     purchases: new DrizzlePurchaseRepository(db),
     purchaseCorrections: new DrizzlePurchaseCorrectionRepository(db),
     stockMovements: new DrizzleStockMovementRepository(db),
+    stockAdjustments: new DrizzleStockAdjustmentRepository(db),
+    inventoryWaste: new DrizzleInventoryWasteRepository(db),
     users: new DrizzleUserRepository(db),
     sessions: new DrizzleSessionRepository(db),
   };

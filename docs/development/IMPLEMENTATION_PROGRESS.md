@@ -7,18 +7,30 @@
 
 | Field                  | Value                                                            |
 | ---------------------- | ---------------------------------------------------------------- |
-| Current milestone      | M4 — Branch Inventory (M3 complete)                              |
-| Current task           | M3 complete and committed; M4 not started                        |
-| Overall project status | M3 purchases and receiving complete, including browser coverage  |
-| Completed milestones   | M1, M2 and M3; the foundation prerequisite is also complete      |
-| In-progress milestones | None; M4 is the next milestone                                   |
+| Current milestone      | M5 — Production (M4 complete, awaiting commit)                   |
+| Current task           | M4 complete; M5 not started                                      |
+| Overall project status | M4 branch inventory complete, including browser coverage         |
+| Completed milestones   | M1, M2, M3 and M4; the foundation prerequisite is also complete  |
+| In-progress milestones | None; M5 is the next milestone                                   |
 | Blocked milestones     | M6 finalization is blocked on BR-013 (WhatsApp reporting format) |
-| Pending milestones     | M4, M5, M6, M7, M8, M9                                           |
-| Last verified commit   | `13b8fcd` (M3 complete)                                          |
-| Last update date       | 2026-11-13                                                       |
-| Next recommended task  | Start M4 branch inventory                                        |
+| Pending milestones     | M5, M6, M7, M8, M9                                               |
+| Last verified commit   | `c86c6c5` (M3 documentation closeout)                            |
+| Last update date       | 2026-11-15                                                       |
+| Next recommended task  | Commit M4, then start M5 production                              |
 
 ### Working tree at the time of this update
+
+M4 adds branch inventory on top of the M3 movement ledger. A branch/product
+balance is derived by summing its movements; no `stock_balances` cache table
+exists (ADR 0041, TD-018). Quantities are exact integer thousandths everywhere.
+Operators can record signed manual adjustments, positive waste and physical
+counts; reconciliation stores expected and counted quantities and writes a
+movement only for a non-zero difference. Any operation that would leave negative
+stock is refused. The `/inventory` screen provides the branch stock table,
+per-product movement history, adjustment/waste/count dialogs, empty states and
+role-aware actions. Migration `0009` converts existing decimal movements and adds
+`stock_adjustments`, `inventory_waste` and the branch/product index on both
+engines.
 
 M3 adds the supplier-purchase flow on top of the M2 master data. A purchase is
 registered for one branch and supplier with immutable multi-line items, integer
@@ -34,8 +46,8 @@ correction dialog.
 Both engines have purchase, correction and stock-movement repositories. The
 migration set is `0007` for the four M3 tables and `0008` for the
 `PURCHASE_CORRECTION` source type, the SQLite source-type check rebuild and the
-unique organization/purchase correction index. M4 now owns balance strategy and
-the inventory UI; M3 only writes the movement ledger.
+unique organization/purchase correction index. M3 writes the movement ledger;
+M4 builds derived balances and the inventory UI on top of it.
 
 M2-T6 adds an append-only, effective-dated `product_price_history` domain entity,
 port, dual-engine tables and repositories, validation, authenticated price
@@ -66,15 +78,18 @@ REST client, React UI, tests, database schema, migrations and documentation.
 | `pnpm run typecheck`                                                      | PASS — 12/12 tasks                                       |
 | `pnpm run lint`                                                           | PASS — 12/12 tasks, `BOUNDARY GUARD OK`                  |
 | `pnpm run guard:boundaries`                                               | PASS — `BOUNDARY GUARD OK`                               |
-| `pnpm run test`                                                           | PASS — 12/12 tasks, 335 passed, 12 skipped               |
-| `TEST_DATABASE_URL= pnpm --filter @inventory-u3/api run test:integration` | PASS — 12 files, 77 passed, 12 skipped                   |
+| `pnpm run test`                                                           | PASS — 12/12 tasks, 361 passed, 13 skipped               |
+| `TEST_DATABASE_URL= pnpm --filter @inventory-u3/api run test:integration` | PASS — 13 files, 82 passed, 13 skipped                   |
 | `pnpm run build`                                                          | PASS — 5/5 tasks; Vite chunk-size warnings only          |
-| `pnpm run db:migrate`                                                     | PASS — SQLite migrations applied through `0008`          |
-| `pnpm run test:e2e`                                                       | PASS — 32 Chromium tests, including three purchase specs |
+| `pnpm run db:migrate`                                                     | PASS — SQLite migrations applied through `0009`          |
+| `pnpm run test:e2e`                                                       | PASS — 36 Chromium tests, including four inventory specs |
 
-Current test counts: domain 99, api-client 42, app 81, API 103 passed + 12
-skipped, database 6 and desktop 4 — 335 passed and 12 skipped in total, plus 32
-browser tests. The skipped tests are PostgreSQL repository cases, which require a
+Current test counts: domain 110, api-client 45, app 88, API 108 passed + 13
+skipped, database 6 and desktop 4 — 361 passed and 13 skipped in total, plus 36
+browser tests. Migration `0009` was also validated against the existing local
+database: 6 `RECEIVING` movements total `118500`, 2 `CORRECTION` movements total
+`-45000`, net `73500`, and both new tables plus the new branch/product index
+exist. The skipped tests are PostgreSQL repository cases, which require a
 reachable `TEST_DATABASE_URL`. All commands above were re-run after the final
 Prettier pass.
 
@@ -460,33 +475,56 @@ M3 is complete and committed as `13b8fcd`. Start M4 branch inventory.
 
 ## M4 — Branch Inventory
 
-**Status: NOT_STARTED**
+**Status: COMPLETED (awaiting commit)**
 
 ### Completed
 
-- [ ] Nothing.
+- [x] Derived balance strategy and integer-thousandth quantity decision
+      (ADR 0041, TD-018).
+- [x] Dual-engine migration `0009` from decimal movements to
+      `quantity_delta_milli`, plus `stock_adjustments`, `inventory_waste` and the
+      branch/product index.
+- [x] Domain stock adjustment, inventory waste, reconciliation entry and
+      negative-stock rule.
+- [x] PostgreSQL and SQLite movement timeline/balance queries, adjustment and
+      waste repositories.
+- [x] Adjustment, waste and reconciliation use cases with reference validation
+      and branch isolation.
+- [x] Purchase receiving/correction updated for milli quantities and negative
+      balance refusal.
+- [x] Authenticated inventory read/write routes, typed client and validation.
+- [x] Branch-aware `/inventory` UI with stock table, history, adjustment, waste,
+      reconciliation, empty states, permissions and bilingual copy.
+- [x] Domain, dual-engine integration, REST-client, component and Playwright
+      tests.
 
 ### Pending
 
-- [ ] Movement ledger and balance decision.
-- [ ] Raw and finished stock.
-- [ ] Adjustments.
-- [ ] Damaged/discarded products.
-- [ ] Reconciliation.
-- [ ] Stock validation and UI.
-- [ ] Tests.
+- [ ] Commit M4 when authorized.
 
 ### Validation
 
-No implementation and no tests. The `/inventory` route renders a static card.
+- `format:check`, `typecheck` 12/12, `lint` 12/12 with `BOUNDARY GUARD OK`,
+  `guard:boundaries`, `build` 5/5, and `db:migrate` through `0009`: PASS.
+- `pnpm run test`: PASS, 361 passed and 13 skipped.
+- SQLite integration suite: PASS, 13 files, 82 passed and 13 skipped.
+- Chromium E2E: PASS, 36 tests, including four inventory specs.
+- Migration `0009` verified against the existing local database with all eight
+  movement rows converted exactly.
+- PostgreSQL cases skip without a reachable `TEST_DATABASE_URL`; they were not
+  executed (SI-06).
 
 ### Notes
 
-Do not build the stock list before the movement model is decided.
+Balances are derived from the append-only ledger; no cache table exists. A zero
+balance is a valid derived result. Negative stock is always refused. Waste is
+stored as a positive quantity and posted as a negative movement. Reconciliation
+keeps expected/counted evidence and posts nothing for a zero difference. Opening
+stock is a positive manual adjustment.
 
 ### Next action
 
-Start after M1 and the stock effects of M3.
+Commit M4, then start M5 production on top of the ledger.
 
 ---
 

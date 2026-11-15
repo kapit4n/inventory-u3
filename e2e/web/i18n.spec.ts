@@ -28,6 +28,13 @@ test.beforeEach(async ({ page }) => {
 test.describe('Spanish', () => {
   test('translates the dashboard, inventory and the language switch', async ({ page }) => {
     const errors = watchForConsoleErrors(page);
+    await installApi(page, {
+      'GET /api/v1/organization': { body: ORGANIZATION },
+      'GET /api/v1/branches': { body: { items: [] } },
+      'GET /api/v1/products': { body: { items: [] } },
+      'GET /api/v1/measurement-units': { body: { items: [] } },
+      'GET /api/v1/inventory': { body: { items: [] } },
+    });
 
     await page.goto('/dashboard');
 

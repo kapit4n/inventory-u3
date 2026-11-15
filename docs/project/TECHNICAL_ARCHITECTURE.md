@@ -136,9 +136,9 @@ amounts with captured currency and kind-derived basis, unique per product and
 effective date (TD-016). Purchases carry organization and branch ownership plus
 one supplier, immutable items, captured currency, status and actor/timestamp
 evidence; corrections are audited full reversals (TD-017). `stock_movements` is
-the persisted append-only ledger written by receiving and correction; the
-`StockBalance` shape is not persisted, and balance strategy belongs to M4
-(ADR 0040). Estimated/measured weight snapshots, production and sales tables do
+the persisted append-only exact-thousandth ledger written by receiving,
+correction, adjustment, waste and reconciliation; `StockBalance` is derived from
+it and is not persisted (ADR 0040, ADR 0041). Estimated/measured weight snapshots, production and sales tables do
 not exist yet. Every operational row carries organization and branch ownership.
 
 ## 7. Frontend architecture

@@ -28,6 +28,7 @@ ADRs retained for the Inventory U3 foundation:
 | 0038 | Inventory U3 starts from a generic organization/session foundation  |
 | 0039 | Branch-scoped persistence                                           |
 | 0040 | Stock movements are append-only; corrections reference the original |
+| 0041 | Stock balances derive from the append-only ledger                   |
 
 Numbering gaps are intentional: dental-specific decisions were removed with the
 business domain rather than rewritten as if they had been made for this product.

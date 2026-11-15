@@ -10,7 +10,7 @@
 ## Current status
 
 - **Foundation prerequisite:** complete.
-- **Business roadmap:** M1, M2 and M3 are COMPLETED; M4–M9 are NOT_STARTED.
+- **Business roadmap:** M1, M2, M3 and M4 are COMPLETED; M5–M9 are NOT_STARTED.
 - **Branch master data:** entity, dual-engine schema, migrations and repositories
   are implemented. `GET/POST/PUT /api/v1/branches`, the Settings management
   section and the reusable active-branch selector are implemented. Three
@@ -39,22 +39,25 @@
   implemented on both engines, in the API, typed client and `/purchases` UI.
   Partial receiving, taxes, freight and unit conversion remain open (BQ-10,
   BQ-13, BQ-14, BQ-15). M3 is committed as `13b8fcd`.
-- **Stock concepts:** append-only movements are persisted from M3 receiving and
-  corrections. The `StockBalance` shape is still domain-only; no balance
-  calculation, adjustment, waste, reconciliation or inventory screen exists.
+- **Branch inventory:** balances are derived from the append-only ledger with
+  exact integer-thousandth movements. Manual adjustments, positive waste,
+  physical-count reconciliation, negative-stock refusal, authenticated inventory
+  routes, typed client and the `/inventory` UI are implemented on both engines.
+  No balance cache table exists (ADR 0041, TD-018). M4 is complete and awaiting
+  commit.
 - **Access model:** documented in `docs/project/ACCESS_MODEL.md`; one
   organization-wide central operator initially. Branch users and assignment
   tables remain unimplemented.
 - **Technical docs and guard:** the database, backend, testing and architecture
-  references describe M1 and M2. The boundary guard checks dependency direction,
-  database access, thin shells, domain Node built-ins, schema-table parity and
-  migration-journal parity.
-- **Next task:** start M4 branch inventory. Real branch names wait for BQ-19;
-  real master data replaces the sample seed when confirmed.
+  references describe M1 through M4. The boundary guard checks dependency
+  direction, database access, thin shells, domain Node built-ins, schema-table
+  parity and migration-journal parity.
+- **Next task:** commit M4, then start M5 production. Real branch names wait for
+  BQ-19; real master data replaces the sample seed when confirmed.
 - **Commits:** M1 closeout `bfdc9cb`; M2-T1 `814f397`; M2-T2 `6b50606`; M2-T3
   `5c96eeb`; M2-T4 `992d6ea`; M2-T5 `c8526d0`; M2-T6/T7 with the sample seed
-  `cc70bfc`; M3 `13b8fcd`.
+  `cc70bfc`; M3 `13b8fcd`; M3 docs closeout `c86c6c5`.
 
 The previous verification records are preserved in
-[SESSION_LOG.md](../development/SESSION_LOG.md) (Sessions 0–17).
+[SESSION_LOG.md](../development/SESSION_LOG.md) (Sessions 0–18).
 [LOG.md](./LOG.md) remains as a pointer to that history.

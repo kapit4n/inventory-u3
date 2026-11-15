@@ -49,6 +49,9 @@ import {
   type UserId,
 } from '@inventory-u3/types';
 
+import { adjustStockUseCase } from '../src/application/inventory/adjust-stock.js';
+import { reconcileStockUseCase } from '../src/application/inventory/reconcile-stock.js';
+import { recordInventoryWasteUseCase } from '../src/application/inventory/record-inventory-waste.js';
 import { receivePurchaseUseCase } from '../src/application/purchase/receive-purchase.js';
 import {
   repositoriesFor,
@@ -172,23 +175,23 @@ async function exercisePurchaseLifecycle(harness: Harness): Promise<void> {
   expect(
     movements
       .map((movement) => ({
-        quantityDelta: movement.quantityDelta,
+        quantityDeltaMilli: movement.quantityDeltaMilli,
         reason: movement.reason,
         source: movement.source,
         recordedAt: movement.recordedAt,
         recordedByUserId: movement.recordedByUserId,
       }))
-      .sort((left, right) => left.quantityDelta - right.quantityDelta),
+      .sort((left, right) => left.quantityDeltaMilli - right.quantityDeltaMilli),
   ).toEqual([
     {
-      quantityDelta: 1.5,
+      quantityDeltaMilli: 1_500,
       reason: 'RECEIVING',
       source: { type: 'PURCHASE_RECEIPT', id: saved.id },
       recordedAt: RECEIVED_AT,
       recordedByUserId: scenario.userA,
     },
     {
-      quantityDelta: 12.5,
+      quantityDeltaMilli: 12_500,
       reason: 'RECEIVING',
       source: { type: 'PURCHASE_RECEIPT', id: saved.id },
       recordedAt: RECEIVED_AT,
@@ -270,6 +273,198 @@ async function exercisePurchaseLifecycle(harness: Harness): Promise<void> {
   expect(cancelledDraft.status).toBe('CANCELLED');
 }
 
+async function exerciseInventoryLifecycle(harness: Harness): Promise<void> {
+  const { repositories, unitOfWork, scenario } = harness;
+  const target = {
+    organizationId: scenario.organizationA,
+    branchId: scenario.branchB,
+    productId: scenario.products[0],
+    recordedByUserId: scenario.userA,
+  };
+
+  await expect(
+    repositories.stockMovements.getBalanceMilli(
+      target.organizationId,
+      target.branchId,
+      target.productId,
+    ),
+  ).resolves.toBe(0);
+
+  const adjustment = await adjustStockUseCase(
+    {
+      ...target,
+      quantityDeltaMilli: 10_000,
+      reason: '  Opening stock  ',
+      note: '  First count  ',
+    },
+    { unitOfWork, ids: harness.ids, clock: harness.clock },
+  );
+  expect(adjustment).toMatchObject({
+    organizationId: scenario.organizationA,
+    branchId: scenario.branchB,
+    productId: scenario.products[0],
+    kind: 'MANUAL',
+    quantityDeltaMilli: 10_000,
+    reason: 'Opening stock',
+    note: 'First count',
+    occurredAt: RECEIVED_AT,
+    recordedAt: RECEIVED_AT,
+    recordedByUserId: scenario.userA,
+  });
+  expect(adjustment.expectedQuantityMilli).toBeUndefined();
+  expect(adjustment.countedQuantityMilli).toBeUndefined();
+
+  await expect(
+    repositories.stockAdjustments.findById(scenario.organizationA, adjustment.id),
+  ).resolves.toEqual(adjustment);
+  await expect(
+    repositories.stockAdjustments.listByBranch(scenario.organizationA, scenario.branchB),
+  ).resolves.toEqual([adjustment]);
+
+  const waste = await recordInventoryWasteUseCase(
+    {
+      ...target,
+      quantityMilli: 2_000,
+      reason: 'Damaged in transit',
+    },
+    { unitOfWork, ids: harness.ids, clock: harness.clock },
+  );
+  expect(waste).toMatchObject({
+    organizationId: scenario.organizationA,
+    branchId: scenario.branchB,
+    productId: scenario.products[0],
+    quantityMilli: 2_000,
+    reason: 'Damaged in transit',
+    recordedByUserId: scenario.userA,
+  });
+  await expect(
+    repositories.inventoryWaste.findById(scenario.organizationA, waste.id),
+  ).resolves.toEqual(waste);
+  await expect(
+    repositories.inventoryWaste.listByBranch(scenario.organizationA, scenario.branchB),
+  ).resolves.toEqual([waste]);
+
+  const reconciliation = await reconcileStockUseCase(
+    {
+      ...target,
+      countedQuantityMilli: 7_500,
+      reason: 'Physical count',
+    },
+    { unitOfWork, ids: harness.ids, clock: harness.clock },
+  );
+  expect(reconciliation).toMatchObject({
+    kind: 'RECONCILIATION',
+    quantityDeltaMilli: -500,
+    expectedQuantityMilli: 8_000,
+    countedQuantityMilli: 7_500,
+    reason: 'Physical count',
+    recordedAt: RECEIVED_AT,
+  });
+
+  const zeroDifference = await reconcileStockUseCase(
+    {
+      ...target,
+      countedQuantityMilli: 7_500,
+      reason: 'Second count matched',
+    },
+    { unitOfWork, ids: harness.ids, clock: harness.clock },
+  );
+  expect(zeroDifference).toMatchObject({
+    kind: 'RECONCILIATION',
+    quantityDeltaMilli: 0,
+    expectedQuantityMilli: 7_500,
+    countedQuantityMilli: 7_500,
+  });
+
+  const movements = await repositories.stockMovements.listByBranchAndProduct(
+    scenario.organizationA,
+    scenario.branchB,
+    scenario.products[0],
+  );
+  expect(movements).toHaveLength(3);
+  expect(
+    movements
+      .map((movement) => ({
+        quantityDeltaMilli: movement.quantityDeltaMilli,
+        reason: movement.reason,
+        source: movement.source,
+      }))
+      .sort((left, right) => left.quantityDeltaMilli - right.quantityDeltaMilli),
+  ).toEqual([
+    { quantityDeltaMilli: -2_000, reason: 'WASTE', source: { type: 'WASTE_REPORT', id: waste.id } },
+    {
+      quantityDeltaMilli: -500,
+      reason: 'ADJUSTMENT',
+      source: { type: 'ADJUSTMENT', id: reconciliation.id },
+    },
+    {
+      quantityDeltaMilli: 10_000,
+      reason: 'ADJUSTMENT',
+      source: { type: 'ADJUSTMENT', id: adjustment.id },
+    },
+  ]);
+
+  await expect(
+    repositories.stockMovements.getBalanceMilli(
+      scenario.organizationA,
+      scenario.branchB,
+      scenario.products[0],
+    ),
+  ).resolves.toBe(7_500);
+  await expect(
+    repositories.stockMovements.listBalancesByBranch(scenario.organizationA, scenario.branchB),
+  ).resolves.toMatchObject([
+    {
+      organizationId: scenario.organizationA,
+      branchId: scenario.branchB,
+      productId: scenario.products[0],
+      quantityOnHandMilli: 7_500,
+    },
+  ]);
+  await expect(
+    repositories.stockMovements.listBalancesByBranch(scenario.organizationB, scenario.branchB),
+  ).resolves.toEqual([]);
+
+  await expect(
+    recordInventoryWasteUseCase(
+      {
+        ...target,
+        quantityMilli: 10_000,
+        reason: 'Too much waste',
+      },
+      { unitOfWork, ids: harness.ids, clock: harness.clock },
+    ),
+  ).rejects.toMatchObject({
+    code: 'INSUFFICIENT_STOCK',
+    details: {
+      currentQuantityMilli: 7_500,
+      deltaQuantityMilli: -10_000,
+      resultingQuantityMilli: -2_500,
+    },
+  });
+  await expect(
+    adjustStockUseCase(
+      {
+        ...target,
+        quantityDeltaMilli: -10_000,
+        reason: 'Remove everything',
+      },
+      { unitOfWork, ids: harness.ids, clock: harness.clock },
+    ),
+  ).rejects.toMatchObject({ code: 'INSUFFICIENT_STOCK' });
+
+  await expect(
+    repositories.stockMovements.listByBranchAndProduct(
+      scenario.organizationA,
+      scenario.branchB,
+      scenario.products[0],
+    ),
+  ).resolves.toHaveLength(3);
+  await expect(
+    repositories.stockAdjustments.listByBranch(scenario.organizationA, scenario.branchB),
+  ).resolves.toHaveLength(3);
+}
+
 describe('purchase receiving (SQLite)', () => {
   let dir: string;
   let connection: ReturnType<typeof createSqliteConnection>;
@@ -302,6 +497,10 @@ describe('purchase receiving (SQLite)', () => {
 
   it('persists and receives a multi-line purchase exactly once', async () => {
     await exercisePurchaseLifecycle(harness);
+  });
+
+  it('records adjustments, waste and reconciliations on the derived ledger', async () => {
+    await exerciseInventoryLifecycle(harness);
   });
 
   it('refuses a purchase line unit that is not the product inventory unit', async () => {
@@ -454,6 +653,10 @@ describe.skipIf(!postgresUrl)('purchase receiving (PostgreSQL)', () => {
 
   it('persists and receives a multi-line purchase exactly once', async () => {
     await exercisePurchaseLifecycle(harness);
+  });
+
+  it('records adjustments, waste and reconciliations on the derived ledger', async () => {
+    await exerciseInventoryLifecycle(harness);
   });
 
   it('refuses a purchase line unit that is not the product inventory unit', async () => {

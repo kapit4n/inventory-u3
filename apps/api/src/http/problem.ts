@@ -31,6 +31,7 @@ const DOMAIN_ERROR_HTTP_STATUS: Record<DomainErrorCode, number> = {
   NOT_FOUND: 404,
   DUPLICATED_RECORD: 409,
   INVALID_STATE: 409,
+  INSUFFICIENT_STOCK: 409,
   // 401, not 403: the caller has not proven who they are, so the answer is
   // "authenticate", which the client can act on by showing a login screen.
   UNAUTHENTICATED: 401,
@@ -78,7 +79,11 @@ export function toApiErrorCode(domainCode: DomainErrorCode): ApiErrorCode {
   if (domainCode === 'FORBIDDEN') {
     return 'FORBIDDEN';
   }
-  if (domainCode === 'DUPLICATED_RECORD' || domainCode === 'INVALID_STATE') {
+  if (
+    domainCode === 'DUPLICATED_RECORD' ||
+    domainCode === 'INVALID_STATE' ||
+    domainCode === 'INSUFFICIENT_STOCK'
+  ) {
     return 'DOMAIN_RULE_VIOLATION';
   }
   return 'VALIDATION_ERROR';

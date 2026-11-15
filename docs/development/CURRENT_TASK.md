@@ -1,68 +1,82 @@
 # Current Task
 
-> Last updated: 2026-11-13.
+> Last updated: 2026-11-15.
 >
-> **M3 is COMPLETE and committed as `13b8fcd`. M2 remains complete and committed
-> as `cc70bfc`.** M4 branch inventory is the next milestone.
+> **M4 is COMPLETE and awaiting commit. M1, M2 and M3 are complete and committed
+> (`cc70bfc` and `13b8fcd`).** M5 production is the next milestone.
 
 ## Task identity
 
-| Field        | Value                                                                                   |
-| ------------ | --------------------------------------------------------------------------------------- |
-| Milestone    | M3 — Supplier Purchases and Receiving                                                   |
-| Task ID      | M3 (all planned tasks)                                                                  |
-| Task         | Purchase registration, one-shot receiving, audited corrections, API/client/UI and tests |
-| Status       | COMPLETED (committed as `13b8fcd`)                                                      |
-| Dependencies | M1 and M2 complete                                                                      |
-| Blocks       | M4 branch inventory                                                                     |
+| Field        | Value                                                                               |
+| ------------ | ----------------------------------------------------------------------------------- |
+| Milestone    | M4 — Branch Inventory                                                               |
+| Task ID      | M4 (all planned tasks)                                                              |
+| Task         | Derived stock balances, adjustments, waste, reconciliation, API/client/UI and tests |
+| Status       | COMPLETED — not yet committed                                                       |
+| Dependencies | M1, M2 and the stock effects of M3                                                  |
+| Blocks       | M5 production, M6 sales checkpoints and M7 closing                                  |
 
 ## Objective
 
-Let the operator register supplier deliveries per branch, change stock only on
-confirmed receiving, preserve purchase prices, and reverse a received purchase
-through an auditable correction.
+Give every branch an independent, auditable inventory of raw and finished stock
+derived from the append-only movement ledger, with explicit adjustments, waste
+and physical-count reconciliation.
 
 ## Completed scope
 
-- Purchase, purchase-item and purchase-correction domain entities, statuses and
-  rules, including integer-thousandth quantities and minor-unit totals.
-- Dual-engine schema and migrations `0007` and `0008`: `purchases`,
-  `purchase_items`, `purchase_corrections` and append-only `stock_movements`,
-  plus the `PURCHASE_CORRECTION` source type and unique correction key.
-- PostgreSQL and SQLite repositories for purchases, corrections and stock
-  movements.
-- Receiving use case: transactional one-shot `DRAFT -> RECEIVED`, one
-  `RECEIVING` movement per line, exactly once.
-- Correction use case: audited full reversal with reason and before/after totals,
-  one compensating `CORRECTION` movement per receipt movement.
-- Validation schemas, authenticated routes (`inventory:read`/`inventory:write`),
-  problem mapping and typed REST client.
-- `/purchases` list, multi-line form, receive/cancel actions, correction dialog,
-  navigation entry and English/Spanish copy.
-- Domain, dual-engine repository, route, REST-client, component and Playwright
-  purchase tests.
+- Accepted ADR 0041 / TD-018: balances are derived from movements, quantities are
+  exact integer thousandths, negative stock is refused, and there is no balance
+  cache table.
+- Stock movement quantities migrated from decimals to
+  `quantity_delta_milli` on both engines, including conversion of existing rows
+  in migration `0009`.
+- Added `StockAdjustment` and `InventoryWaste` domain entities with signed
+  adjustment deltas, positive waste quantities, required reasons, optional notes
+  and actor/time audit fields.
+- Added `assertStockDoesNotGoNegative` and the `INSUFFICIENT_STOCK` domain error.
+- Extended movement repositories with product timelines, per-product balances and
+  branch balance aggregation; added stock-adjustment and inventory-waste
+  repositories for PostgreSQL and SQLite.
+- Added adjustment, waste and reconciliation use cases with active
+  branch/product/unit validation, branch isolation and transactional movement
+  writes.
+- Reconciliation stores expected and counted quantities and records a movement
+  only when the difference is non-zero.
+- Purchase receiving and correction now use integer thousandths and refuse a
+  correction that would leave negative stock.
+- Added `GET /inventory`, `GET /inventory/:productId/movements`,
+  `POST /inventory/adjustments`, `POST /inventory/waste` and
+  `POST /inventory/reconciliations` behind `inventory:read`/`inventory:write`.
+- Added inventory validation schemas, typed REST-client functions and typed
+  responses.
+- Replaced the `/inventory` placeholder with the branch-aware stock table,
+  movement history, adjustment, waste and reconciliation dialogs, empty states,
+  permissions and English/Spanish copy.
+- Added domain, dual-engine integration, REST-client, component and Playwright
+  coverage.
+- Updated the project, workflow, database, roadmap, progress, decision and
+  continuity documentation.
 
 ## Out of scope
 
-- Partial receiving (BQ-15).
-- Taxes and freight (BQ-14).
-- Unit conversion between purchase and inventory units (BQ-10).
-- Shared supplier deliveries across branches (BQ-13).
-- Balance calculation, adjustments, waste and reconciliation: M4.
-- Supplier payment, invoice and accounts-payable records (BQ-21).
+- Cached balances and materialized projections; M4 derives from the ledger.
+- Negative-stock overrides or approval workflows.
+- Transfers between branches.
+- Production input/output movements (M5).
+- Sales checkpoint movements and tray-to-kilogram sales calculations (M6).
+- Daily closing and reporting aggregation (M7/M8).
 
 ## Acceptance criteria
 
-- [x] Operator can register a purchase with multiple lines for one branch.
-- [x] A draft purchase does not change stock.
-- [x] Confirming receiving creates stock movements and cannot run twice.
-- [x] Purchase line prices are preserved for history.
-- [x] A received purchase cannot be silently edited or deleted.
-- [x] Correction path records actor, reason and before/after evidence.
-- [x] Both engines implement the same purchase/receiving methods; PostgreSQL
-      tests exist and skip without a server.
-- [x] Branch and organization isolation are enforced and tested.
-- [x] `/purchases` browser coverage passes.
+- [x] Stock is independent per branch and cannot leak between branches.
+- [x] Every stock change is traceable to a movement, reason and actor.
+- [x] Adjustments and waste are distinct from sales.
+- [x] A reconciliation produces an auditable adjustment.
+- [x] Negative stock is refused; no override exists.
+- [x] Raw and finished products use their configured inventory units.
+- [x] Both engines implement the same inventory methods; PostgreSQL tests exist
+      and skip without a server.
+- [x] `/inventory` browser coverage passes.
 
 ## Verification
 
@@ -72,18 +86,22 @@ All commands were re-run after the final Prettier pass.
 - `pnpm run typecheck` — PASS, 12/12 tasks.
 - `pnpm run lint` — PASS, 12/12 tasks and `BOUNDARY GUARD OK`.
 - `pnpm run guard:boundaries` — PASS.
-- `pnpm run test` — PASS, 12/12 tasks; 335 passed and 12 skipped.
+- `pnpm run test` — PASS, 12/12 tasks; 361 passed and 13 skipped.
 - `TEST_DATABASE_URL= pnpm --filter @inventory-u3/api run test:integration` —
-  PASS, 12 files, 77 passed and 12 skipped.
+  PASS, 13 files, 82 passed and 13 skipped.
 - `pnpm run build` — PASS, 5/5 tasks; Vite chunk-size warnings only.
-- `pnpm run test:e2e` — PASS, 32 Chromium tests.
-- `pnpm run db:migrate` — PASS, SQLite migrations applied through `0008`.
+- `pnpm run test:e2e` — PASS, 36 Chromium tests, including four inventory tests.
+- `pnpm run db:migrate` — PASS, SQLite migrations applied through `0009`.
+- Migration `0009` was validated against the existing local database: 8
+  movements converted to 6 `RECEIVING` totaling `118500` and 2 `CORRECTION`
+  totaling `-45000`, with a net balance of `73500`; both new tables and the new
+  branch/product index exist.
 
 PostgreSQL integration tests were not executed because no PostgreSQL server is
 available on this machine. See SI-06.
 
 ## Next task
 
-Start M4 branch inventory. Read the M4 roadmap section and BQ-07/BQ-08 first.
-Build the movement ledger/balance decision on top of the persisted M3 movements;
-do not add production, sales, closing or reporting work.
+Commit M4 when authorized, then start M5 production: branch batches with
+preparer/operator, tray counts, average-weight snapshots, optional raw inputs,
+finished outputs and waste, all writing to the M4 ledger.

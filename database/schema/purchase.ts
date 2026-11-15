@@ -1,6 +1,5 @@
 import {
   date,
-  doublePrecision,
   index,
   integer,
   pgTable,
@@ -133,7 +132,7 @@ export const stockMovements = pgTable(
     productId: uuid('product_id')
       .notNull()
       .references(() => products.id, { onDelete: 'restrict' }),
-    quantityDelta: doublePrecision('quantity_delta').notNull(),
+    quantityDeltaMilli: integer('quantity_delta_milli').notNull(),
     reason: stockMovementReasonEnum('reason').notNull(),
     sourceType: stockMovementSourceTypeEnum('source_type'),
     sourceId: text('source_id'),
@@ -159,6 +158,11 @@ export const stockMovements = pgTable(
       table.organizationId,
       table.productId,
       table.occurredAt,
+    ),
+    index('stock_movements_organization_branch_product_idx').on(
+      table.organizationId,
+      table.branchId,
+      table.productId,
     ),
   ],
 );

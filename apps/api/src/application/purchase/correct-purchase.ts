@@ -1,5 +1,6 @@
 import {
   DomainError,
+  assertStockDoesNotGoNegative,
   correctPurchase,
   createPurchaseCorrection,
   createStockMovement,
@@ -14,6 +15,7 @@ import {
   asPurchaseCorrectionId,
   asStockMovementId,
   type OrganizationId,
+  type ProductId,
   type PurchaseId,
   type UserId,
 } from '@inventory-u3/types';
@@ -68,6 +70,26 @@ export async function correctPurchaseUseCase(
       );
     }
 
+    const reversalByProduct = new Map<ProductId, number>();
+    for (const movement of receiptMovements) {
+      reversalByProduct.set(
+        movement.productId,
+        (reversalByProduct.get(movement.productId) ?? 0) - movement.quantityDeltaMilli,
+      );
+    }
+
+    for (const [productId, reversalQuantityMilli] of reversalByProduct) {
+      const currentQuantityMilli = await repositories.stockMovements.getBalanceMilli(
+        command.organizationId,
+        purchase.branchId,
+        productId,
+      );
+      assertStockDoesNotGoNegative(currentQuantityMilli, reversalQuantityMilli, {
+        purchaseId: purchase.id,
+        productId,
+      });
+    }
+
     const correctedAt = clock.now();
     const correction = createPurchaseCorrection(
       {
@@ -100,7 +122,7 @@ export async function correctPurchaseUseCase(
           organizationId: command.organizationId,
           branchId: movement.branchId,
           productId: movement.productId,
-          quantityDelta: -movement.quantityDelta,
+          quantityDeltaMilli: -movement.quantityDeltaMilli,
           reason: 'CORRECTION',
           source: { type: 'PURCHASE_CORRECTION', id: correction.id },
           correctsMovementId: movement.id,

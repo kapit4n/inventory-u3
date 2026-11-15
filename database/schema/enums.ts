@@ -12,6 +12,7 @@ import {
   PRODUCT_KINDS,
   PRODUCT_PRICE_BASES,
   PURCHASE_STATUSES,
+  STOCK_ADJUSTMENT_KINDS,
   STOCK_MOVEMENT_REASONS,
   STOCK_MOVEMENT_SOURCE_TYPES,
 } from '@inventory-u3/domain';
@@ -20,6 +21,7 @@ export const organizationRoleEnum = pgEnum('organization_role', ORGANIZATION_ROL
 export const productKindEnum = pgEnum('product_kind', PRODUCT_KINDS);
 export const productPriceBasisEnum = pgEnum('product_price_basis', PRODUCT_PRICE_BASES);
 export const purchaseStatusEnum = pgEnum('purchase_status', PURCHASE_STATUSES);
+export const stockAdjustmentKindEnum = pgEnum('stock_adjustment_kind', STOCK_ADJUSTMENT_KINDS);
 export const stockMovementReasonEnum = pgEnum('stock_movement_reason', STOCK_MOVEMENT_REASONS);
 export const stockMovementSourceTypeEnum = pgEnum(
   'stock_movement_source_type',
@@ -31,6 +33,7 @@ export const DATABASE_ENUM_VALUES = {
   productKind: PRODUCT_KINDS,
   productPriceBasis: PRODUCT_PRICE_BASES,
   purchaseStatus: PURCHASE_STATUSES,
+  stockAdjustmentKind: STOCK_ADJUSTMENT_KINDS,
   stockMovementReason: STOCK_MOVEMENT_REASONS,
   stockMovementSourceType: STOCK_MOVEMENT_SOURCE_TYPES,
 } as const;

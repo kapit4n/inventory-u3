@@ -73,6 +73,8 @@ The current specs cover:
   including the read-only STAFF view
 - multi-line purchase creation with the exact thousandths/minor-unit payload,
   explicit receiving, and the audited correction dialog on `/purchases`
+- branch stock balances and movement history on `/inventory`, plus adjustment,
+  waste and reconciliation payloads
 
 The mock API dispatches by method and pathname and fails loudly for unknown
 paths, so a wrong base URL does not silently reach the network.
@@ -87,12 +89,9 @@ have the same entry count.
 
 ## Current gaps
 
-- No stock balance, adjustment, waste or reconciliation tests exist because M4
-  has not started; M3 covers the movement ledger written by receiving.
 - No production, sales-checkpoint or closing tests exist because those features
   do not exist.
 - No branch-scoped authorization tests exist until branch users are implemented.
-- E2E now covers master data, products, presentations, prices and purchases; the
-  reusable branch selector has no dedicated component test, and no inventory
-  workflow screen exists yet.
+- E2E covers master data, products, presentations, prices, purchases and branch
+  inventory; the reusable branch selector still has no dedicated component test.
 - There is no CI workflow; the commands above are run locally.

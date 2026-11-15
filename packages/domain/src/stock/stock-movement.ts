@@ -6,9 +6,9 @@
  * `correctsMovementId` points at the original. Reversal arithmetic needs both
  * rows and belongs to the service that reads them, not to this value object.
  *
- * The quantity is signed and expressed in the product's inventory unit. No unit
- * conversion is applied (BQ-10), and no negative-stock policy is decided here
- * (BQ-08).
+ * The quantity is a signed integer in thousandths of the product's inventory
+ * unit. No unit conversion is applied (BQ-10); the decision to refuse negative
+ * balances lives in the use case that knows the current balance (ADR 0041).
  */
 
 import type {
@@ -29,8 +29,8 @@ export interface StockMovement {
   readonly organizationId: OrganizationId;
   readonly branchId: BranchId;
   readonly productId: ProductId;
-  /** Signed quantity in the product's inventory unit; never zero. */
-  readonly quantityDelta: number;
+  /** Signed quantity in thousandths of the product's inventory unit; never zero. */
+  readonly quantityDeltaMilli: number;
   readonly reason: StockMovementReason;
   /** The record that caused this movement, when one exists. */
   readonly source?: StockMovementSource;
@@ -49,7 +49,7 @@ export interface NewStockMovement {
   readonly organizationId: OrganizationId;
   readonly branchId: BranchId;
   readonly productId: ProductId;
-  readonly quantityDelta: number;
+  readonly quantityDeltaMilli: number;
   readonly reason: StockMovementReason;
   readonly source?: StockMovementSource;
   readonly correctsMovementId?: StockMovementId;
@@ -68,14 +68,10 @@ export function createStockMovement(
   input: NewStockMovement,
   recordedAt: IsoDateTime,
 ): StockMovement {
-  if (
-    typeof input.quantityDelta !== 'number' ||
-    !Number.isFinite(input.quantityDelta) ||
-    input.quantityDelta === 0
-  ) {
+  if (!Number.isSafeInteger(input.quantityDeltaMilli) || input.quantityDeltaMilli === 0) {
     throw new DomainError(
       'INVALID_INPUT',
-      'Stock movement quantity must be a finite non-zero number',
+      'Stock movement quantity must be a non-zero integer in thousandths',
     );
   }
 
@@ -128,7 +124,7 @@ export function createStockMovement(
     organizationId: input.organizationId,
     branchId: input.branchId,
     productId: input.productId,
-    quantityDelta: input.quantityDelta,
+    quantityDeltaMilli: input.quantityDeltaMilli,
     reason: input.reason,
     ...(source === undefined ? {} : { source }),
     ...(input.correctsMovementId === undefined

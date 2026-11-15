@@ -64,6 +64,13 @@
       "when": 1794623972808,
       "tag": "0008_smart_lady_deathstrike",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1794717640512,
+      "tag": "0009_mature_serpent_society",
+      "breakpoints": true
     }
   ]
 }

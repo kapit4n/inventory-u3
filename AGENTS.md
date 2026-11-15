@@ -34,7 +34,9 @@ effective-dated selling-price history. Product management lives on `/products`
 and includes the presentation editor for processed products. M3 supplier
 purchases and receiving is complete: multi-line draft purchases, one-shot
 receiving into append-only stock movements, and audited full reversals. M4 branch
-inventory (balances, adjustments, waste and reconciliation) is next.
+inventory is complete: balances derive from the exact integer-thousandth ledger,
+adjustments, waste and reconciliation are audited, negative stock is refused, and
+`/inventory` is implemented. M5 production is next.
 
 - Canonical roadmap: `docs/development/IMPLEMENTATION_ROADMAP.md`.
 - Current task and status: `docs/development/CURRENT_TASK.md` and

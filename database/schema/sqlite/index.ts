@@ -9,6 +9,7 @@
 export * from './branch.js';
 export * from './catalog.js';
 export * from './employee.js';
+export * from './inventory.js';
 export * from './organization.js';
 export * from './purchase.js';
 export * from './supplier.js';

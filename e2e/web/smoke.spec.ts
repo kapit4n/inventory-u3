@@ -23,13 +23,15 @@ test.describe('Smoke (web shell)', () => {
     await expect(page.getByText(/^Web · /)).toBeVisible();
   });
 
-  test('navigates to the inventory placeholder', async ({ page }) => {
+  test('navigates to branch inventory', async ({ page }) => {
     await page.goto('/dashboard');
     await page.getByTestId('sidebar').getByRole('link', { name: 'Inventory' }).click();
 
     await expect(page).toHaveURL(/\/inventory$/);
     await expect(page.getByRole('heading', { name: 'Inventory', exact: true })).toBeVisible();
-    await expect(page.getByText('Inventory foundation')).toBeVisible();
+    await expect(
+      page.getByText('Independent branch stock, with an auditable movement for every change.'),
+    ).toBeVisible();
   });
 
   test('the sidebar collapses to an icon rail and remembers the choice', async ({ page }) => {
