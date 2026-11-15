@@ -38,7 +38,7 @@
   into append-only stock movements, cancellation and audited full reversals are
   implemented on both engines, in the API, typed client and `/purchases` UI.
   Partial receiving, taxes, freight and unit conversion remain open (BQ-10,
-  BQ-13, BQ-14, BQ-15). M3 is verified in the working tree and not yet committed.
+  BQ-13, BQ-14, BQ-15). M3 is committed as `13b8fcd`.
 - **Stock concepts:** append-only movements are persisted from M3 receiving and
   corrections. The `StockBalance` shape is still domain-only; no balance
   calculation, adjustment, waste, reconciliation or inventory screen exists.
@@ -49,12 +49,11 @@
   references describe M1 and M2. The boundary guard checks dependency direction,
   database access, thin shells, domain Node built-ins, schema-table parity and
   migration-journal parity.
-- **Next task:** commit the M3 closeout, then start M4 branch inventory. Real
-  branch names wait for BQ-19; real master data replaces the sample seed when
-  confirmed.
+- **Next task:** start M4 branch inventory. Real branch names wait for BQ-19;
+  real master data replaces the sample seed when confirmed.
 - **Commits:** M1 closeout `bfdc9cb`; M2-T1 `814f397`; M2-T2 `6b50606`; M2-T3
   `5c96eeb`; M2-T4 `992d6ea`; M2-T5 `c8526d0`; M2-T6/T7 with the sample seed
-  `cc70bfc`.
+  `cc70bfc`; M3 `13b8fcd`.
 
 The previous verification records are preserved in
 [SESSION_LOG.md](../development/SESSION_LOG.md) (Sessions 0–17).

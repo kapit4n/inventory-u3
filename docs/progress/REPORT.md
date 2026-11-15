@@ -2,7 +2,7 @@
 
 > Last updated: 2026-11-13. M1 is committed at `bfdc9cb`, M2-T1 at `814f397`,
 > M2-T2 at `6b50606`, M2-T3 at `5c96eeb`, M2-T4 at `992d6ea`, M2-T5 at
-> `c8526d0` and M2-T6/T7 with the sample seed at `cc70bfc`.
+> `c8526d0`, M2-T6/T7 with the sample seed at `cc70bfc` and M3 at `13b8fcd`.
 
 ## 1. Architecture overview
 
@@ -31,10 +31,11 @@ domain-purity, schema-parity and migration-parity checks.
 
 Implemented domain areas are organization, user, role, session, permissions,
 organization settings, branch, employee, supplier, product catalog, price
-history, stock movement concepts, errors, time and identifiers. Branch, employee,
-supplier, catalog, product and price-history data are persisted through both
-engines and exposed through API and UI. Stock concepts remain domain-only. No inventory balance,
-purchase, production, sales checkpoint or closing entity is implemented.
+history, purchase, purchase item, purchase correction, stock movement concepts,
+errors, time and identifiers. Branch, employee, supplier, catalog, product,
+price-history, purchase and stock-movement data are persisted through both
+engines and exposed through API and UI. No inventory balance, production, sales
+checkpoint or closing entity is implemented.
 
 ## 5. Web/Desktop strategy
 
@@ -49,22 +50,26 @@ Fastify with Zod validation at every boundary, opaque bearer authentication,
 domain use cases, repository ports, standard problem envelopes and structured
 redacted logs. Branch, employee, supplier, category, unit, product, presentation
 and price routes are authenticated; writes require the administrator-only
-`organization:manage` permission and reads require `organization:read`. Employee assignments are
-validated against a branch in the caller's organization; suppliers, categories,
-units and products are organization-wide. Product references are validated
-against the caller's organization, and presentations and prices are nested under
-a product and verify product ownership. Price rows derive basis from product kind
-and currency from the organization and reject duplicate effective dates.
+`organization:manage` permission and reads require `organization:read`. Purchase
+routes require `inventory:read`/`inventory:write`; receiving and correction are
+transactional application use cases. Employee assignments are validated against a
+branch in the caller's organization; suppliers, categories, units and products
+are organization-wide. Product references are validated against the caller's
+organization, and presentations and prices are nested under a product and verify
+product ownership. Price rows derive basis from product kind and currency from the
+organization and reject duplicate effective dates. Purchase references are
+validated against the branch, supplier, products and inventory unit of the
+caller's organization.
 
 ## 7. Database architecture
 
 SQLite is the default engine; PostgreSQL is retained as the second engine. Both
 have schema trees, generated migrations and repository implementations. Current
 tables are organizations, branches, employees, suppliers, measurement units,
-product categories, products, product presentations, product price history, users
-and sessions. SQLite migrations are applied through `0006`; seed data contains
-only the development organization and users because real master data is not
-confirmed.
+product categories, products, product presentations, product price history,
+purchases, purchase items, purchase corrections, stock movements, users and
+sessions. SQLite migrations are applied through `0008`; the sample seed contains
+the development organization, users and illustrative master data.
 
 ## 8. State-management strategy
 
@@ -77,11 +82,11 @@ global API-data store and no giant Zustand store.
 Vitest covers domain rules, REST-client behavior, API route integration,
 dual-engine repository behavior and React components with React Testing Library.
 SQLite integration tests run by default; PostgreSQL cases skip without a
-reachable server. Playwright now covers shell, settings, master-data management,
-products, presentations and price history. The default suites report 292 passed
-and 10 skipped; the separately invoked SQLite integration command reports 69
-passed and 10 skipped; the Chromium E2E suite reports 29 passed. Typecheck, lint,
-build and formatting pass.
+reachable server. Playwright covers the shell, settings, master-data management,
+products, presentations, price history and purchases. The default suites report
+335 passed and 12 skipped; the separately invoked SQLite integration command
+reports 77 passed and 12 skipped; the Chromium E2E suite reports 32 passed.
+Typecheck, lint, build and formatting pass.
 
 ## 10. What was actually implemented
 
@@ -110,17 +115,22 @@ validation, authenticated product-nested price routes, typed client, and the
 coverage for master-data create/edit, the duplicate-name problem, read-only
 non-administrator views, product create/edit, tray presentations and
 effective-dated prices, completing M2. The sample seed adds an illustrative
-fruit-and-vegetable catalogue on both engines.
+fruit-and-vegetable catalogue on both engines. M3 added multi-line draft
+purchases per branch, one-shot transactional receiving into append-only stock
+movements, cancellation, and audited full-reversal corrections with a required
+reason and before/after totals. It includes dual-engine purchase, correction and
+stock-movement repositories, authenticated purchase routes, typed client
+functions, the `/purchases` UI and domain, repository, route, client, component
+and Playwright coverage (TD-017).
 
 ## 11. What was intentionally NOT implemented
 
 Employee login accounts, branch-scoped authorization, payroll, attendance,
-contact or identity data, supplier contact/tax/payment fields, branch-scoped or
-purchase prices, price update/delete and correction audit, weight snapshots,
-recipe/bill-of-materials entities (BQ-11 defers production inputs to M5),
-purchases, receiving, stock tables and balances, production, sales checkpoints,
-daily closing, reporting, offline mode, desktop-local data, synchronization,
-microservices, GraphQL and Redux.
+contact or identity data, supplier contact/tax/payment fields, branch-scoped
+prices, price update/delete, weight snapshots, recipe/bill-of-materials entities
+(BQ-11 defers production inputs to M5), stock balances and adjustments,
+production, sales checkpoints, daily closing, reporting, offline mode,
+desktop-local data, synchronization, microservices, GraphQL and Redux.
 
 ## 12. Open architectural questions
 
@@ -133,5 +143,7 @@ membership, reporting valuation and the WhatsApp report format that blocks M6
 
 ## 13. Recommended next milestone
 
-Start **M3 — Supplier Purchases and Receiving** with the purchase and
-purchase-item domain entities and states. M2 is committed as `cc70bfc`.
+Start **M4 — Branch Inventory**: decide derived versus cached stock levels
+(BQ-07) and the negative-stock policy (BQ-08), then implement balances,
+adjustments, waste and reconciliation on the persisted movement ledger. M3 is
+committed as `13b8fcd`.

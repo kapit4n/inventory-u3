@@ -1853,7 +1853,8 @@ only audited corrections. Finish with browser coverage and honest verification.
 
 ### Pending work
 
-- Review and commit the M3 closeout changes when authorized.
+- M3 closeout committed as `13b8fcd feat: add supplier purchases, receiving and
+audited corrections`; no M3 work remains pending.
 - Start M4 branch inventory: decide derived versus cached balances (BQ-07),
   negative-stock policy (BQ-08), then implement balances, adjustments, waste and
   reconciliation on the persisted movement ledger.

@@ -8,15 +8,15 @@
 | Field                  | Value                                                            |
 | ---------------------- | ---------------------------------------------------------------- |
 | Current milestone      | M4 — Branch Inventory (M3 complete)                              |
-| Current task           | M3 verified in the working tree; pending commit                  |
+| Current task           | M3 complete and committed; M4 not started                        |
 | Overall project status | M3 purchases and receiving complete, including browser coverage  |
 | Completed milestones   | M1, M2 and M3; the foundation prerequisite is also complete      |
 | In-progress milestones | None; M4 is the next milestone                                   |
 | Blocked milestones     | M6 finalization is blocked on BR-013 (WhatsApp reporting format) |
 | Pending milestones     | M4, M5, M6, M7, M8, M9                                           |
-| Last verified commit   | `cc70bfc` (M2 complete); M3 closeout is not yet committed        |
+| Last verified commit   | `13b8fcd` (M3 complete)                                          |
 | Last update date       | 2026-11-13                                                       |
-| Next recommended task  | Start M4 branch inventory after committing M3                    |
+| Next recommended task  | Start M4 branch inventory                                        |
 
 ### Working tree at the time of this update
 
@@ -390,8 +390,8 @@ entity: BQ-11 leaves production inputs free-form per batch for M5.
 
 ### Next action
 
-M2 is complete and committed as `cc70bfc`. Start M3 supplier purchases and
-receiving. See [CURRENT_TASK.md](./CURRENT_TASK.md).
+M2 is complete and committed as `cc70bfc`. M3 is complete and committed as
+`13b8fcd`. See [CURRENT_TASK.md](./CURRENT_TASK.md).
 
 ---
 
@@ -454,7 +454,7 @@ and `docs/workflows/PURCHASE_WORKFLOW.md`.
 
 ### Next action
 
-Start M4 branch inventory after the M3 closeout is committed.
+M3 is complete and committed as `13b8fcd`. Start M4 branch inventory.
 
 ---
 

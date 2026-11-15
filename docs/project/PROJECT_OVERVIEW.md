@@ -2,8 +2,7 @@
 
 > Last verified: 2026-11-13. M1 is committed at `bfdc9cb`, M2-T1 at `814f397`,
 > M2-T2 at `6b50606`, M2-T3 at `5c96eeb`, M2-T4 at `992d6ea`, M2-T5 at
-> `c8526d0` and M2-T6/T7 with the sample seed at `cc70bfc`. M3 is implemented
-> and verified in the working tree; see
+> `c8526d0`, M2-T6/T7 with the sample seed at `cc70bfc` and M3 at `13b8fcd`. See
 > [IMPLEMENTATION_PROGRESS](../development/IMPLEMENTATION_PROGRESS.md).
 
 ## Purpose

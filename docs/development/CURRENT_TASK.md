@@ -2,8 +2,8 @@
 
 > Last updated: 2026-11-13.
 >
-> **M3 is COMPLETE and verified in the working tree. M2 remains complete and
-> committed as `cc70bfc`.** The M3 closeout changes are not yet committed.
+> **M3 is COMPLETE and committed as `13b8fcd`. M2 remains complete and committed
+> as `cc70bfc`.** M4 branch inventory is the next milestone.
 
 ## Task identity
 
@@ -12,7 +12,7 @@
 | Milestone    | M3 — Supplier Purchases and Receiving                                                   |
 | Task ID      | M3 (all planned tasks)                                                                  |
 | Task         | Purchase registration, one-shot receiving, audited corrections, API/client/UI and tests |
-| Status       | COMPLETED (working tree; pending commit)                                                |
+| Status       | COMPLETED (committed as `13b8fcd`)                                                      |
 | Dependencies | M1 and M2 complete                                                                      |
 | Blocks       | M4 branch inventory                                                                     |
 
