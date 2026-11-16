@@ -2269,7 +2269,7 @@ the append-only ledger, and support audited reversal.
 
 ### Pending work
 
-- Commit authorization for the M6 changes.
+- M6 committed as `52e39a3`; no pending commit authorization.
 - Resolve BR-013 before finalizing WhatsApp fields, labels and message format.
 - Resolve BQ-02 for period naming/configurability and BQ-17 for no-sales.
 - Resolve BQ-10 before accepting raw sales units that differ from inventory.
@@ -2278,5 +2278,5 @@ the append-only ledger, and support audited reversal.
 ### Next session
 
 Read `AGENTS.md`, `PROJECT_OVERVIEW.md`, `IMPLEMENTATION_PROGRESS.md`,
-`CURRENT_TASK.md` and the M7 roadmap section. If M6 has been committed, start M7
-daily closing; otherwise request commit authorization first.
+`CURRENT_TASK.md` and the M7 roadmap section. M6 is committed; start M7 daily
+closing.

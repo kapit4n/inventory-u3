@@ -437,7 +437,8 @@ and TD-019. The milestone is complete and committed as `7441653`.
 
 ## M6 — Sales Checkpoints
 
-**Status: COMPLETE (generic model); WhatsApp reporting fields pending BR-013**
+**Status: COMPLETE (generic model) — committed as `52e39a3`; WhatsApp reporting
+fields pending BR-013**
 
 ### Objective
 
@@ -710,15 +711,15 @@ been executed." A passing unit suite is not a backup/restore drill.
 
 ## Status summary
 
-| Milestone               | Status      | Evidence                                                                                          |
-| ----------------------- | ----------- | ------------------------------------------------------------------------------------------------- |
-| Foundation prerequisite | COMPLETED   | Foundation code, migrations, tests and recorded verification                                      |
-| M1                      | COMPLETED   | Branch, catalog, measurement, stock and access note; docs and guard closed                        |
-| M2                      | COMPLETED   | Master data, product presentations, price history and browser coverage                            |
-| M3                      | COMPLETED   | Purchases, receiving, audited corrections, dual-engine tests and browser coverage                 |
-| M4                      | COMPLETED   | Derived balances, adjustments, waste, reconciliation, dual-engine tests, UI and browser coverage  |
-| M5                      | COMPLETE    | Production batches, snapshots, ledger integration, UI and tests; committed as `7441653`           |
-| M6                      | COMPLETE    | Generic checkpoints, snapshots, ledger integration, UI and tests; BR-013 reporting fields pending |
-| M7                      | NOT_STARTED | No closing tables or screens                                                                      |
-| M8                      | NOT_STARTED | Dashboard is static foundation content; no reports                                                |
-| M9                      | NOT_STARTED | No CI, branch permissions, audit log or backup drill                                              |
+| Milestone               | Status      | Evidence                                                                                         |
+| ----------------------- | ----------- | ------------------------------------------------------------------------------------------------ |
+| Foundation prerequisite | COMPLETED   | Foundation code, migrations, tests and recorded verification                                     |
+| M1                      | COMPLETED   | Branch, catalog, measurement, stock and access note; docs and guard closed                       |
+| M2                      | COMPLETED   | Master data, product presentations, price history and browser coverage                           |
+| M3                      | COMPLETED   | Purchases, receiving, audited corrections, dual-engine tests and browser coverage                |
+| M4                      | COMPLETED   | Derived balances, adjustments, waste, reconciliation, dual-engine tests, UI and browser coverage |
+| M5                      | COMPLETE    | Production batches, snapshots, ledger integration, UI and tests; committed as `7441653`          |
+| M6                      | COMPLETED   | Generic checkpoints, snapshots, ledger integration, UI and tests; committed as `52e39a3`         |
+| M7                      | NOT_STARTED | No closing tables or screens                                                                     |
+| M8                      | NOT_STARTED | Dashboard is static foundation content; no reports                                               |
+| M9                      | NOT_STARTED | No CI, branch permissions, audit log or backup drill                                             |

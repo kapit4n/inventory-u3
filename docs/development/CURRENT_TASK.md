@@ -2,9 +2,8 @@
 
 > Last updated: 2026-11-16.
 >
-> **M6 sales checkpoints are IMPLEMENTED end-to-end and await authorization to
-> commit.** M5 production is committed as `7441653`; M4 is `8f5f326`; M1–M3 are
-> complete. The generic M6 model is implemented, but BR-013, BQ-02 and BQ-17
+> **M6 sales checkpoints are COMPLETE and committed as `52e39a3`.** M5
+> production is `7441653`; M4 is `8f5f326`; M1–M3 are complete. The generic M6 model is implemented, but BR-013, BQ-02 and BQ-17
 > still block the final WhatsApp reporting contract.
 
 ## Task identity
@@ -14,7 +13,7 @@
 | Milestone    | M6 — Sales Checkpoints                                          |
 | Task ID      | M6 (all generic planned tasks)                                  |
 | Task         | Checkpoints, snapshots, ledger integration, API/client/UI/tests |
-| Status       | IMPLEMENTED — verification green; commit not authorized         |
+| Status       | COMPLETE — committed as `52e39a3`; verification green           |
 | Dependencies | M1, M2 and the M4 stock ledger                                  |
 | Blocks       | M7 closing and M8 sales reporting                               |
 
@@ -110,5 +109,5 @@ append-only stock ledger with audited correction.
 
 ## Next task
 
-Authorize the M6 commit, then start M7 daily closing. Resolve BR-013 before
-finalizing WhatsApp reporting fields or period names.
+Start M7 daily closing. Resolve BR-013 before finalizing WhatsApp reporting
+fields or period names.

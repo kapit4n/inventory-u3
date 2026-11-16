@@ -37,8 +37,8 @@ receiving into append-only stock movements, and audited full reversals. M4 branc
 inventory is complete: balances derive from the exact integer-thousandth ledger,
 adjustments, waste and reconciliation are audited, negative stock is refused, and
 `/inventory` is implemented. M5 production is complete and committed as `7441653`.
-M6 sales checkpoints are implemented on `/sales-checkpoints` and await commit
-authorization; the final WhatsApp reporting fields remain blocked on BR-013.
+M6 sales checkpoints are complete and committed as `52e39a3`; the final WhatsApp
+reporting fields remain blocked on BR-013.
 
 - Canonical roadmap: `docs/development/IMPLEMENTATION_ROADMAP.md`.
 - Current task and status: `docs/development/CURRENT_TASK.md` and

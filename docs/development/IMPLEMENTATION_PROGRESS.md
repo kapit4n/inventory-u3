@@ -7,16 +7,16 @@
 
 | Field                  | Value                                                        |
 | ---------------------- | ------------------------------------------------------------ |
-| Current milestone      | M6 — Sales Checkpoints (implemented; commit not authorized)  |
-| Current task           | M6 verification is green; await commit authorization         |
-| Overall project status | M6 implemented end-to-end; reporting contract still open     |
-| Completed milestones   | A prerequisite, M1, M2, M3, M4 and M5                        |
-| In-progress milestones | M6 (implementation complete, uncommitted)                    |
+| Current milestone      | M7 — Daily Closing (next)                                    |
+| Current task           | Start M7 after committed M6 verification                     |
+| Overall project status | M6 committed end-to-end; reporting contract still open       |
+| Completed milestones   | A prerequisite, M1, M2, M3, M4, M5 and M6                    |
+| In-progress milestones | M6 follow-ups blocked on BR-013/BQ-02/BQ-17                  |
 | Blocked milestones     | Final WhatsApp fields on BR-013; BQ-02/BQ-17 affect M6 scope |
 | Pending milestones     | M7, M8, M9                                                   |
-| Last verified commit   | `7441653` (M5 branch production)                             |
+| Last verified commit   | `52e39a3` (M6 sales checkpoints)                             |
 | Last update date       | 2026-11-16                                                   |
-| Next recommended task  | Authorize M6 commit, then start M7 daily closing             |
+| Next recommended task  | Start M7 daily closing                                       |
 
 ### State at the time of this update
 
@@ -612,8 +612,8 @@ unchanged; BR-013 still blocks the final reporting contract.
 
 ## M6 — Sales Checkpoints
 
-**Status: IMPLEMENTED and verified; commit not authorized. Reporting contract
-blocked on BR-013.**
+**Status: COMPLETE and committed as `52e39a3`. Reporting contract blocked on
+BR-013.**
 
 ### Completed
 
