@@ -2,8 +2,8 @@
 
 > Last updated: 2026-11-15.
 >
-> **M5 production is COMPLETE in the working tree and pending commit.** M4 is
-> committed as `8f5f326`; M1–M3 are also complete.
+> **M5 production is COMPLETE and committed as `7441653`.** M4 is committed as
+> `8f5f326`; M1–M3 are also complete.
 
 ## Task identity
 
@@ -12,7 +12,7 @@
 | Milestone    | M5 — Production                                                 |
 | Task ID      | M5 (all planned tasks)                                          |
 | Task         | Batches, snapshots, ledger integration, API/client/UI and tests |
-| Status       | COMPLETE in the working tree — pending commit                   |
+| Status       | COMPLETE — committed as `7441653`                               |
 | Dependencies | M1, M2 and the M4 stock ledger                                  |
 | Blocks       | M6 sales checkpoints and M7 closing                             |
 
@@ -82,5 +82,4 @@ to the M4 append-only ledger.
 
 ## Next task
 
-Commit M5 after explicit authorization. Then start M6 sales checkpoints only
-after BR-013 is resolved.
+Resolve BR-013, then start M6 sales checkpoints.

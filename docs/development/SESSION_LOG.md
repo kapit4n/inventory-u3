@@ -2091,12 +2091,12 @@ browser coverage and continuity documentation.
 
 ### Pending work
 
-- Commit M5 after explicit authorization.
+- None for M5; it is committed as `7441653`.
 - Run the PostgreSQL half of the integration suite on a machine with a server.
 - Resolve BR-013 before starting M6 sales checkpoints.
 
 ### Next session
 
 Read `AGENTS.md`, `PROJECT_OVERVIEW.md`, `IMPLEMENTATION_PROGRESS.md`,
-`CURRENT_TASK.md` and the M6 roadmap section. Do not start M6 until BR-013 is
-resolved.
+`CURRENT_TASK.md` and the M6 roadmap section. M5 is committed as `7441653`; do
+not start M6 until BR-013 is resolved.

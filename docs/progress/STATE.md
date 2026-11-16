@@ -10,8 +10,7 @@
 ## Current status
 
 - **Foundation prerequisite:** complete.
-- **Business roadmap:** M1–M4 are COMPLETED; M5 is COMPLETE in the working tree;
-  M6–M9 are NOT_STARTED.
+- **Business roadmap:** M1–M5 are COMPLETED; M6–M9 are NOT_STARTED.
 - **Branch master data:** entity, dual-engine schema, migrations and repositories
   are implemented. `GET/POST/PUT /api/v1/branches`, the Settings management
   section and the reusable active-branch selector are implemented. Three
@@ -53,7 +52,7 @@
   per product to the ledger and refuses negative stock; a confirmed batch can be
   fully reversed once through an audited correction. The `/production` UI, API,
   typed client, dual-engine persistence and tests are implemented (ADR 0042,
-  TD-019). M5 is pending commit.
+  TD-019). M5 is committed as `7441653`.
 - **Access model:** documented in `docs/project/ACCESS_MODEL.md`; one
   organization-wide central operator initially. Branch users and assignment
   tables remain unimplemented.
@@ -61,14 +60,13 @@
   references describe M1 through M5. The boundary guard checks dependency
   direction, database access, thin shells, domain Node built-ins, schema-table
   parity and migration-journal parity.
-- **Next task:** commit M5 after authorization, then resolve BR-013 before M6.
-  Real branch names wait for BQ-19; real master data replaces the sample seed
-  when confirmed.
+- **Next task:** resolve BR-013, then start M6 sales checkpoints. Real branch
+  names wait for BQ-19; real master data replaces the sample seed when confirmed.
 - **Commits:** M1 closeout `bfdc9cb`; M2-T1 `814f397`; M2-T2 `6b50606`; M2-T3
   `5c96eeb`; M2-T4 `992d6ea`; M2-T5 `c8526d0`; M2-T6/T7 with the sample seed
-  `cc70bfc`; M3 `13b8fcd`; M3 docs closeout `c86c6c5`; M4 `8f5f326`. M5 is
-  complete in the working tree and not yet committed.
+  `cc70bfc`; M3 `13b8fcd`; M3 docs closeout `c86c6c5`; M4 `8f5f326`; M5
+  `7441653`.
 
 The previous verification records are preserved in
-[SESSION_LOG.md](../development/SESSION_LOG.md) (Sessions 0–18).
+[SESSION_LOG.md](../development/SESSION_LOG.md) (Sessions 0–19).
 [LOG.md](./LOG.md) remains as a pointer to that history.

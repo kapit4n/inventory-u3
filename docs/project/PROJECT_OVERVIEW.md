@@ -92,7 +92,8 @@ product.** As of this document:
   average-weight snapshots, optional measured weight, optional raw inputs and
   explicit waste. Confirmation writes one net movement per product to the M4
   ledger and refuses negative stock; confirmed batches can be reversed once
-  through an audited correction (ADR 0042, TD-019). M5 is pending commit.
+  through an audited correction (ADR 0042, TD-019). M5 is committed as
+  `7441653`.
 - Operational price consumption is M6 work.
 - No sales checkpoint, daily closing or report feature exists. Employees and
   suppliers are master data only; they do not log in.
@@ -105,7 +106,7 @@ product.** As of this document:
   concepts, master data, product presentations, price history, the access note,
   technical docs and the dual-engine guard are done. M3 purchase registration,
   receiving and audited corrections are complete. M4 branch inventory and M5
-  production are complete in the working tree. M6 sales checkpoints are next,
+  production are complete and committed. M6 sales checkpoints are next,
   blocked on BR-013. The sample seed carries three illustrative
   branches until the real names are confirmed (BQ-19), employee sharing across
   branches remains open (BQ-20), and supplier detail fields remain open (BQ-21).

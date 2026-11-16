@@ -365,7 +365,7 @@ local database. PostgreSQL cases skip without a server (SI-06). See
 
 ## M5 — Production
 
-**Status: COMPLETE (pending commit).**
+**Status: COMPLETE — committed as `7441653`.**
 
 ### Objective
 
@@ -431,7 +431,7 @@ All are implemented. PostgreSQL cases skip without a server (SI-06).
 ### Notes
 
 A recipe/bill of materials is not assumed. Raw inputs are optional. See ADR 0042
-and TD-019. The milestone is complete in the working tree, pending commit.
+and TD-019. The milestone is complete and committed as `7441653`.
 
 ---
 
@@ -710,7 +710,7 @@ been executed." A passing unit suite is not a backup/restore drill.
 | M2                      | COMPLETED   | Master data, product presentations, price history and browser coverage                           |
 | M3                      | COMPLETED   | Purchases, receiving, audited corrections, dual-engine tests and browser coverage                |
 | M4                      | COMPLETED   | Derived balances, adjustments, waste, reconciliation, dual-engine tests, UI and browser coverage |
-| M5                      | COMPLETE    | Production batches, snapshots, ledger integration, UI and tests; pending commit                  |
+| M5                      | COMPLETE    | Production batches, snapshots, ledger integration, UI and tests; committed as `7441653`          |
 | M6                      | NOT_STARTED | No checkpoint tables or screens; BR-013 pending                                                  |
 | M7                      | NOT_STARTED | No closing tables or screens                                                                     |
 | M8                      | NOT_STARTED | Dashboard is static foundation content; no reports                                               |

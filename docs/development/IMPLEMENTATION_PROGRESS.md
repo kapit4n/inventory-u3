@@ -7,18 +7,18 @@
 
 | Field                  | Value                                                            |
 | ---------------------- | ---------------------------------------------------------------- |
-| Current milestone      | M5 — Production (complete in the working tree; pending commit)   |
-| Current task           | M5 verification and documentation closeout                       |
-| Overall project status | M5 production complete in the working tree; pending commit       |
-| Completed milestones   | A prerequisite, M1, M2, M3, M4 and M5 (working tree)             |
-| In-progress milestones | None; M5 closeout verification is in progress                    |
+| Current milestone      | M5 — Production (complete and committed as `7441653`)            |
+| Current task           | M6 is next; finalization is blocked on BR-013                    |
+| Overall project status | M5 production complete and committed                             |
+| Completed milestones   | A prerequisite, M1, M2, M3, M4 and M5                            |
+| In-progress milestones | None                                                             |
 | Blocked milestones     | M6 finalization is blocked on BR-013 (WhatsApp reporting format) |
 | Pending milestones     | M6, M7, M8, M9                                                   |
-| Last verified commit   | `8f5f326` (M4 branch inventory)                                  |
+| Last verified commit   | `7441653` (M5 branch production)                                 |
 | Last update date       | 2026-11-15                                                       |
-| Next recommended task  | Finish M5 verification, then commit after authorization          |
+| Next recommended task  | Resolve BR-013, then start M6 sales checkpoints                  |
 
-### Working tree at the time of this update
+### State at the time of this update
 
 M5 adds branch production on top of the M4 ledger. Batches record the preparer,
 registering operator, business date, tray counts, average-weight snapshots,
@@ -538,7 +538,7 @@ Start M5 production on top of the ledger.
 
 ## M5 — Production
 
-**Status: COMPLETE in the working tree (pending commit).**
+**Status: COMPLETE and committed as `7441653`.**
 
 ### Completed
 
@@ -562,7 +562,6 @@ Start M5 production on top of the ledger.
 
 ### Pending
 
-- [ ] Commit M5 after explicit authorization.
 - [ ] Execute the PostgreSQL half of the integration suite on a machine with a
       server; it skips locally (SI-06).
 
@@ -595,8 +594,7 @@ TD-019.
 
 ### Next action
 
-Finish verification and commit after authorization; then start M6 sales
-checkpoints only after BR-013 is resolved.
+Resolve BR-013, then start M6 sales checkpoints.
 
 ---
 

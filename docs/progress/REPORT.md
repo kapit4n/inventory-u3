@@ -4,7 +4,7 @@
 > M2-T2 at `6b50606`, M2-T3 at `5c96eeb`, M2-T4 at `992d6ea`, M2-T5 at
 > `c8526d0`, M2-T6/T7 with the sample seed at `cc70bfc`, M3 at `13b8fcd` and its
 > documentation closeout at `c86c6c5`, and M4 at `8f5f326`. M5 production is
-> complete in the working tree and pending commit.
+> complete and committed as `7441653`.
 
 ## 1. Architecture overview
 
@@ -166,5 +166,5 @@ membership, reporting valuation and the WhatsApp report format that blocks M6
 
 ## 13. Recommended next milestone
 
-Commit M5 after authorization, then start **M6 — Sales Checkpoints** only after
-BR-013 confirms the reported fields.
+Resolve BR-013, then start **M6 — Sales Checkpoints** once the reported fields
+are confirmed.
