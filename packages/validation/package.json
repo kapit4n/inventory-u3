@@ -13,7 +13,8 @@
     "./employee": "./src/employee/index.ts",
     "./env": "./src/env/index.ts",
     "./organization": "./src/organization/index.ts",
-    "./production": "./src/production/index.ts"
+    "./production": "./src/production/index.ts",
+    "./sales-checkpoint": "./src/sales-checkpoint/index.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",

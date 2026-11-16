@@ -1,10 +1,13 @@
 # Sales Checkpoint Workflow
 
-> Implementation status: **NOT_IMPLEMENTED.** No sales checkpoint table exists.
-> This is the design target for M6.
+> Implementation status: **IMPLEMENTED WITH PROVISIONAL REPORTING FIELDS.**
+> PostgreSQL and SQLite tables, migrations, API, client and `/sales-checkpoints`
+> UI exist as of M6.
 >
 > **Important:** the exact information employees report through WhatsApp is not
-> confirmed (BR-013). Do not treat the proposed fields below as final.
+> confirmed (BR-013), and period naming/configuration remains open (BQ-02). The
+> implemented model is deliberately generic; do not treat these fields or the
+> `MORNING | EVENING` names as the final reporting contract.
 
 ## 1. Scope
 
@@ -27,7 +30,7 @@ are fixed, configurable or only typical is **PENDING**.
 7. Sales are distinct from damaged/discarded products.
 8. Corrections require audit history.
 
-## 3. Proposed model
+## 3. Implemented model
 
 ```text
 SalesCheckpoint
@@ -38,26 +41,30 @@ SalesCheckpoint
   period                (MORNING | EVENING; naming pending)
   status                (DRAFT | CONFIRMED | CORRECTED)
   registeredByUserId
-  confirmedAt
   note
+  confirmedByUserId / confirmedAt
+  correctedByUserId / correctedAt / correctionReason
 
 SalesCheckpointItem
   checkpointId
   productId
-  quantity              (in sales unit)
-  unitId                (snapshot of the unit used)
-  trayCount             (when applicable)
-  averageWeightPerTrayKg (snapshot, when applicable)
-  estimatedWeightKg     (snapshot, when applicable)
+  productKind           (RAW | PROCESSED snapshot)
+  unitId                (snapshot of the inventory unit)
+  quantityMilli         (exact integer thousandths)
+  presentationId        (processed only)
+  trayCount             (processed only)
+  averageWeightPerTrayGrams (processed snapshot)
+  estimatedWeightGrams  (processed snapshot)
+  measuredWeightGrams   (processed optional)
   weightBasis           (ESTIMATED | MEASURED | NOT_APPLICABLE)
-  sellingPricePerKg     (snapshot, when applicable)
-  sellingPricePerUnit   (snapshot, when applicable)
-  estimatedSalesValue   (snapshot)
+  sellingPriceAmountMinor / sellingPriceBasis / sellingPriceCurrency
+  estimatedSalesValueMinor (rounding as specified below)
 ```
 
-The names and optionality are **PROPOSED**.
+The implemented names are fixed in migration `0011`; reporting labels and
+mandatory WhatsApp fields remain **PROPOSED** until BR-013.
 
-## 4. Proposed workflow
+## 4. Implemented workflow
 
 1. Operator selects branch and business date.
 2. Operator selects the checkpoint period.
@@ -66,28 +73,43 @@ The names and optionality are **PROPOSED**.
    - processed product: tray count, with estimated kilograms shown from the
      product's current average weight per tray.
 4. The system snapshots the average weight, selling price and weight basis.
-5. The operator enters waste/damage separately (not as a sale).
+5. Waste/damage is recorded through the existing M4 waste workflow, not as a
+   sale.
 6. The operator reviews totals by product and confirms.
-7. Confirmation creates inventory decreases for the sold quantities.
-8. A confirmed checkpoint is not silently edited; corrections are audited.
+7. Confirmation appends one negative `SALES_CHECKPOINT` movement per line and
+   refuses negative stock.
+8. A confirmed checkpoint is not silently edited; one full reversal with a
+   required reason moves it to `CORRECTED`.
 
 ## 5. Snapshot and calculation rules
 
 For a processed product:
 
 ```text
-estimatedWeightKg = trayCount × averageWeightPerTrayKg
-estimatedSalesValue = estimatedWeightKg × sellingPricePerKg
+estimatedWeightGrams = trayCount × averageWeightPerTrayGrams
+quantityMilli = measuredWeightGrams ?? estimatedWeightGrams
+estimatedSalesValueMinor =
+  floor((quantityMilli × sellingPriceAmountMinor + 500) / 1000)
 ```
 
-For a raw product sold by unit:
+For a raw product:
 
 ```text
-estimatedSalesValue = unitCount × sellingPricePerUnit
+quantityMilli = reported sales quantity in exact thousandths
+estimatedSalesValueMinor =
+  floor((quantityMilli × sellingPriceAmountMinor + 500) / 1000)
 ```
 
 Rules:
 
+- Raw lines require `salesUnitId === inventoryUnitId`; unit conversion is not
+  implemented (BQ-10).
+- Processed lines require the inventory unit `kg`, so grams map 1:1 to
+  milli-kilograms.
+- The newest selling price whose `effectiveFrom` is on or before the business
+  date is snapshotted. A missing price blocks creation.
+- Raw prices use `PER_SALES_UNIT`; processed prices use `PER_KILOGRAM`.
+- At least one line is required. No-sales checkpoints are not supported (BQ-17).
 - Store the snapshot values in the checkpoint item; never recompute history from
   current master data.
 - Label estimated values in the UI and reports.
@@ -135,7 +157,7 @@ The following must be confirmed before the workflow is finalized:
 - Confirmation step that explains inventory effects.
 - Correction view with audit history.
 
-## 9. Tests required
+## 9. Tests required and implemented
 
 - Domain calculation and snapshot tests for processed and raw products.
 - Snapshot immutability when product weight/price changes.

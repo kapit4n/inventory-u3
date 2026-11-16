@@ -5,20 +5,31 @@
 
 ## Summary
 
-| Field                  | Value                                                            |
-| ---------------------- | ---------------------------------------------------------------- |
-| Current milestone      | M5 — Production (complete and committed as `7441653`)            |
-| Current task           | M6 is next; finalization is blocked on BR-013                    |
-| Overall project status | M5 production complete and committed                             |
-| Completed milestones   | A prerequisite, M1, M2, M3, M4 and M5                            |
-| In-progress milestones | None                                                             |
-| Blocked milestones     | M6 finalization is blocked on BR-013 (WhatsApp reporting format) |
-| Pending milestones     | M6, M7, M8, M9                                                   |
-| Last verified commit   | `7441653` (M5 branch production)                                 |
-| Last update date       | 2026-11-15                                                       |
-| Next recommended task  | Resolve BR-013, then start M6 sales checkpoints                  |
+| Field                  | Value                                                        |
+| ---------------------- | ------------------------------------------------------------ |
+| Current milestone      | M6 — Sales Checkpoints (implemented; commit not authorized)  |
+| Current task           | M6 verification is green; await commit authorization         |
+| Overall project status | M6 implemented end-to-end; reporting contract still open     |
+| Completed milestones   | A prerequisite, M1, M2, M3, M4 and M5                        |
+| In-progress milestones | M6 (implementation complete, uncommitted)                    |
+| Blocked milestones     | Final WhatsApp fields on BR-013; BQ-02/BQ-17 affect M6 scope |
+| Pending milestones     | M7, M8, M9                                                   |
+| Last verified commit   | `7441653` (M5 branch production)                             |
+| Last update date       | 2026-11-16                                                   |
+| Next recommended task  | Authorize M6 commit, then start M7 daily closing             |
 
 ### State at the time of this update
+
+M6 adds aggregate branch sales on top of the M4 ledger. A checkpoint belongs to
+one branch, business date and provisional `MORNING | EVENING` period. Lines
+snapshot product kind, unit, quantity, processed presentation/tray weight,
+measured-or-estimated basis, and the selling price effective on the business
+date. Confirmation appends one negative `SALES_CHECKPOINT` movement per line and
+refuses negative stock; one audited full reversal moves a confirmed checkpoint
+to `CORRECTED`. The `/sales-checkpoints` screen, API, typed client, dual-engine
+persistence, seed data and tests are implemented. Final WhatsApp fields wait for
+BR-013; configurable periods wait for BQ-02 and no-sales checkpoints for BQ-17.
+See ADR 0043 and TD-020.
 
 M5 adds branch production on top of the M4 ledger. Batches record the preparer,
 registering operator, business date, tray counts, average-weight snapshots,
@@ -594,41 +605,79 @@ TD-019.
 
 ### Next action
 
-Resolve BR-013, then start M6 sales checkpoints.
+M5 is complete. Start M6 after the M4/M5 verification and continuity docs are
+unchanged; BR-013 still blocks the final reporting contract.
 
 ---
 
 ## M6 — Sales Checkpoints
 
-**Status: NOT_STARTED (finalization blocked on BR-013)**
+**Status: IMPLEMENTED and verified; commit not authorized. Reporting contract
+blocked on BR-013.**
 
 ### Completed
 
-- [ ] Nothing.
+- [x] Checkpoint and item domain model with `DRAFT | CONFIRMED | CORRECTED`
+      transitions and provisional `MORNING | EVENING` periods.
+- [x] Aggregate product lines; no individual sales records.
+- [x] Processed tray → estimated grams with optional measured weight.
+- [x] Raw kg/unit lines with the inventory-unit guard (no conversion).
+- [x] Weight and effective-dated selling-price snapshots with integer value
+      calculation.
+- [x] Waste excluded from sales; waste remains the M4 workflow.
+- [x] Confirmation appends negative movements and refuses negative stock.
+- [x] One audited full correction with required reason and linked reversals;
+      draft discard via `DELETE`.
+- [x] PostgreSQL and SQLite schemas, migrations `0011`, repositories and
+      registries.
+- [x] Validation schemas, use cases and six authenticated REST endpoints.
+- [x] Typed API client, React Query hooks, `/sales-checkpoints` UI and
+      English/Spanish copy.
+- [x] Domain, dual-engine integration, client, component and Playwright coverage.
+- [x] Seeded draft, confirmed and corrected checkpoints with matching movements.
+- [x] ADR 0043, TD-020, workflow, database, roadmap and continuity documentation.
 
 ### Pending
 
-- [ ] Checkpoint/period model.
-- [ ] Aggregate product lines.
-- [ ] Processed tray → estimated kg calculation.
-- [ ] Raw kg/unit lines.
-- [ ] Weight and price snapshots.
-- [ ] Waste separation.
-- [ ] Correction audit.
-- [ ] UI and tests.
+- [ ] Final WhatsApp fields, order, labels and mandatory fields (BR-013).
+- [ ] Configurable or time-derived checkpoint periods (BQ-02).
+- [ ] Explicit no-sales checkpoints (BQ-17).
+- [ ] Unit conversion when raw sales and inventory units differ (BQ-10).
+- [ ] Execute the PostgreSQL half of the integration suite on a machine with a
+      server; it skips locally (SI-06).
+- [ ] Commit authorization.
 
 ### Validation
 
-No implementation and no tests.
+- `pnpm run format:check` — PASS.
+- `pnpm run typecheck` — PASS, 12/12 tasks.
+- `pnpm run lint` — PASS, 12/12 tasks and `BOUNDARY GUARD OK`.
+- `pnpm run guard:boundaries` — PASS.
+- `pnpm run test` — PASS, 12/12 tasks; 410 passed and 13 skipped.
+- `TEST_DATABASE_URL= pnpm --filter @inventory-u3/api run test:integration` —
+  PASS, 15 files, 100 passed and 13 skipped.
+- `pnpm run build` — PASS, 5/5 tasks; Vite chunk-size warnings only.
+- `pnpm run test:e2e` — PASS, 44 Chromium tests, including four
+  sales-checkpoint specs.
+- `pnpm run db:seed` — PASS on SQLite; 3 checkpoints, 6 items, 6 sales/correction
+  movements and no negative balances.
+- PostgreSQL integration cases were skipped because no server is available
+  (SI-06), not passed.
+- `apps/api/test/sales-checkpoints.integration.test.ts` covers snapshots,
+  confirmation into stock, branch filtering, correction audit/reversal,
+  duplicate periods, missing prices, invalid references, negative stock, draft
+  discard and 404.
 
 ### Notes
 
-The exact WhatsApp fields are not confirmed. Build the generic model only after
-the product confirms the reported fields, or mark the feature as pending.
+M6 implements the generic model only. Period names and all WhatsApp field
+requirements remain provisional until product confirms BR-013/BQ-02. A no-sales
+checkpoint is intentionally unsupported until BQ-17. Raw unit conversion is
+intentionally refused while BQ-10 is open. See ADR 0043 and TD-020.
 
 ### Next action
 
-Confirm BR-013, then start after M1/M2/M4.
+Authorize the M6 commit, then start M7 daily closing.
 
 ---
 

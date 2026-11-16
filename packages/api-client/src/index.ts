@@ -55,4 +55,12 @@ export {
   getProductionBatch,
   listProductionBatches,
 } from './production.js';
+export {
+  confirmSalesCheckpoint,
+  correctSalesCheckpoint,
+  createSalesCheckpoint,
+  discardSalesCheckpoint,
+  getSalesCheckpoint,
+  listSalesCheckpoints,
+} from './sales-checkpoints.js';
 export { createSupplier, listSuppliers, updateSupplier } from './suppliers.js';

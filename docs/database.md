@@ -17,7 +17,9 @@ database/schema/              PostgreSQL Drizzle schema
   enums.ts
   inventory.ts
   organization.ts
+  production.ts
   purchase.ts
+  sales-checkpoints.ts
   supplier.ts
   index.ts
   sqlite/                     SQLite Drizzle schema
@@ -28,36 +30,40 @@ database/schema/              PostgreSQL Drizzle schema
     enum-check.ts
     inventory.ts
     organization.ts
+    production.ts
     purchase.ts
+    sales-checkpoints.ts
     supplier.ts
     index.ts
 ```
 
 The current tables are:
 
-| Table                   | Ownership                 | Purpose                                                     |
-| ----------------------- | ------------------------- | ----------------------------------------------------------- |
-| `organizations`         | tenant root               | Name, timezone, currency and active flag                    |
-| `branches`              | organization              | Physical location with independent inventory                |
-| `employees`             | organization and branch   | Person whose production work is recorded; no login          |
-| `suppliers`             | organization              | Provider referenced by purchases; no login                  |
-| `measurement_units`     | organization              | Configurable unit code, name and active flag                |
-| `product_categories`    | organization              | Catalog grouping with a name and active flag                |
-| `products`              | organization              | Category, raw/processed kind and inventory/sales units      |
-| `product_presentations` | organization and product  | Presentation name and configured average weight in grams    |
-| `product_price_history` | organization and product  | Effective-dated selling price, currency, kind-derived basis |
-| `purchases`             | organization and branch   | Supplier delivery with status, date, currency and totals    |
-| `purchase_items`        | organization and purchase | Immutable product, quantity, unit and purchase price        |
-| `purchase_corrections`  | organization and purchase | Audited full reversal with reason and before/after totals   |
-| `stock_movements`       | organization and branch   | Append-only stock change with reason and source             |
-| `stock_adjustments`     | organization and branch   | Audited manual adjustment or physical-count reconciliation  |
-| `inventory_waste`       | organization and branch   | Audited positive waste quantity with reason                 |
-| `production_batches`    | organization and branch   | Prepared/registered batch with status and audit fields      |
-| `production_inputs`     | organization and batch    | Optional raw product, unit, quantity and position           |
-| `production_outputs`    | organization and batch    | Presentation, tray count, weight snapshots and basis        |
-| `production_waste`      | organization and batch    | Explicit production loss with product, quantity and reason  |
-| `users`                 | organization              | Email, password hash, role and active flag                  |
-| `sessions`              | organization and user     | Hashed opaque token, issue/expiry and revocation            |
+| Table                    | Ownership                   | Purpose                                                     |
+| ------------------------ | --------------------------- | ----------------------------------------------------------- |
+| `organizations`          | tenant root                 | Name, timezone, currency and active flag                    |
+| `branches`               | organization                | Physical location with independent inventory                |
+| `employees`              | organization and branch     | Person whose production work is recorded; no login          |
+| `suppliers`              | organization                | Provider referenced by purchases; no login                  |
+| `measurement_units`      | organization                | Configurable unit code, name and active flag                |
+| `product_categories`     | organization                | Catalog grouping with a name and active flag                |
+| `products`               | organization                | Category, raw/processed kind and inventory/sales units      |
+| `product_presentations`  | organization and product    | Presentation name and configured average weight in grams    |
+| `product_price_history`  | organization and product    | Effective-dated selling price, currency, kind-derived basis |
+| `purchases`              | organization and branch     | Supplier delivery with status, date, currency and totals    |
+| `purchase_items`         | organization and purchase   | Immutable product, quantity, unit and purchase price        |
+| `purchase_corrections`   | organization and purchase   | Audited full reversal with reason and before/after totals   |
+| `stock_movements`        | organization and branch     | Append-only stock change with reason and source             |
+| `stock_adjustments`      | organization and branch     | Audited manual adjustment or physical-count reconciliation  |
+| `inventory_waste`        | organization and branch     | Audited positive waste quantity with reason                 |
+| `production_batches`     | organization and branch     | Prepared/registered batch with status and audit fields      |
+| `production_inputs`      | organization and batch      | Optional raw product, unit, quantity and position           |
+| `production_outputs`     | organization and batch      | Presentation, tray count, weight snapshots and basis        |
+| `production_waste`       | organization and batch      | Explicit production loss with product, quantity and reason  |
+| `sales_checkpoints`      | organization and branch     | Sales period with status, auditor fields and period key     |
+| `sales_checkpoint_items` | organization and checkpoint | Immutable product, quantity, weight and price snapshots     |
+| `users`                  | organization                | Email, password hash, role and active flag                  |
+| `sessions`               | organization and user       | Hashed opaque token, issue/expiry and revocation            |
 
 Branch, employee, supplier and catalog tables carry `organization_id`.
 Employees also carry `branch_id`; suppliers and catalog master data are
@@ -104,6 +110,19 @@ and position. Confirmation writes one net movement per affected product with
 source `PRODUCTION_BATCH`; correction writes linked `CORRECTION` movements
 (ADR 0042, TD-019).
 
+`sales_checkpoints` stores branch, business date, `MORNING | EVENING` period,
+`DRAFT | CONFIRMED | CORRECTED` status, registering user, note and confirmation
+and correction actor/time fields with a required correction reason. The
+organization/branch/date/period unique index prevents parallel reports for one
+period. Items snapshot the product kind, unit, quantity in integer thousandths,
+optional presentation/tray/weight data, selling-price amount/basis/currency and
+estimated sales value. Raw lines require a quantity and use
+`NOT_APPLICABLE` weight basis; processed lines require a presentation and tray
+count, snapshot the average tray weight, and record `ESTIMATED` or `MEASURED`
+weight. Confirmation appends negative `SALES_CHECKPOINT` movements sourced by
+`SALES_CHECKPOINT`; correction writes linked `CORRECTION` movements. See the
+sales-checkpoint workflow and TD-020.
+
 ## Migrations
 
 ```
@@ -111,7 +130,7 @@ database/migrations/          PostgreSQL migrations + journal
 database/migrations-sqlite/   SQLite migrations + journal
 ```
 
-Both journals currently contain eleven entries, `0000` through `0010`; `0002` adds
+Both journals currently contain twelve entries, `0000` through `0011`; `0002` adds
 branches and the catalog, `0003` adds product kind and average weight, `0004`
 adds employees with organization and branch references, `0005` adds
 organization-wide suppliers, `0006` adds effective-dated product price history,
@@ -120,7 +139,9 @@ adds the `PURCHASE_CORRECTION` source type plus the unique
 organization/purchase correction index, and `0009` converts movement quantities
 to integer thousandths, adds `stock_adjustments` and `inventory_waste`, and adds
 the branch/product movement index; `0010` adds the production status/weight-basis
-enums and the four production tables with their indexes. M2-T4 and M2-T5 did not
+enums and the four production tables with their indexes; `0011` adds the sales
+checkpoint status/period/weight-basis enums and the two sales-checkpoint tables
+with their indexes and period uniqueness. M2-T4 and M2-T5 did not
 change the schema
 because the catalog and product tables already carried the needed ownership,
 unique keys and active-state columns. The SQLite `0008` migration rebuilds
@@ -154,8 +175,9 @@ empty, or write an explicit data migration and test it on a populated database.
 users and a sample fruit-and-vegetable catalogue. `database/seed.ts` writes them
 using the same password hashing implementation the API uses. Every row uses a
 fixed id, so the seed is idempotent and restores the sample data on each run.
-It also writes illustrative inventory: opening balances, waste reports and
-physical-count reconciliations linked to their ledger movements.
+It also writes illustrative inventory: opening balances, waste reports,
+physical-count reconciliations, production batches and sales checkpoints linked
+to their ledger movements.
 
 Seeded master data:
 
@@ -169,7 +191,9 @@ Seeded master data:
 | Products      | 21 raw and processed fruit, vegetable and herb products                                                       |
 | Stock         | 22 adjustments (19 opening balances and 3 reconciliations, one with no difference)                            |
 | Waste         | 5 positive waste reports                                                                                      |
-| Movements     | 26 ledger rows (21 adjustment movements and 5 waste movements; the zero-difference count posts none)          |
+| Production    | 3 batches (1 draft, 1 confirmed, 1 corrected), 7 inputs, 3 outputs and 2 waste lines                          |
+| Sales         | 3 checkpoints (1 draft, 1 confirmed, 1 corrected) and 6 product lines                                         |
+| Movements     | 42 ledger rows (21 adjustment, 5 waste, 10 production and 6 sales/correction movements)                       |
 | Presentations | 6 trays for the processed products                                                                            |
 | Price history | 27 effective-dated selling-price rows (current prices from `2026-11-01`, some earlier rows from `2026-06-01`) |
 

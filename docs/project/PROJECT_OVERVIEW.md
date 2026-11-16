@@ -94,9 +94,13 @@ product.** As of this document:
   ledger and refuses negative stock; confirmed batches can be reversed once
   through an audited correction (ADR 0042, TD-019). M5 is committed as
   `7441653`.
-- Operational price consumption is M6 work.
-- No sales checkpoint, daily closing or report feature exists. Employees and
-  suppliers are master data only; they do not log in.
+- Sales checkpoints are implemented on `/sales-checkpoints`: aggregate product
+  lines for a branch, business date and provisional period snapshot processed
+  tray weight and the effective selling price, then confirm into the M4 ledger
+  with audited reversal (ADR 0043, TD-020). BR-013 still blocks the final
+  WhatsApp reporting fields.
+- No daily closing or report feature exists. Employees and suppliers are master
+  data only; they do not log in.
 - The initial access boundary is documented in
   [ACCESS_MODEL.md](./ACCESS_MODEL.md): one organization-wide central operator,
   no branch employee login, and no branch-scoped authorization yet.
@@ -106,8 +110,9 @@ product.** As of this document:
   concepts, master data, product presentations, price history, the access note,
   technical docs and the dual-engine guard are done. M3 purchase registration,
   receiving and audited corrections are complete. M4 branch inventory and M5
-  production are complete and committed. M6 sales checkpoints are next,
-  blocked on BR-013. The sample seed carries three illustrative
+  production are complete and committed. M6 sales checkpoints are implemented
+  end-to-end, with the reporting contract still blocked on BR-013. The sample
+  seed carries three illustrative
   branches until the real names are confirmed (BQ-19), employee sharing across
   branches remains open (BQ-20), and supplier detail fields remain open (BQ-21).
   The seed also adds illustrative opening stock, waste and reconciliation data

@@ -1,5 +1,15 @@
 /** Fixed development data shared by the seed and the integration tests. */
 
+import type {
+  ProductionStatus,
+  ProductionWeightBasis,
+  SalesCheckpointPeriod,
+  SalesCheckpointStatus,
+  SalesCheckpointWeightBasis,
+  StockMovementReason,
+  StockMovementSourceType,
+} from '@inventory-u3/domain';
+
 /** Must match `ORGANIZATION_ID` in `.env.example`. */
 export const DEVELOPMENT_ORGANIZATION_ID = '11111111-1111-4111-8111-111111111111';
 
@@ -583,9 +593,10 @@ export interface DevelopmentStockMovement {
   readonly branchId: string;
   readonly productId: string;
   readonly quantityDeltaMilli: number;
-  readonly reason: 'ADJUSTMENT' | 'WASTE';
-  readonly sourceType: 'ADJUSTMENT' | 'WASTE_REPORT';
+  readonly reason: StockMovementReason;
+  readonly sourceType: StockMovementSourceType;
   readonly sourceId: string;
+  readonly correctsMovementId?: string;
   readonly occurredAt: string;
   readonly recordedByUserId: string;
   readonly note?: string;
@@ -805,6 +816,511 @@ export const DEVELOPMENT_INVENTORY_WASTE: readonly DevelopmentInventoryWaste[] =
   },
 ];
 
+export interface DevelopmentProductionInput {
+  readonly id: string;
+  readonly productId: string;
+  readonly unitId: string;
+  readonly quantityMilli: number;
+}
+
+export interface DevelopmentProductionOutput {
+  readonly id: string;
+  readonly productId: string;
+  readonly presentationId: string;
+  readonly trayCount: number;
+  readonly averageWeightPerTrayGrams: number;
+  readonly estimatedWeightGrams: number;
+  readonly measuredWeightGrams?: number;
+  readonly weightBasis: ProductionWeightBasis;
+}
+
+export interface DevelopmentProductionWaste {
+  readonly id: string;
+  readonly productId: string;
+  readonly quantityMilli: number;
+  readonly reason: string;
+  readonly note?: string;
+}
+
+export interface DevelopmentProductionBatch {
+  readonly id: string;
+  readonly branchId: string;
+  readonly businessDate: string;
+  readonly preparedByEmployeeId: string;
+  readonly registeredByUserId: string;
+  readonly status: ProductionStatus;
+  readonly note?: string;
+  readonly confirmedByUserId?: string;
+  readonly confirmedAt?: string;
+  readonly correctedByUserId?: string;
+  readonly correctedAt?: string;
+  readonly correctionReason?: string;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+  readonly inputs: readonly DevelopmentProductionInput[];
+  readonly outputs: readonly DevelopmentProductionOutput[];
+  readonly waste: readonly DevelopmentProductionWaste[];
+}
+
+export const DEVELOPMENT_PRODUCTION_BATCHES: readonly DevelopmentProductionBatch[] = [
+  {
+    id: 'c1000000-0000-4000-8000-000000000001',
+    branchId: '22222222-2222-4222-8222-000000000001',
+    businessDate: '2026-11-15',
+    preparedByEmployeeId: '44444444-4444-4444-8444-000000000001',
+    registeredByUserId: DEVELOPMENT_ADMIN_USER_ID,
+    status: 'DRAFT',
+    note: 'Morning fruit salad preparation',
+    createdAt: '2026-11-15T13:15:00.000Z',
+    updatedAt: '2026-11-15T13:15:00.000Z',
+    inputs: [
+      {
+        id: 'c1100000-0000-4000-8000-000000000001',
+        productId: '77777777-7777-4777-8777-000000000001',
+        unitId: '55555555-5555-4555-8555-000000000001',
+        quantityMilli: 2_000,
+      },
+      {
+        id: 'c1100000-0000-4000-8000-000000000002',
+        productId: '77777777-7777-4777-8777-000000000002',
+        unitId: '55555555-5555-4555-8555-000000000001',
+        quantityMilli: 2_500,
+      },
+      {
+        id: 'c1100000-0000-4000-8000-000000000003',
+        productId: '77777777-7777-4777-8777-000000000003',
+        unitId: '55555555-5555-4555-8555-000000000001',
+        quantityMilli: 1_500,
+      },
+    ],
+    outputs: [
+      {
+        id: 'c1200000-0000-4000-8000-000000000001',
+        productId: '77777777-7777-4777-8777-000000000019',
+        presentationId: '88888888-8888-4888-8888-000000000002',
+        trayCount: 6,
+        averageWeightPerTrayGrams: 1_000,
+        estimatedWeightGrams: 6_000,
+        weightBasis: 'ESTIMATED',
+      },
+    ],
+    waste: [
+      {
+        id: 'c1300000-0000-4000-8000-000000000001',
+        productId: '77777777-7777-4777-8777-000000000002',
+        quantityMilli: 250,
+        reason: 'Fruit damaged while cutting',
+        note: 'Irregular pieces removed',
+      },
+    ],
+  },
+  {
+    id: 'c1000000-0000-4000-8000-000000000002',
+    branchId: '22222222-2222-4222-8222-000000000002',
+    businessDate: '2026-11-14',
+    preparedByEmployeeId: '44444444-4444-4444-8444-000000000003',
+    registeredByUserId: DEVELOPMENT_ADMIN_USER_ID,
+    status: 'CONFIRMED',
+    note: 'Afternoon vegetable mix',
+    confirmedByUserId: DEVELOPMENT_ADMIN_USER_ID,
+    confirmedAt: '2026-11-14T14:35:00.000Z',
+    createdAt: '2026-11-14T14:20:00.000Z',
+    updatedAt: '2026-11-14T14:35:00.000Z',
+    inputs: [
+      {
+        id: 'c1100000-0000-4000-8000-000000000004',
+        productId: '77777777-7777-4777-8777-000000000011',
+        unitId: '55555555-5555-4555-8555-000000000001',
+        quantityMilli: 3_000,
+      },
+      {
+        id: 'c1100000-0000-4000-8000-000000000005',
+        productId: '77777777-7777-4777-8777-000000000012',
+        unitId: '55555555-5555-4555-8555-000000000001',
+        quantityMilli: 1_500,
+      },
+    ],
+    outputs: [
+      {
+        id: 'c1200000-0000-4000-8000-000000000002',
+        productId: '77777777-7777-4777-8777-000000000020',
+        presentationId: '88888888-8888-4888-8888-000000000003',
+        trayCount: 8,
+        averageWeightPerTrayGrams: 500,
+        estimatedWeightGrams: 4_000,
+        measuredWeightGrams: 4_200,
+        weightBasis: 'MEASURED',
+      },
+    ],
+    waste: [
+      {
+        id: 'c1300000-0000-4000-8000-000000000002',
+        productId: '77777777-7777-4777-8777-000000000012',
+        quantityMilli: 250,
+        reason: 'Peels and trimmings',
+        note: 'Carrot trimmed during preparation',
+      },
+    ],
+  },
+  {
+    id: 'c1000000-0000-4000-8000-000000000003',
+    branchId: '22222222-2222-4222-8222-000000000003',
+    businessDate: '2026-11-14',
+    preparedByEmployeeId: '44444444-4444-4444-8444-000000000004',
+    registeredByUserId: DEVELOPMENT_ADMIN_USER_ID,
+    status: 'CORRECTED',
+    note: 'Evening fruit salad preparation',
+    confirmedByUserId: DEVELOPMENT_ADMIN_USER_ID,
+    confirmedAt: '2026-11-14T18:10:00.000Z',
+    correctedByUserId: DEVELOPMENT_ADMIN_USER_ID,
+    correctedAt: '2026-11-14T19:00:00.000Z',
+    correctionReason: 'One extra tray was registered',
+    createdAt: '2026-11-14T18:00:00.000Z',
+    updatedAt: '2026-11-14T19:00:00.000Z',
+    inputs: [
+      {
+        id: 'c1100000-0000-4000-8000-000000000006',
+        productId: '77777777-7777-4777-8777-000000000007',
+        unitId: '55555555-5555-4555-8555-000000000001',
+        quantityMilli: 1_500,
+      },
+      {
+        id: 'c1100000-0000-4000-8000-000000000007',
+        productId: '77777777-7777-4777-8777-000000000006',
+        unitId: '55555555-5555-4555-8555-000000000001',
+        quantityMilli: 1_000,
+      },
+    ],
+    outputs: [
+      {
+        id: 'c1200000-0000-4000-8000-000000000003',
+        productId: '77777777-7777-4777-8777-000000000019',
+        presentationId: '88888888-8888-4888-8888-000000000001',
+        trayCount: 4,
+        averageWeightPerTrayGrams: 500,
+        estimatedWeightGrams: 2_000,
+        weightBasis: 'ESTIMATED',
+      },
+    ],
+    waste: [],
+  },
+];
+
+export interface DevelopmentSalesCheckpointItem {
+  readonly id: string;
+  readonly productId: string;
+  readonly productKind: 'RAW' | 'PROCESSED';
+  readonly unitId: string;
+  readonly quantityMilli: number;
+  readonly presentationId?: string;
+  readonly trayCount?: number;
+  readonly averageWeightPerTrayGrams?: number;
+  readonly estimatedWeightGrams?: number;
+  readonly measuredWeightGrams?: number;
+  readonly weightBasis: SalesCheckpointWeightBasis;
+  readonly sellingPriceAmountMinor: number;
+  readonly sellingPriceBasis: 'PER_KILOGRAM' | 'PER_SALES_UNIT';
+  readonly estimatedSalesValueMinor: number;
+}
+
+export interface DevelopmentSalesCheckpoint {
+  readonly id: string;
+  readonly branchId: string;
+  readonly businessDate: string;
+  readonly period: SalesCheckpointPeriod;
+  readonly status: SalesCheckpointStatus;
+  readonly registeredByUserId: string;
+  readonly note?: string;
+  readonly confirmedByUserId?: string;
+  readonly confirmedAt?: string;
+  readonly correctedByUserId?: string;
+  readonly correctedAt?: string;
+  readonly correctionReason?: string;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+  readonly items: readonly DevelopmentSalesCheckpointItem[];
+}
+
+export const DEVELOPMENT_SALES_CHECKPOINTS: readonly DevelopmentSalesCheckpoint[] = [
+  {
+    id: 'd1000000-0000-4000-8000-000000000001',
+    branchId: '22222222-2222-4222-8222-000000000001',
+    businessDate: '2026-11-15',
+    period: 'MORNING',
+    status: 'DRAFT',
+    registeredByUserId: DEVELOPMENT_ADMIN_USER_ID,
+    note: 'Morning counter sales',
+    createdAt: '2026-11-15T14:05:00.000Z',
+    updatedAt: '2026-11-15T14:05:00.000Z',
+    items: [
+      {
+        id: 'd1100000-0000-4000-8000-000000000001',
+        productId: '77777777-7777-4777-8777-000000000001',
+        productKind: 'RAW',
+        unitId: KG,
+        quantityMilli: 1_000,
+        weightBasis: 'NOT_APPLICABLE',
+        sellingPriceAmountMinor: 249,
+        sellingPriceBasis: 'PER_SALES_UNIT',
+        estimatedSalesValueMinor: 249,
+      },
+      {
+        id: 'd1100000-0000-4000-8000-000000000002',
+        productId: '77777777-7777-4777-8777-000000000019',
+        productKind: 'PROCESSED',
+        unitId: KG,
+        quantityMilli: 2_000,
+        presentationId: '88888888-8888-4888-8888-000000000001',
+        trayCount: 4,
+        averageWeightPerTrayGrams: 500,
+        estimatedWeightGrams: 2_000,
+        weightBasis: 'ESTIMATED',
+        sellingPriceAmountMinor: 899,
+        sellingPriceBasis: 'PER_KILOGRAM',
+        estimatedSalesValueMinor: 1_798,
+      },
+    ],
+  },
+  {
+    id: 'd1000000-0000-4000-8000-000000000002',
+    branchId: '22222222-2222-4222-8222-000000000002',
+    businessDate: '2026-11-14',
+    period: 'EVENING',
+    status: 'CONFIRMED',
+    registeredByUserId: DEVELOPMENT_ADMIN_USER_ID,
+    note: 'Evening vegetable sales',
+    confirmedByUserId: DEVELOPMENT_ADMIN_USER_ID,
+    confirmedAt: '2026-11-14T21:10:00.000Z',
+    createdAt: '2026-11-14T20:45:00.000Z',
+    updatedAt: '2026-11-14T21:10:00.000Z',
+    items: [
+      {
+        id: 'd1100000-0000-4000-8000-000000000003',
+        productId: '77777777-7777-4777-8777-000000000011',
+        productKind: 'RAW',
+        unitId: KG,
+        quantityMilli: 500,
+        weightBasis: 'NOT_APPLICABLE',
+        sellingPriceAmountMinor: 189,
+        sellingPriceBasis: 'PER_SALES_UNIT',
+        estimatedSalesValueMinor: 95,
+      },
+      {
+        id: 'd1100000-0000-4000-8000-000000000004',
+        productId: '77777777-7777-4777-8777-000000000020',
+        productKind: 'PROCESSED',
+        unitId: KG,
+        quantityMilli: 1_000,
+        presentationId: '88888888-8888-4888-8888-000000000003',
+        trayCount: 2,
+        averageWeightPerTrayGrams: 500,
+        estimatedWeightGrams: 1_000,
+        measuredWeightGrams: 1_000,
+        weightBasis: 'MEASURED',
+        sellingPriceAmountMinor: 749,
+        sellingPriceBasis: 'PER_KILOGRAM',
+        estimatedSalesValueMinor: 749,
+      },
+    ],
+  },
+  {
+    id: 'd1000000-0000-4000-8000-000000000003',
+    branchId: '22222222-2222-4222-8222-000000000003',
+    businessDate: '2026-11-14',
+    period: 'MORNING',
+    status: 'CORRECTED',
+    registeredByUserId: DEVELOPMENT_ADMIN_USER_ID,
+    note: 'Morning fruit sales',
+    confirmedByUserId: DEVELOPMENT_ADMIN_USER_ID,
+    confirmedAt: '2026-11-14T13:20:00.000Z',
+    correctedByUserId: DEVELOPMENT_ADMIN_USER_ID,
+    correctedAt: '2026-11-14T15:00:00.000Z',
+    correctionReason: 'One tray was counted twice',
+    createdAt: '2026-11-14T13:00:00.000Z',
+    updatedAt: '2026-11-14T15:00:00.000Z',
+    items: [
+      {
+        id: 'd1100000-0000-4000-8000-000000000005',
+        productId: '77777777-7777-4777-8777-000000000006',
+        productKind: 'RAW',
+        unitId: KG,
+        quantityMilli: 500,
+        weightBasis: 'NOT_APPLICABLE',
+        sellingPriceAmountMinor: 399,
+        sellingPriceBasis: 'PER_SALES_UNIT',
+        estimatedSalesValueMinor: 200,
+      },
+      {
+        id: 'd1100000-0000-4000-8000-000000000006',
+        productId: '77777777-7777-4777-8777-000000000019',
+        productKind: 'PROCESSED',
+        unitId: KG,
+        quantityMilli: 500,
+        presentationId: '88888888-8888-4888-8888-000000000001',
+        trayCount: 1,
+        averageWeightPerTrayGrams: 500,
+        estimatedWeightGrams: 500,
+        weightBasis: 'ESTIMATED',
+        sellingPriceAmountMinor: 899,
+        sellingPriceBasis: 'PER_KILOGRAM',
+        estimatedSalesValueMinor: 450,
+      },
+    ],
+  },
+];
+
+function salesCheckpointMovementId(sequence: number): string {
+  return `b4000000-0000-4000-8000-${String(sequence).padStart(12, '0')}`;
+}
+
+function createSalesCheckpointStockMovements(): readonly DevelopmentStockMovement[] {
+  const movements: DevelopmentStockMovement[] = [];
+  let sequence = 1;
+
+  for (const checkpoint of DEVELOPMENT_SALES_CHECKPOINTS) {
+    if (
+      checkpoint.status === 'DRAFT' ||
+      checkpoint.confirmedAt === undefined ||
+      checkpoint.confirmedByUserId === undefined
+    ) {
+      continue;
+    }
+
+    const sourceMovements: DevelopmentStockMovement[] = [];
+    for (const item of checkpoint.items) {
+      sourceMovements.push({
+        id: salesCheckpointMovementId(sequence++),
+        branchId: checkpoint.branchId,
+        productId: item.productId,
+        quantityDeltaMilli: -item.quantityMilli,
+        reason: 'SALES_CHECKPOINT',
+        sourceType: 'SALES_CHECKPOINT',
+        sourceId: checkpoint.id,
+        occurredAt: checkpoint.confirmedAt,
+        recordedByUserId: checkpoint.confirmedByUserId,
+        ...(checkpoint.note === undefined ? {} : { note: checkpoint.note }),
+      });
+    }
+
+    movements.push(...sourceMovements);
+
+    if (
+      checkpoint.status === 'CORRECTED' &&
+      checkpoint.correctedAt !== undefined &&
+      checkpoint.correctedByUserId !== undefined &&
+      checkpoint.correctionReason !== undefined
+    ) {
+      for (const movement of sourceMovements) {
+        movements.push({
+          id: salesCheckpointMovementId(sequence++),
+          branchId: movement.branchId,
+          productId: movement.productId,
+          quantityDeltaMilli: -movement.quantityDeltaMilli,
+          reason: 'CORRECTION',
+          sourceType: 'SALES_CHECKPOINT',
+          sourceId: checkpoint.id,
+          correctsMovementId: movement.id,
+          occurredAt: checkpoint.correctedAt,
+          recordedByUserId: checkpoint.correctedByUserId,
+          note: checkpoint.correctionReason,
+        });
+      }
+    }
+  }
+
+  return movements;
+}
+
+function productionMovementId(sequence: number): string {
+  return `b3000000-0000-4000-8000-${String(sequence).padStart(12, '0')}`;
+}
+
+function createProductionStockMovements(): readonly DevelopmentStockMovement[] {
+  const movements: DevelopmentStockMovement[] = [];
+  let sequence = 1;
+
+  for (const batch of DEVELOPMENT_PRODUCTION_BATCHES) {
+    if (
+      batch.status === 'DRAFT' ||
+      batch.confirmedAt === undefined ||
+      batch.confirmedByUserId === undefined
+    ) {
+      continue;
+    }
+
+    const sourceMovements: DevelopmentStockMovement[] = [];
+    for (const input of batch.inputs) {
+      sourceMovements.push({
+        id: productionMovementId(sequence++),
+        branchId: batch.branchId,
+        productId: input.productId,
+        quantityDeltaMilli: -input.quantityMilli,
+        reason: 'PRODUCTION_INPUT',
+        sourceType: 'PRODUCTION_BATCH',
+        sourceId: batch.id,
+        occurredAt: batch.confirmedAt,
+        recordedByUserId: batch.confirmedByUserId,
+        ...(batch.note === undefined ? {} : { note: batch.note }),
+      });
+    }
+    for (const output of batch.outputs) {
+      sourceMovements.push({
+        id: productionMovementId(sequence++),
+        branchId: batch.branchId,
+        productId: output.productId,
+        quantityDeltaMilli: output.measuredWeightGrams ?? output.estimatedWeightGrams,
+        reason: 'PRODUCTION_OUTPUT',
+        sourceType: 'PRODUCTION_BATCH',
+        sourceId: batch.id,
+        occurredAt: batch.confirmedAt,
+        recordedByUserId: batch.confirmedByUserId,
+        ...(batch.note === undefined ? {} : { note: batch.note }),
+      });
+    }
+    for (const waste of batch.waste) {
+      sourceMovements.push({
+        id: productionMovementId(sequence++),
+        branchId: batch.branchId,
+        productId: waste.productId,
+        quantityDeltaMilli: -waste.quantityMilli,
+        reason: 'WASTE',
+        sourceType: 'PRODUCTION_BATCH',
+        sourceId: batch.id,
+        occurredAt: batch.confirmedAt,
+        recordedByUserId: batch.confirmedByUserId,
+        note: waste.reason,
+      });
+    }
+
+    movements.push(...sourceMovements);
+
+    if (
+      batch.status === 'CORRECTED' &&
+      batch.correctedAt !== undefined &&
+      batch.correctedByUserId !== undefined &&
+      batch.correctionReason !== undefined
+    ) {
+      for (const movement of sourceMovements) {
+        movements.push({
+          id: productionMovementId(sequence++),
+          branchId: movement.branchId,
+          productId: movement.productId,
+          quantityDeltaMilli: -movement.quantityDeltaMilli,
+          reason: 'CORRECTION',
+          sourceType: 'PRODUCTION_BATCH',
+          sourceId: batch.id,
+          correctsMovementId: movement.id,
+          occurredAt: batch.correctedAt,
+          recordedByUserId: batch.correctedByUserId,
+          note: batch.correctionReason,
+        });
+      }
+    }
+  }
+
+  return movements;
+}
+
 export const DEVELOPMENT_STOCK_MOVEMENTS: readonly DevelopmentStockMovement[] = [
   ...DEVELOPMENT_STOCK_ADJUSTMENTS.filter((adjustment) => adjustment.quantityDeltaMilli !== 0).map(
     (adjustment, index) => ({
@@ -832,4 +1348,6 @@ export const DEVELOPMENT_STOCK_MOVEMENTS: readonly DevelopmentStockMovement[] = 
     recordedByUserId: waste.recordedByUserId,
     ...(waste.note === undefined ? {} : { note: waste.note }),
   })),
+  ...createProductionStockMovements(),
+  ...createSalesCheckpointStockMovements(),
 ];

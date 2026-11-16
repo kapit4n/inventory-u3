@@ -2100,3 +2100,183 @@ browser coverage and continuity documentation.
 Read `AGENTS.md`, `PROJECT_OVERVIEW.md`, `IMPLEMENTATION_PROGRESS.md`,
 `CURRENT_TASK.md` and the M6 roadmap section. M5 is committed as `7441653`; do
 not start M6 until BR-013 is resolved.
+
+## Session 20 — 2026-11-16 — M5 production seed data
+
+### Objective
+
+Populate the development database with illustrative production batches so the
+`/production` screen and stock ledger show M5 data immediately after seeding.
+
+### Work completed
+
+- Added fixed production seed data to `database/development-data.ts`: one
+  draft, one confirmed and one corrected batch across the three sample branches.
+- Added production inputs, output weight snapshots (estimated and measured),
+  production waste and the matching append-only ledger movements. The corrected
+  batch carries linked `CORRECTION` movements.
+- Wired production batch, input, output and waste inserts into both PostgreSQL
+  and SQLite seed paths.
+- Corrected the Palermo sample batch to consume carrot stock that the branch
+  actually has, avoiding a negative balance.
+- Applied the seed to the local SQLite database and verified the resulting
+  batches, movement counts and non-negative balances.
+- Updated `docs/database.md` with the production sample rows and total ledger
+  count.
+
+### Files changed
+
+- `database/development-data.ts`
+- `database/seed.ts`
+- `docs/database.md`
+- `docs/development/SESSION_LOG.md`
+
+### Technical decisions
+
+- Seed all three production statuses so the UI can demonstrate draft
+  confirmation, correction history and ordinary confirmed batches.
+- Only confirmed and corrected batches produce ledger movements. The draft batch
+  intentionally has no stock effect.
+- Movement identifiers use a fixed `b3000000-...` range and production record
+  identifiers use `c1...` ranges, preserving seed idempotency.
+
+### Validation
+
+- `pnpm --filter @inventory-u3/database run typecheck` — PASS.
+- `pnpm --filter @inventory-u3/database run lint` — PASS.
+- `pnpm run db:seed` — PASS on SQLite; running it twice left the same counts.
+- Local SQLite check — 3 batches, 7 inputs, 3 outputs, 2 waste lines and 10
+  production movements; no negative branch/product balances.
+- PostgreSQL seed path was typechecked but not executed locally because no
+  server is available (SI-06).
+
+### Pending work
+
+- Run the PostgreSQL seed on a machine with a server.
+- Resolve BR-013 before starting M6 sales checkpoints.
+
+### Next session
+
+Read `AGENTS.md`, `PROJECT_OVERVIEW.md`, `IMPLEMENTATION_PROGRESS.md`,
+`CURRENT_TASK.md` and the M6 roadmap section. M5 is committed as `7441653`; do
+not start M6 until BR-013 is resolved.
+
+## Session 21 — 2026-11-16 — M6 sales checkpoints
+
+### Objective
+
+Implement generic sales checkpoints end-to-end without inventing the unresolved
+BR-013 WhatsApp reporting contract: aggregate sales by branch, business date and
+period, snapshot presentation weight and effective price, post confirmed sales to
+the append-only ledger, and support audited reversal.
+
+### Work completed
+
+- Added the checkpoint/item domain model, branded ids, repository port, status
+  and period rules, processed/raw line validation, integer value calculation,
+  confirmation and correction transitions, and domain tests.
+- Added PostgreSQL and SQLite schemas and generated/applied migration `0011`:
+  `sales_checkpoints`, `sales_checkpoint_items`, status/period/weight-basis
+  enums, indexes and the branch/date/period unique key. The local SQLite
+  database was migrated.
+- Implemented both repositories, registered them in the PostgreSQL unit of work
+  and SQLite registry, and added a 10-case dual-engine integration suite.
+- Added validation schemas, confirmation/correction use cases, price lookup,
+  branch isolation, negative-stock refusal and six authenticated routes.
+- Added the typed API client, React Query hooks, English/Spanish catalogues,
+  `/sales-checkpoints` route and sidebar entry, list/detail/create/confirm/
+  correct/discard flows, and a three-case component test.
+- Added a four-case Playwright spec and fixed its raw-product presentations
+  fixture after the API mock caught the missing endpoint.
+- Added illustrative sales seed data for all three statuses and matching ledger
+  movements; verified counts and non-negative balances on SQLite.
+- Added ADR 0043 and TD-020, and updated the workflow, database, roadmap,
+  project overview and continuity documents.
+
+### Files changed
+
+- `packages/domain/src/sales-checkpoint/*`, `packages/domain/src/ports/index.ts`,
+  `packages/domain/src/index.ts`
+- `packages/types/src/identifiers.ts`
+- `database/schema/sales-checkpoints.ts`,
+  `database/schema/sqlite/sales-checkpoints.ts`, `database/schema/enums.ts`,
+  schema barrels and migration `0011` files/journals/snapshots
+- `apps/api/src/application/sales-checkpoint/*`,
+  `apps/api/src/http/routes/sales-checkpoints.ts`, `apps/api/src/app.ts`
+- `apps/api/src/infrastructure/persistence/repositories/sales-checkpoint-repository.ts`,
+  the SQLite twin and both repository registries
+- `apps/api/test/sales-checkpoints.integration.test.ts`
+- `packages/validation/src/sales-checkpoint/*`, package barrel and export map
+- `packages/api-client/src/sales-checkpoints.ts` and its unit test
+- `packages/app/src/features/sales-checkpoints/*`,
+  `packages/app/src/routes/sales-checkpoints.tsx`,
+  `packages/app/src/routeTree.gen.ts`, sidebar and i18n catalogues
+- `e2e/web/sales-checkpoints.spec.ts`
+- `database/development-data.ts`, `database/seed.ts`, `docs/database.md`
+- `docs/decisions/0043-sales-checkpoints-snapshot-weight-and-price.md`,
+  `docs/project/TECHNICAL_DECISIONS.md`
+- `docs/workflows/SALES_CHECKPOINT_WORKFLOW.md`,
+  `docs/development/IMPLEMENTATION_ROADMAP.md`,
+  `docs/development/IMPLEMENTATION_PROGRESS.md`,
+  `docs/development/CURRENT_TASK.md`, `docs/project/PROJECT_OVERVIEW.md`,
+  `docs/progress/STATE.md` and this log
+
+### Technical decisions
+
+- Period names remain `MORNING | EVENING` provisionally until BR-013/BQ-02.
+- At least one line is required; no-sales checkpoints wait for BQ-17.
+- Raw lines require `salesUnitId === inventoryUnitId`; unit conversion is refused
+  while BQ-10 remains open. Processed lines require the `kg` inventory unit.
+- Processed `quantityMilli` is measured grams or `trayCount × averageWeight`;
+  the basis is `MEASURED` or `ESTIMATED`.
+- The newest effective price on or before the business date is snapshotted.
+  Raw lines use `PER_SALES_UNIT`; processed lines use `PER_KILOGRAM`.
+- `estimatedSalesValueMinor` uses integer-safe half-up rounding and is immutable.
+- Confirmation appends negative `SALES_CHECKPOINT` movements; one correction
+  writes linked `CORRECTION` reversals with a required reason.
+- Seed identifiers use the `d1...` ranges and movement ids the `b4000000-...`
+  range, preserving idempotency.
+
+### Validation
+
+- `pnpm run format:check` — PASS.
+- `pnpm run typecheck` — PASS, 12/12 tasks.
+- `pnpm run lint` — PASS, 12/12 tasks and `BOUNDARY GUARD OK`.
+- `pnpm run guard:boundaries` — PASS.
+- `pnpm run test` — PASS, 12/12 tasks; 410 passed and 13 skipped.
+- `TEST_DATABASE_URL= pnpm --filter @inventory-u3/api run test:integration` —
+  PASS, 15 files, 100 passed and 13 skipped.
+- `pnpm run build` — PASS, 5/5 tasks; Vite chunk-size warnings only.
+- `pnpm run test:e2e` — PASS, 44 Chromium tests, including four sales-checkpoint
+  specs.
+- `pnpm run db:migrate` — PASS, SQLite applied through `0011`.
+- `pnpm run db:seed` — PASS on SQLite; 3 checkpoints, 6 items, 4 sales movements,
+  2 correction movements and no negative balances.
+- PostgreSQL integration and seed cases were skipped/not executed because no
+  server is available (SI-06), not passed.
+
+### Problems found
+
+- The first E2E creation run logged a 501 because the form fetches presentations
+  for the selected raw product too; the mock now supplies an empty raw
+  presentation list.
+- The component create fixture initially hardcoded the same value on both lines;
+  it now computes `750` for the raw line and `500` for the processed line.
+- The product-required component assertion had to select a branch first because
+  the form-level branch error otherwise blocked the line-level validation.
+- The route initially used an invalid `CONFLICT` domain error code; it now uses
+  `DUPLICATED_RECORD`, which maps to HTTP 409.
+
+### Pending work
+
+- Commit authorization for the M6 changes.
+- Resolve BR-013 before finalizing WhatsApp fields, labels and message format.
+- Resolve BQ-02 for period naming/configurability and BQ-17 for no-sales.
+- Resolve BQ-10 before accepting raw sales units that differ from inventory.
+- Run the PostgreSQL integration and seed paths on a machine with a server.
+
+### Next session
+
+Read `AGENTS.md`, `PROJECT_OVERVIEW.md`, `IMPLEMENTATION_PROGRESS.md`,
+`CURRENT_TASK.md` and the M7 roadmap section. If M6 has been committed, start M7
+daily closing; otherwise request commit authorization first.

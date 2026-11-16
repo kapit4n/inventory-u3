@@ -10,7 +10,8 @@
 ## Current status
 
 - **Foundation prerequisite:** complete.
-- **Business roadmap:** M1–M5 are COMPLETED; M6–M9 are NOT_STARTED.
+- **Business roadmap:** M1–M5 are COMPLETED; M6 is IMPLEMENTED but uncommitted;
+  M7–M9 are NOT_STARTED.
 - **Branch master data:** entity, dual-engine schema, migrations and repositories
   are implemented. `GET/POST/PUT /api/v1/branches`, the Settings management
   section and the reusable active-branch selector are implemented. Three

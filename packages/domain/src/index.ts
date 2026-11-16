@@ -13,6 +13,7 @@ export * from './ports/index.js';
 export * from './production/index.js';
 export * from './product/index.js';
 export * from './purchase/index.js';
+export * from './sales-checkpoint/index.js';
 export * from './shared/index.js';
 export * from './stock/index.js';
 export * from './supplier/index.js';

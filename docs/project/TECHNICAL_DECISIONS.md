@@ -513,3 +513,39 @@ averageWeightPerTray` and `estimatedValue = estimatedKg × sellingPricePerKg`.
   Sales checkpoints and closing can reuse snapshots. Recipes, partial
   corrections and valuation require an explicit future decision, schema and
   migration.
+
+### TD-020 — Sales checkpoints snapshot weight and price and post one net movement per line
+
+- **Date:** 2026-11-16
+- **Status:** ACCEPTED and implemented in M6; BR-013 reporting fields, BQ-02
+  period configuration, BQ-17 no-sales behavior and BQ-10 unit conversion remain
+  open.
+- **Context:** M6 records aggregate branch sales on top of the M4 ledger. The
+  business may report processed products in trays and raw products in their sales
+  units. Presentations and effective-dated prices can change later, so a
+  confirmed checkpoint must preserve the weight and price used at that time.
+  BR-013 has not confirmed the final WhatsApp message contract.
+- **Decision:** Store checkpoints with branch, business date,
+  `MORNING | EVENING` period, registering user, note and
+  `DRAFT | CONFIRMED | CORRECTED` status; branch/date/period is unique. Require
+  at least one line. Raw lines use a positive quantity, reject tray/weight
+  fields, require their sales unit to equal the inventory unit and use
+  `NOT_APPLICABLE` weight basis. Processed lines require a presentation and
+  positive tray count, snapshot the average tray weight, derive estimated grams
+  and use an optional measured weight; `quantityMilli` is measured or estimated
+  grams with an `ESTIMATED | MEASURED` basis. Every line snapshots the newest
+  selling price effective on or before the business date with its amount, basis
+  and currency. `estimatedSalesValueMinor` uses integer rounding
+  `floor((quantityMilli × amountMinor + 500) / 1000)`. Confirmation appends
+  negative `SALES_CHECKPOINT` movements and refuses negative stock; correction is
+  one audited full reversal with linked `CORRECTION` movements. Reads use
+  `inventory:read`; writes use `inventory:write`.
+- **Alternatives considered:** Recompute prices and weights at display time;
+  rejected because master-data edits would rewrite history. Allow raw sales in a
+  unit different from inventory; rejected while BQ-10 is unresolved. Add a
+  no-sales marker; rejected until BQ-17 confirms the reporting rule. Permit
+  repeated corrections; rejected because it needs a reversal-of-reversal model.
+- **Consequences:** Checkpoint history is stable and M7 can consume it for
+  revenue. Confirmation and correction must be transactional with movement
+  writes. The WhatsApp reporting layer and period configuration still require
+  product confirmation before they are final.

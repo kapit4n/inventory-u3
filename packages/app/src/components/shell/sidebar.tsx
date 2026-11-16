@@ -10,6 +10,7 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   Settings,
+  ShoppingBasket,
   ShoppingCart,
   Tags,
 } from 'lucide-react';
@@ -47,6 +48,11 @@ const navItems: NavItem[] = [
     titleKey: 'common.nav.production',
     href: '/production',
     icon: ChefHat,
+  },
+  {
+    titleKey: 'common.nav.salesCheckpoints',
+    href: '/sales-checkpoints',
+    icon: ShoppingBasket,
   },
 ];
 

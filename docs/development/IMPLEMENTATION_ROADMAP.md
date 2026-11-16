@@ -437,7 +437,7 @@ and TD-019. The milestone is complete and committed as `7441653`.
 
 ## M6 — Sales Checkpoints
 
-**Status: NOT_STARTED**
+**Status: COMPLETE (generic model); WhatsApp reporting fields pending BR-013**
 
 ### Objective
 
@@ -471,15 +471,19 @@ reporting format) before the workflow can be finalized.
 
 ### Acceptance criteria
 
-- [ ] Operator can select branch, business date and checkpoint period.
-- [ ] At least morning and evening checkpoints are supported.
-- [ ] Sales are aggregated by product; no individual sale records exist.
-- [ ] Processed lines calculate estimated kg from tray count and snapshot weight.
-- [ ] Raw lines use kg or unit without tray conversion.
-- [ ] Price and weight snapshots are stored and never recomputed.
-- [ ] Waste/damage is excluded from sales.
-- [ ] Corrections are audited.
-- [ ] Both engines pass the same tests.
+- [x] Operator can select branch, business date and checkpoint period.
+- [x] At least morning and evening checkpoints are supported.
+- [x] Sales are aggregated by product; no individual sale records exist.
+- [x] Processed lines calculate estimated kg from tray count and snapshot weight.
+- [x] Raw lines use kg or unit without tray conversion.
+- [x] Price and weight snapshots are stored and never recomputed.
+- [x] Waste/damage is excluded from sales.
+- [x] Corrections are audited.
+- [x] Both engines pass the same tests.
+
+Additional implemented constraints: raw sales must use the product inventory unit
+(no conversion while BQ-10 is open); processed sales require the `kg` inventory
+unit; at least one line is required and no-sales checkpoints wait for BQ-17.
 
 ### Expected database changes
 
@@ -499,8 +503,11 @@ historical immutability regression test.
 
 ### Notes
 
-Do not finalize the reporting fields until BR-013 is confirmed. The milestone can
-prepare the generic model, but the workflow is blocked from completion.
+M6 implemented the generic checkpoint model, dual-engine persistence, API,
+client, `/sales-checkpoints` UI and tests. ADR 0043 and TD-020 record the
+decisions. Do not finalize WhatsApp reporting fields until BR-013 is confirmed,
+and do not rename periods or add no-sales checkpoints until BQ-02/BQ-17 are
+resolved. The milestone itself is implemented; the reporting contract is not.
 
 ---
 
@@ -703,15 +710,15 @@ been executed." A passing unit suite is not a backup/restore drill.
 
 ## Status summary
 
-| Milestone               | Status      | Evidence                                                                                         |
-| ----------------------- | ----------- | ------------------------------------------------------------------------------------------------ |
-| Foundation prerequisite | COMPLETED   | Foundation code, migrations, tests and recorded verification                                     |
-| M1                      | COMPLETED   | Branch, catalog, measurement, stock and access note; docs and guard closed                       |
-| M2                      | COMPLETED   | Master data, product presentations, price history and browser coverage                           |
-| M3                      | COMPLETED   | Purchases, receiving, audited corrections, dual-engine tests and browser coverage                |
-| M4                      | COMPLETED   | Derived balances, adjustments, waste, reconciliation, dual-engine tests, UI and browser coverage |
-| M5                      | COMPLETE    | Production batches, snapshots, ledger integration, UI and tests; committed as `7441653`          |
-| M6                      | NOT_STARTED | No checkpoint tables or screens; BR-013 pending                                                  |
-| M7                      | NOT_STARTED | No closing tables or screens                                                                     |
-| M8                      | NOT_STARTED | Dashboard is static foundation content; no reports                                               |
-| M9                      | NOT_STARTED | No CI, branch permissions, audit log or backup drill                                             |
+| Milestone               | Status      | Evidence                                                                                          |
+| ----------------------- | ----------- | ------------------------------------------------------------------------------------------------- |
+| Foundation prerequisite | COMPLETED   | Foundation code, migrations, tests and recorded verification                                      |
+| M1                      | COMPLETED   | Branch, catalog, measurement, stock and access note; docs and guard closed                        |
+| M2                      | COMPLETED   | Master data, product presentations, price history and browser coverage                            |
+| M3                      | COMPLETED   | Purchases, receiving, audited corrections, dual-engine tests and browser coverage                 |
+| M4                      | COMPLETED   | Derived balances, adjustments, waste, reconciliation, dual-engine tests, UI and browser coverage  |
+| M5                      | COMPLETE    | Production batches, snapshots, ledger integration, UI and tests; committed as `7441653`           |
+| M6                      | COMPLETE    | Generic checkpoints, snapshots, ledger integration, UI and tests; BR-013 reporting fields pending |
+| M7                      | NOT_STARTED | No closing tables or screens                                                                      |
+| M8                      | NOT_STARTED | Dashboard is static foundation content; no reports                                                |
+| M9                      | NOT_STARTED | No CI, branch permissions, audit log or backup drill                                              |

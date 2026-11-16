@@ -10,4 +10,5 @@ export * from './inventory.js';
 export * from './organization.js';
 export * from './production.js';
 export * from './purchase.js';
+export * from './sales-checkpoints.js';
 export * from './supplier.js';

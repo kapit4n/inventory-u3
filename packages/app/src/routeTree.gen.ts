@@ -15,6 +15,7 @@ import { Route as InventoryRouteImport } from './routes/inventory'
 import { Route as ProductionRouteImport } from './routes/production'
 import { Route as ProductsRouteImport } from './routes/products'
 import { Route as PurchasesRouteImport } from './routes/purchases'
+import { Route as SalesCheckpointsRouteImport } from './routes/sales-checkpoints'
 import { Route as SettingsRouteImport } from './routes/settings'
 
 const IndexRoute = IndexRouteImport.update({
@@ -47,6 +48,11 @@ const PurchasesRoute = PurchasesRouteImport.update({
   path: '/purchases',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SalesCheckpointsRoute = SalesCheckpointsRouteImport.update({
+  id: '/sales-checkpoints',
+  path: '/sales-checkpoints',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SettingsRoute = SettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -60,6 +66,7 @@ export interface FileRoutesByFullPath {
   '/production': typeof ProductionRoute
   '/products': typeof ProductsRoute
   '/purchases': typeof PurchasesRoute
+  '/sales-checkpoints': typeof SalesCheckpointsRoute
   '/settings': typeof SettingsRoute
 }
 export interface FileRoutesByTo {
@@ -69,6 +76,7 @@ export interface FileRoutesByTo {
   '/production': typeof ProductionRoute
   '/products': typeof ProductsRoute
   '/purchases': typeof PurchasesRoute
+  '/sales-checkpoints': typeof SalesCheckpointsRoute
   '/settings': typeof SettingsRoute
 }
 export interface FileRoutesById {
@@ -79,6 +87,7 @@ export interface FileRoutesById {
   '/production': typeof ProductionRoute
   '/products': typeof ProductsRoute
   '/purchases': typeof PurchasesRoute
+  '/sales-checkpoints': typeof SalesCheckpointsRoute
   '/settings': typeof SettingsRoute
 }
 export interface FileRouteTypes {
@@ -90,6 +99,7 @@ export interface FileRouteTypes {
     | '/production'
     | '/products'
     | '/purchases'
+    | '/sales-checkpoints'
     | '/settings'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -99,6 +109,7 @@ export interface FileRouteTypes {
     | '/production'
     | '/products'
     | '/purchases'
+    | '/sales-checkpoints'
     | '/settings'
   id:
     | '__root__'
@@ -108,6 +119,7 @@ export interface FileRouteTypes {
     | '/production'
     | '/products'
     | '/purchases'
+    | '/sales-checkpoints'
     | '/settings'
   fileRoutesById: FileRoutesById
 }
@@ -118,6 +130,7 @@ export interface RootRouteChildren {
   ProductionRoute: typeof ProductionRoute
   ProductsRoute: typeof ProductsRoute
   PurchasesRoute: typeof PurchasesRoute
+  SalesCheckpointsRoute: typeof SalesCheckpointsRoute
   SettingsRoute: typeof SettingsRoute
 }
 
@@ -165,6 +178,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PurchasesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/sales-checkpoints': {
+      id: '/sales-checkpoints'
+      path: '/sales-checkpoints'
+      fullPath: '/sales-checkpoints'
+      preLoaderRoute: typeof SalesCheckpointsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/settings': {
       id: '/settings'
       path: '/settings'
@@ -182,6 +202,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProductionRoute: ProductionRoute,
   ProductsRoute: ProductsRoute,
   PurchasesRoute: PurchasesRoute,
+  SalesCheckpointsRoute: SalesCheckpointsRoute,
   SettingsRoute: SettingsRoute,
 }
 export const routeTree = rootRouteImport

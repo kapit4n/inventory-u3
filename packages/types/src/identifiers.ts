@@ -33,6 +33,8 @@ export type ProductionBatchId = Brand<string, 'ProductionBatchId'>;
 export type ProductionInputId = Brand<string, 'ProductionInputId'>;
 export type ProductionOutputId = Brand<string, 'ProductionOutputId'>;
 export type ProductionWasteId = Brand<string, 'ProductionWasteId'>;
+export type SalesCheckpointId = Brand<string, 'SalesCheckpointId'>;
+export type SalesCheckpointItemId = Brand<string, 'SalesCheckpointItemId'>;
 
 export type OrganizationIdentifier =
   | OrganizationId
@@ -55,7 +57,9 @@ export type OrganizationIdentifier =
   | ProductionBatchId
   | ProductionInputId
   | ProductionOutputId
-  | ProductionWasteId;
+  | ProductionWasteId
+  | SalesCheckpointId
+  | SalesCheckpointItemId;
 
 export const asOrganizationId = (value: string): OrganizationId => value as OrganizationId;
 export const asUserId = (value: string): UserId => value as UserId;
@@ -82,3 +86,6 @@ export const asProductionInputId = (value: string): ProductionInputId => value a
 export const asProductionOutputId = (value: string): ProductionOutputId =>
   value as ProductionOutputId;
 export const asProductionWasteId = (value: string): ProductionWasteId => value as ProductionWasteId;
+export const asSalesCheckpointId = (value: string): SalesCheckpointId => value as SalesCheckpointId;
+export const asSalesCheckpointItemId = (value: string): SalesCheckpointItemId =>
+  value as SalesCheckpointItemId;

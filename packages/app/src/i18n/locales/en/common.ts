@@ -7,6 +7,7 @@ export const common = {
   'common.nav.inventory': 'Inventory',
   'common.nav.products': 'Products',
   'common.nav.production': 'Production',
+  'common.nav.salesCheckpoints': 'Sales',
   'common.nav.purchases': 'Purchases',
   'common.nav.settings': 'Settings',
   'common.nav.primary': 'Primary',

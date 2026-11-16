@@ -29,6 +29,7 @@ import { registerProductPresentationRoutes } from './http/routes/product-present
 import { registerProductPriceHistoryRoutes } from './http/routes/product-price-history.js';
 import { registerProductRoutes } from './http/routes/products.js';
 import { registerProductionRoutes } from './http/routes/production.js';
+import { registerSalesCheckpointRoutes } from './http/routes/sales-checkpoints.js';
 import { registerPurchaseRoutes } from './http/routes/purchases.js';
 import { registerSupplierRoutes } from './http/routes/suppliers.js';
 import { systemClock } from './infrastructure/clock/system-clock.js';
@@ -167,6 +168,18 @@ export async function buildServer(env: EnvSource = process.env): Promise<Invento
     employees: connection.repositories.employees,
     products: connection.repositories.products,
     productPresentations: connection.repositories.productPresentations,
+    measurementUnits: connection.repositories.measurementUnits,
+    unitOfWork: connection.unitOfWork,
+    clock: systemClock,
+    ids: uuidGenerator,
+  });
+
+  await registerSalesCheckpointRoutes(app, {
+    salesCheckpoints: connection.repositories.salesCheckpoints,
+    branches: connection.repositories.branches,
+    products: connection.repositories.products,
+    productPresentations: connection.repositories.productPresentations,
+    productPriceHistory: connection.repositories.productPriceHistory,
     measurementUnits: connection.repositories.measurementUnits,
     unitOfWork: connection.unitOfWork,
     clock: systemClock,

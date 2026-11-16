@@ -78,6 +78,13 @@
       "when": 1794793572292,
       "tag": "0010_wild_reavers",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1794869031037,
+      "tag": "0011_abnormal_swordsman",
+      "breakpoints": true
     }
   ]
 }

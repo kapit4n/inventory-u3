@@ -25,7 +25,9 @@ import {
   DEVELOPMENT_PASSWORD,
   DEVELOPMENT_PRODUCT_CATEGORIES,
   DEVELOPMENT_PRODUCT_PRESENTATIONS,
+  DEVELOPMENT_PRODUCTION_BATCHES,
   DEVELOPMENT_PRODUCT_PRICES,
+  DEVELOPMENT_SALES_CHECKPOINTS,
   DEVELOPMENT_PRODUCTS,
   DEVELOPMENT_STOCK_ADJUSTMENTS,
   DEVELOPMENT_STOCK_MOVEMENTS,
@@ -77,6 +79,12 @@ async function seedPostgres(db: PostgresJsDatabase<typeof pgSchema>): Promise<vo
     productCategories,
     productPresentations,
     productPriceHistory,
+    productionBatches,
+    salesCheckpointItems,
+    salesCheckpoints,
+    productionInputs,
+    productionOutputs,
+    productionWaste,
     products,
     stockAdjustments,
     stockMovements,
@@ -289,6 +297,144 @@ async function seedPostgres(db: PostgresJsDatabase<typeof pgSchema>): Promise<vo
       });
   }
 
+  for (const batch of DEVELOPMENT_PRODUCTION_BATCHES) {
+    const createdAt = new Date(batch.createdAt);
+    const updatedAt = new Date(batch.updatedAt);
+    const confirmedAt = batch.confirmedAt === undefined ? null : new Date(batch.confirmedAt);
+    const correctedAt = batch.correctedAt === undefined ? null : new Date(batch.correctedAt);
+
+    await db
+      .insert(productionBatches)
+      .values({
+        id: batch.id,
+        organizationId: DEVELOPMENT_ORGANIZATION_ID,
+        branchId: batch.branchId,
+        businessDate: batch.businessDate,
+        preparedByEmployeeId: batch.preparedByEmployeeId,
+        registeredByUserId: batch.registeredByUserId,
+        status: batch.status,
+        note: batch.note ?? null,
+        confirmedByUserId: batch.confirmedByUserId ?? null,
+        confirmedAt,
+        correctedByUserId: batch.correctedByUserId ?? null,
+        correctedAt,
+        correctionReason: batch.correctionReason ?? null,
+        createdAt,
+        updatedAt,
+      })
+      .onConflictDoNothing();
+
+    for (const [index, input] of batch.inputs.entries()) {
+      await db
+        .insert(productionInputs)
+        .values({
+          id: input.id,
+          organizationId: DEVELOPMENT_ORGANIZATION_ID,
+          batchId: batch.id,
+          productId: input.productId,
+          unitId: input.unitId,
+          quantityMilli: input.quantityMilli,
+          position: index + 1,
+          createdAt,
+        })
+        .onConflictDoNothing();
+    }
+
+    for (const [index, output] of batch.outputs.entries()) {
+      await db
+        .insert(productionOutputs)
+        .values({
+          id: output.id,
+          organizationId: DEVELOPMENT_ORGANIZATION_ID,
+          batchId: batch.id,
+          productId: output.productId,
+          presentationId: output.presentationId,
+          trayCount: output.trayCount,
+          averageWeightPerTrayGrams: output.averageWeightPerTrayGrams,
+          estimatedWeightGrams: output.estimatedWeightGrams,
+          measuredWeightGrams: output.measuredWeightGrams ?? null,
+          weightBasis: output.weightBasis,
+          position: index + 1,
+          createdAt,
+        })
+        .onConflictDoNothing();
+    }
+
+    for (const [index, waste] of batch.waste.entries()) {
+      await db
+        .insert(productionWaste)
+        .values({
+          id: waste.id,
+          organizationId: DEVELOPMENT_ORGANIZATION_ID,
+          batchId: batch.id,
+          productId: waste.productId,
+          quantityMilli: waste.quantityMilli,
+          reason: waste.reason,
+          note: waste.note ?? null,
+          position: index + 1,
+          createdAt,
+        })
+        .onConflictDoNothing();
+    }
+  }
+
+  for (const checkpoint of DEVELOPMENT_SALES_CHECKPOINTS) {
+    const createdAt = new Date(checkpoint.createdAt);
+    const updatedAt = new Date(checkpoint.updatedAt);
+    const confirmedAt =
+      checkpoint.confirmedAt === undefined ? null : new Date(checkpoint.confirmedAt);
+    const correctedAt =
+      checkpoint.correctedAt === undefined ? null : new Date(checkpoint.correctedAt);
+
+    await db
+      .insert(salesCheckpoints)
+      .values({
+        id: checkpoint.id,
+        organizationId: DEVELOPMENT_ORGANIZATION_ID,
+        branchId: checkpoint.branchId,
+        businessDate: checkpoint.businessDate,
+        period: checkpoint.period,
+        status: checkpoint.status,
+        registeredByUserId: checkpoint.registeredByUserId,
+        note: checkpoint.note ?? null,
+        confirmedByUserId: checkpoint.confirmedByUserId ?? null,
+        confirmedAt,
+        correctedByUserId: checkpoint.correctedByUserId ?? null,
+        correctedAt,
+        correctionReason: checkpoint.correctionReason ?? null,
+        createdAt,
+        updatedAt,
+      })
+      .onConflictDoNothing();
+
+    for (const [index, item] of checkpoint.items.entries()) {
+      await db
+        .insert(salesCheckpointItems)
+        .values({
+          id: item.id,
+          organizationId: DEVELOPMENT_ORGANIZATION_ID,
+          checkpointId: checkpoint.id,
+          productId: item.productId,
+          productKind: item.productKind,
+          unitId: item.unitId,
+          quantityMilli: item.quantityMilli,
+          presentationId: item.presentationId ?? null,
+          trayCount: item.trayCount ?? null,
+          averageWeightPerTrayGrams: item.averageWeightPerTrayGrams ?? null,
+          estimatedWeightGrams: item.estimatedWeightGrams ?? null,
+          measuredWeightGrams: item.measuredWeightGrams ?? null,
+          weightBasis: item.weightBasis,
+          sellingPriceAmountMinor: item.sellingPriceAmountMinor,
+          sellingPriceBasis: item.sellingPriceBasis,
+          sellingPriceCurrency: currency,
+          estimatedSalesValueMinor: item.estimatedSalesValueMinor,
+          position: index + 1,
+          createdAt,
+        })
+        .onConflictDoNothing();
+    }
+  }
+
   for (const adjustment of DEVELOPMENT_STOCK_ADJUSTMENTS) {
     const occurredAt = new Date(adjustment.occurredAt);
     await db
@@ -343,7 +489,7 @@ async function seedPostgres(db: PostgresJsDatabase<typeof pgSchema>): Promise<vo
         reason: movement.reason,
         sourceType: movement.sourceType,
         sourceId: movement.sourceId,
-        correctsMovementId: null,
+        correctsMovementId: movement.correctsMovementId ?? null,
         occurredAt,
         recordedAt: occurredAt,
         recordedByUserId: movement.recordedByUserId,
@@ -363,6 +509,12 @@ async function seedSqlite(db: BetterSQLite3Database<typeof sqliteSchema>): Promi
     productCategories,
     productPresentations,
     productPriceHistory,
+    productionBatches,
+    salesCheckpointItems,
+    salesCheckpoints,
+    productionInputs,
+    productionOutputs,
+    productionWaste,
     products,
     stockAdjustments,
     stockMovements,
@@ -575,6 +727,144 @@ async function seedSqlite(db: BetterSQLite3Database<typeof sqliteSchema>): Promi
       });
   }
 
+  for (const batch of DEVELOPMENT_PRODUCTION_BATCHES) {
+    const createdAt = new Date(batch.createdAt);
+    const updatedAt = new Date(batch.updatedAt);
+    const confirmedAt = batch.confirmedAt === undefined ? null : new Date(batch.confirmedAt);
+    const correctedAt = batch.correctedAt === undefined ? null : new Date(batch.correctedAt);
+
+    await db
+      .insert(productionBatches)
+      .values({
+        id: batch.id,
+        organizationId: DEVELOPMENT_ORGANIZATION_ID,
+        branchId: batch.branchId,
+        businessDate: batch.businessDate,
+        preparedByEmployeeId: batch.preparedByEmployeeId,
+        registeredByUserId: batch.registeredByUserId,
+        status: batch.status,
+        note: batch.note ?? null,
+        confirmedByUserId: batch.confirmedByUserId ?? null,
+        confirmedAt,
+        correctedByUserId: batch.correctedByUserId ?? null,
+        correctedAt,
+        correctionReason: batch.correctionReason ?? null,
+        createdAt,
+        updatedAt,
+      })
+      .onConflictDoNothing();
+
+    for (const [index, input] of batch.inputs.entries()) {
+      await db
+        .insert(productionInputs)
+        .values({
+          id: input.id,
+          organizationId: DEVELOPMENT_ORGANIZATION_ID,
+          batchId: batch.id,
+          productId: input.productId,
+          unitId: input.unitId,
+          quantityMilli: input.quantityMilli,
+          position: index + 1,
+          createdAt,
+        })
+        .onConflictDoNothing();
+    }
+
+    for (const [index, output] of batch.outputs.entries()) {
+      await db
+        .insert(productionOutputs)
+        .values({
+          id: output.id,
+          organizationId: DEVELOPMENT_ORGANIZATION_ID,
+          batchId: batch.id,
+          productId: output.productId,
+          presentationId: output.presentationId,
+          trayCount: output.trayCount,
+          averageWeightPerTrayGrams: output.averageWeightPerTrayGrams,
+          estimatedWeightGrams: output.estimatedWeightGrams,
+          measuredWeightGrams: output.measuredWeightGrams ?? null,
+          weightBasis: output.weightBasis,
+          position: index + 1,
+          createdAt,
+        })
+        .onConflictDoNothing();
+    }
+
+    for (const [index, waste] of batch.waste.entries()) {
+      await db
+        .insert(productionWaste)
+        .values({
+          id: waste.id,
+          organizationId: DEVELOPMENT_ORGANIZATION_ID,
+          batchId: batch.id,
+          productId: waste.productId,
+          quantityMilli: waste.quantityMilli,
+          reason: waste.reason,
+          note: waste.note ?? null,
+          position: index + 1,
+          createdAt,
+        })
+        .onConflictDoNothing();
+    }
+  }
+
+  for (const checkpoint of DEVELOPMENT_SALES_CHECKPOINTS) {
+    const createdAt = new Date(checkpoint.createdAt);
+    const updatedAt = new Date(checkpoint.updatedAt);
+    const confirmedAt =
+      checkpoint.confirmedAt === undefined ? null : new Date(checkpoint.confirmedAt);
+    const correctedAt =
+      checkpoint.correctedAt === undefined ? null : new Date(checkpoint.correctedAt);
+
+    await db
+      .insert(salesCheckpoints)
+      .values({
+        id: checkpoint.id,
+        organizationId: DEVELOPMENT_ORGANIZATION_ID,
+        branchId: checkpoint.branchId,
+        businessDate: checkpoint.businessDate,
+        period: checkpoint.period,
+        status: checkpoint.status,
+        registeredByUserId: checkpoint.registeredByUserId,
+        note: checkpoint.note ?? null,
+        confirmedByUserId: checkpoint.confirmedByUserId ?? null,
+        confirmedAt,
+        correctedByUserId: checkpoint.correctedByUserId ?? null,
+        correctedAt,
+        correctionReason: checkpoint.correctionReason ?? null,
+        createdAt,
+        updatedAt,
+      })
+      .onConflictDoNothing();
+
+    for (const [index, item] of checkpoint.items.entries()) {
+      await db
+        .insert(salesCheckpointItems)
+        .values({
+          id: item.id,
+          organizationId: DEVELOPMENT_ORGANIZATION_ID,
+          checkpointId: checkpoint.id,
+          productId: item.productId,
+          productKind: item.productKind,
+          unitId: item.unitId,
+          quantityMilli: item.quantityMilli,
+          presentationId: item.presentationId ?? null,
+          trayCount: item.trayCount ?? null,
+          averageWeightPerTrayGrams: item.averageWeightPerTrayGrams ?? null,
+          estimatedWeightGrams: item.estimatedWeightGrams ?? null,
+          measuredWeightGrams: item.measuredWeightGrams ?? null,
+          weightBasis: item.weightBasis,
+          sellingPriceAmountMinor: item.sellingPriceAmountMinor,
+          sellingPriceBasis: item.sellingPriceBasis,
+          sellingPriceCurrency: currency,
+          estimatedSalesValueMinor: item.estimatedSalesValueMinor,
+          position: index + 1,
+          createdAt,
+        })
+        .onConflictDoNothing();
+    }
+  }
+
   for (const adjustment of DEVELOPMENT_STOCK_ADJUSTMENTS) {
     const occurredAt = new Date(adjustment.occurredAt);
     await db
@@ -629,7 +919,7 @@ async function seedSqlite(db: BetterSQLite3Database<typeof sqliteSchema>): Promi
         reason: movement.reason,
         sourceType: movement.sourceType,
         sourceId: movement.sourceId,
-        correctsMovementId: null,
+        correctsMovementId: movement.correctsMovementId ?? null,
         occurredAt,
         recordedAt: occurredAt,
         recordedByUserId: movement.recordedByUserId,

@@ -19,6 +19,7 @@ import type {
   ProductPresentationId,
   ProductionBatchId,
   PurchaseId,
+  SalesCheckpointId,
   StockAdjustmentId,
   SessionId,
   SupplierId,
@@ -42,6 +43,12 @@ import type {
 } from '../production/production-batch.js';
 import type { PurchaseCorrection } from '../purchase/purchase-correction.js';
 import type { Purchase, PurchaseReceipt } from '../purchase/purchase.js';
+import type {
+  SalesCheckpoint,
+  SalesCheckpointConfirmation,
+  SalesCheckpointCorrection,
+  SalesCheckpointPeriod,
+} from '../sales-checkpoint/sales-checkpoint.js';
 import type { InventoryWaste } from '../stock/inventory-waste.js';
 import type { StockAdjustment } from '../stock/stock-adjustment.js';
 import type { StockBalance } from '../stock/stock-balance.js';
@@ -71,6 +78,7 @@ export interface Repositories {
   readonly purchases: PurchaseRepository;
   readonly purchaseCorrections: PurchaseCorrectionRepository;
   readonly productionBatches: ProductionBatchRepository;
+  readonly salesCheckpoints: SalesCheckpointRepository;
   readonly stockMovements: StockMovementRepository;
   readonly stockAdjustments: StockAdjustmentRepository;
   readonly inventoryWaste: InventoryWasteRepository;
@@ -229,6 +237,42 @@ export interface ProductionBatchRepository {
   deleteDraft(
     organizationId: OrganizationId,
     productionBatchId: ProductionBatchId,
+  ): Promise<boolean>;
+}
+
+export interface SalesCheckpointRepository {
+  findById(
+    organizationId: OrganizationId,
+    salesCheckpointId: SalesCheckpointId,
+  ): Promise<SalesCheckpoint | undefined>;
+  findByPeriod(
+    organizationId: OrganizationId,
+    branchId: BranchId,
+    businessDate: IsoDate,
+    period: SalesCheckpointPeriod,
+  ): Promise<SalesCheckpoint | undefined>;
+  listByOrganization(organizationId: OrganizationId): Promise<readonly SalesCheckpoint[]>;
+  listByBranch(
+    organizationId: OrganizationId,
+    branchId: BranchId,
+  ): Promise<readonly SalesCheckpoint[]>;
+  create(salesCheckpoint: SalesCheckpoint): Promise<SalesCheckpoint>;
+  /** Returns `undefined` when the checkpoint is not a draft in this organization. */
+  markConfirmed(
+    organizationId: OrganizationId,
+    salesCheckpointId: SalesCheckpointId,
+    confirmation: SalesCheckpointConfirmation,
+  ): Promise<SalesCheckpoint | undefined>;
+  /** Returns `undefined` when the checkpoint is not confirmed in this organization. */
+  markCorrected(
+    organizationId: OrganizationId,
+    salesCheckpointId: SalesCheckpointId,
+    correction: SalesCheckpointCorrection,
+  ): Promise<SalesCheckpoint | undefined>;
+  /** Removes a draft and its lines. Returns `false` when it is not a draft. */
+  deleteDraft(
+    organizationId: OrganizationId,
+    salesCheckpointId: SalesCheckpointId,
   ): Promise<boolean>;
 }
 

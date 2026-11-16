@@ -3,6 +3,7 @@ export const common = {
   'common.nav.inventory': 'Inventario',
   'common.nav.products': 'Productos',
   'common.nav.production': 'Producción',
+  'common.nav.salesCheckpoints': 'Ventas',
   'common.nav.purchases': 'Compras',
   'common.nav.settings': 'Configuración',
   'common.nav.primary': 'Principal',
