@@ -9,6 +9,7 @@ import { SQLiteOrganizationRepository } from './repositories/organization-reposi
 import { SQLiteProductCategoryRepository } from './repositories/product-category-repository.js';
 import { SQLiteProductPresentationRepository } from './repositories/product-presentation-repository.js';
 import { SQLiteProductPriceHistoryRepository } from './repositories/product-price-history-repository.js';
+import { SQLiteProductionBatchRepository } from './repositories/production-repository.js';
 import { SQLiteProductRepository } from './repositories/product-repository.js';
 import { SQLitePurchaseCorrectionRepository } from './repositories/purchase-correction-repository.js';
 import { SQLitePurchaseRepository } from './repositories/purchase-repository.js';
@@ -29,6 +30,7 @@ export function sqliteRepositoriesFor(db: SqliteDatabase): Repositories {
     products: new SQLiteProductRepository(db),
     productPresentations: new SQLiteProductPresentationRepository(db),
     productPriceHistory: new SQLiteProductPriceHistoryRepository(db),
+    productionBatches: new SQLiteProductionBatchRepository(db),
     purchases: new SQLitePurchaseRepository(db),
     purchaseCorrections: new SQLitePurchaseCorrectionRepository(db),
     stockMovements: new SQLiteStockMovementRepository(db),

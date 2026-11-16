@@ -52,6 +52,10 @@ The current tables are:
 | `stock_movements`       | organization and branch   | Append-only stock change with reason and source             |
 | `stock_adjustments`     | organization and branch   | Audited manual adjustment or physical-count reconciliation  |
 | `inventory_waste`       | organization and branch   | Audited positive waste quantity with reason                 |
+| `production_batches`    | organization and branch   | Prepared/registered batch with status and audit fields      |
+| `production_inputs`     | organization and batch    | Optional raw product, unit, quantity and position           |
+| `production_outputs`    | organization and batch    | Presentation, tray count, weight snapshots and basis        |
+| `production_waste`      | organization and batch    | Explicit production loss with product, quantity and reason  |
 | `users`                 | organization              | Email, password hash, role and active flag                  |
 | `sessions`              | organization and user     | Hashed opaque token, issue/expiry and revocation            |
 
@@ -89,6 +93,17 @@ sourced by `PURCHASE_CORRECTION`; manual adjustments and reconciliation write
 stores a positive `quantity_milli`, reason, note and actor/time fields. Both have
 organization/branch/occurred and organization/product indexes.
 
+`production_batches` stores branch, business date, preparer employee, registering
+user, `DRAFT | CONFIRMED | CORRECTED` status, note, creation, confirmation and
+correction actor/time fields with a required correction reason. Inputs carry the
+raw product, inventory unit, `quantity_milli` and position. Outputs carry the
+processed product, presentation, tray count, snapshotted average weight and
+estimated weight, optional measured weight and `ESTIMATED | MEASURED` basis.
+Production waste carries product, unit, positive `quantity_milli`, reason, note
+and position. Confirmation writes one net movement per affected product with
+source `PRODUCTION_BATCH`; correction writes linked `CORRECTION` movements
+(ADR 0042, TD-019).
+
 ## Migrations
 
 ```
@@ -96,7 +111,7 @@ database/migrations/          PostgreSQL migrations + journal
 database/migrations-sqlite/   SQLite migrations + journal
 ```
 
-Both journals currently contain ten entries, `0000` through `0009`; `0002` adds
+Both journals currently contain eleven entries, `0000` through `0010`; `0002` adds
 branches and the catalog, `0003` adds product kind and average weight, `0004`
 adds employees with organization and branch references, `0005` adds
 organization-wide suppliers, `0006` adds effective-dated product price history,
@@ -104,7 +119,9 @@ organization-wide suppliers, `0006` adds effective-dated product price history,
 adds the `PURCHASE_CORRECTION` source type plus the unique
 organization/purchase correction index, and `0009` converts movement quantities
 to integer thousandths, adds `stock_adjustments` and `inventory_waste`, and adds
-the branch/product movement index. M2-T4 and M2-T5 did not change the schema
+the branch/product movement index; `0010` adds the production status/weight-basis
+enums and the four production tables with their indexes. M2-T4 and M2-T5 did not
+change the schema
 because the catalog and product tables already carried the needed ownership,
 unique keys and active-state columns. The SQLite `0008` migration rebuilds
 `stock_movements` to extend its source-type `CHECK` constraint; `0009` rebuilds
@@ -137,6 +154,8 @@ empty, or write an explicit data migration and test it on a populated database.
 users and a sample fruit-and-vegetable catalogue. `database/seed.ts` writes them
 using the same password hashing implementation the API uses. Every row uses a
 fixed id, so the seed is idempotent and restores the sample data on each run.
+It also writes illustrative inventory: opening balances, waste reports and
+physical-count reconciliations linked to their ledger movements.
 
 Seeded master data:
 
@@ -148,6 +167,9 @@ Seeded master data:
 | Units         | 6 (`kg`, `unit`, `tray`, `box`, `bunch`, `bag`)                                                               |
 | Categories    | 4 (`Frutas`, `Verduras`, `Frutas y verduras preparadas`, `Hierbas aromáticas`)                                |
 | Products      | 21 raw and processed fruit, vegetable and herb products                                                       |
+| Stock         | 22 adjustments (19 opening balances and 3 reconciliations, one with no difference)                            |
+| Waste         | 5 positive waste reports                                                                                      |
+| Movements     | 26 ledger rows (21 adjustment movements and 5 waste movements; the zero-difference count posts none)          |
 | Presentations | 6 trays for the processed products                                                                            |
 | Price history | 27 effective-dated selling-price rows (current prices from `2026-11-01`, some earlier rows from `2026-06-01`) |
 

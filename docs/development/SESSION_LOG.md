@@ -1978,8 +1978,9 @@ and continuity documentation.
 
 ### Pending work
 
-- M4 is complete but not committed; commit only with explicit authorization.
-- Start M5 production after the M4 commit: batches, preparer/operator, tray
+- M4 was committed as `8f5f326 feat: add branch inventory with adjustments and
+reconciliation`; no M4 work remains pending.
+- Start M5 production: batches, preparer/operator, tray
   counts, average-weight snapshots, optional raw inputs, finished outputs and
   waste, all writing to the M4 ledger.
 
@@ -1988,3 +1989,114 @@ and continuity documentation.
 Read `AGENTS.md`, `PROJECT_OVERVIEW.md`, `IMPLEMENTATION_PROGRESS.md`,
 `CURRENT_TASK.md`, the M5 roadmap section and BQ-11/BQ-12 before changing
 production code. Do not start sales checkpoints or closing work.
+
+## Session 19 — 2026-11-15 — M5 branch production
+
+### Objective
+
+Implement M5 end to end on top of the M4 ledger: branch production batches with
+preparer/operator identity, tray counts, immutable weight snapshots, optional raw
+inputs and measured weight, explicit waste, API/client/UI, dual-engine tests,
+browser coverage and continuity documentation.
+
+### Work completed
+
+- Accepted ADR 0042 / TD-019: output lines snapshot the presentation, average
+  weight per tray and estimated weight; confirmation posts one net ledger
+  movement per product; a confirmed batch can be fully reversed once through an
+  audited correction.
+- Added `ProductionBatch`, `ProductionInput`, `ProductionOutput` and
+  `ProductionWaste` domain types, statuses, weight bases and factories.
+- Added `ProductionBatchRepository` with PostgreSQL and SQLite Drizzle
+  implementations and registrations.
+- Added production enums, tables, indexes and migrations `0010` on both engines.
+- Added validation schemas, confirmation/correction use cases and six
+  authenticated REST endpoints.
+- Added typed API-client functions and tests, React Query hooks, `/production`
+  with a branch filter, sidebar navigation, batch detail, create, confirm,
+  correct and discard dialogs and English/Spanish copy.
+- Added domain tests, a dual-engine production integration file, API-client
+  tests, component tests and four Playwright specs.
+- Fixed production form validation so blank default input/output rows do not
+  block submission, while partial lines and a missing waste reason still fail.
+- Fixed UI error mapping: the API client only exposes `DOMAIN_RULE_VIOLATION`
+  for domain refusals, so stock and invalid-state messages are chosen from the
+  error details.
+- Updated ADR/TD, workflow, roadmap, progress, report, overview and state docs.
+
+### Files changed
+
+- `packages/domain/src/production/*`, `packages/domain/src/ports/index.ts`
+- `packages/types/src/identifiers.ts`
+- `database/schema/production.ts`, `database/schema/sqlite/production.ts`,
+  enum/exports, migrations `0010` and both journals/snapshots
+- `apps/api/src/infrastructure/persistence/{repositories,sqlite/repositories}/production-repository.ts`,
+  both registries
+- `apps/api/src/application/production/`, `apps/api/src/http/routes/production.ts`,
+  `apps/api/src/app.ts`
+- `packages/validation/src/production/`, `packages/api-client/src/production.ts`
+  and its test
+- `packages/app/src/features/production/*`, route tree, sidebar, i18n catalogues
+- `apps/api/test/production.integration.test.ts`,
+  `packages/app/src/features/production/components/production-page.test.tsx`,
+  `e2e/web/production.spec.ts`
+- `docs/decisions/0042-production-snapshots-drive-the-stock-ledger.md`,
+  `docs/project/TECHNICAL_DECISIONS.md`, `docs/workflows/PRODUCTION_WORKFLOW.md`
+  and the continuity documents listed above
+
+### Technical decisions
+
+- Output weight is `measuredWeightGrams ?? estimatedWeightGrams`; grams map 1:1
+  to milli-kilograms.
+- Confirmation aggregates net deltas per product, refuses negative stock, and
+  writes one movement per affected product with source `PRODUCTION_BATCH`.
+- Inputs require active `RAW` products; outputs require active `PROCESSED`
+  products; waste may reference any active product.
+- At least one line across inputs/outputs/waste is required. Input-only and
+  waste-only batches are valid in the domain even though the normal workflow
+  produces finished trays.
+- Corrections are full reversals linked by `correctsMovementId`; one correction
+  per batch. Draft discard is a hard delete.
+- Production stores quantities and weights, not prices.
+
+### Validation
+
+- `pnpm run format:check` — PASS.
+- `pnpm run typecheck` — PASS, 12/12 tasks.
+- `pnpm run lint` — PASS, 12/12 tasks and `BOUNDARY GUARD OK`.
+- `pnpm run guard:boundaries` — PASS.
+- `pnpm run test` — PASS, 12/12 tasks; 385 passed and 13 skipped.
+- `TEST_DATABASE_URL= pnpm --filter @inventory-u3/api run test:integration` —
+  PASS, 14 files, 90 passed and 13 skipped.
+- `pnpm run build` — PASS, 5/5 tasks; Vite chunk-size warnings only.
+- `pnpm run test:e2e` — PASS, 40 Chromium tests, including four production
+  specs.
+- PostgreSQL integration cases were skipped because no server is available
+  (SI-06), not passed.
+
+### Problems found
+
+- The first production component assertion expected `2 trays · 1 kg`; the screen
+  renders separate cells as `2 · 1.000 kg`, so the assertion was corrected.
+- The first E2E correction assertion used the wrong copy; it now matches the
+  dialog description exactly.
+- A full parallel E2E run exposed a strict-mode collision on `getByText('Draft')`
+  because the page also shows a draft-hint paragraph. Status assertions are now
+  scoped to the batch row.
+- The production form originally required non-empty zod strings on default blank
+  rows, which silently blocked submission; the schema now validates only rows
+  that contain data.
+- `ApiClientError` does not expose `INVALID_STATE` or `INSUFFICIENT_STOCK`; UI
+  code distinguishes them through `DOMAIN_RULE_VIOLATION` and error details.
+
+### Pending work
+
+- Commit M5 after explicit authorization.
+- Run the PostgreSQL half of the integration suite on a machine with a server.
+- Resolve BR-013 before starting M6 sales checkpoints.
+
+### Next session
+
+Read `AGENTS.md`, `PROJECT_OVERVIEW.md`, `IMPLEMENTATION_PROGRESS.md`,
+`CURRENT_TASK.md` and the M6 roadmap section. Do not start M6 until BR-013 is
+resolved.

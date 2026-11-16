@@ -75,6 +75,8 @@ The current specs cover:
   explicit receiving, and the audited correction dialog on `/purchases`
 - branch stock balances and movement history on `/inventory`, plus adjustment,
   waste and reconciliation payloads
+- production creation, confirmation, correction and draft discard on
+  `/production`
 
 The mock API dispatches by method and pathname and fails loudly for unknown
 paths, so a wrong base URL does not silently reach the network.
@@ -89,9 +91,10 @@ have the same entry count.
 
 ## Current gaps
 
-- No production, sales-checkpoint or closing tests exist because those features
-  do not exist.
+- No sales-checkpoint or closing tests exist because those features do not
+  exist.
 - No branch-scoped authorization tests exist until branch users are implemented.
-- E2E covers master data, products, presentations, prices, purchases and branch
-  inventory; the reusable branch selector still has no dedicated component test.
+- E2E covers master data, products, presentations, prices, purchases, branch
+  inventory and production; the reusable branch selector still has no dedicated
+  component test.
 - There is no CI workflow; the commands above are run locally.

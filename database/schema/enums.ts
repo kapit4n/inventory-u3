@@ -11,6 +11,8 @@ import {
   ORGANIZATION_ROLES,
   PRODUCT_KINDS,
   PRODUCT_PRICE_BASES,
+  PRODUCTION_STATUSES,
+  PRODUCTION_WEIGHT_BASES,
   PURCHASE_STATUSES,
   STOCK_ADJUSTMENT_KINDS,
   STOCK_MOVEMENT_REASONS,
@@ -21,6 +23,8 @@ export const organizationRoleEnum = pgEnum('organization_role', ORGANIZATION_ROL
 export const productKindEnum = pgEnum('product_kind', PRODUCT_KINDS);
 export const productPriceBasisEnum = pgEnum('product_price_basis', PRODUCT_PRICE_BASES);
 export const purchaseStatusEnum = pgEnum('purchase_status', PURCHASE_STATUSES);
+export const productionStatusEnum = pgEnum('production_status', PRODUCTION_STATUSES);
+export const productionWeightBasisEnum = pgEnum('production_weight_basis', PRODUCTION_WEIGHT_BASES);
 export const stockAdjustmentKindEnum = pgEnum('stock_adjustment_kind', STOCK_ADJUSTMENT_KINDS);
 export const stockMovementReasonEnum = pgEnum('stock_movement_reason', STOCK_MOVEMENT_REASONS);
 export const stockMovementSourceTypeEnum = pgEnum(
@@ -33,6 +37,8 @@ export const DATABASE_ENUM_VALUES = {
   productKind: PRODUCT_KINDS,
   productPriceBasis: PRODUCT_PRICE_BASES,
   purchaseStatus: PURCHASE_STATUSES,
+  productionStatus: PRODUCTION_STATUSES,
+  productionWeightBasis: PRODUCTION_WEIGHT_BASES,
   stockAdjustmentKind: STOCK_ADJUSTMENT_KINDS,
   stockMovementReason: STOCK_MOVEMENT_REASONS,
   stockMovementSourceType: STOCK_MOVEMENT_SOURCE_TYPES,

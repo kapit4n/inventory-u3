@@ -138,8 +138,11 @@ one supplier, immutable items, captured currency, status and actor/timestamp
 evidence; corrections are audited full reversals (TD-017). `stock_movements` is
 the persisted append-only exact-thousandth ledger written by receiving,
 correction, adjustment, waste and reconciliation; `StockBalance` is derived from
-it and is not persisted (ADR 0040, ADR 0041). Estimated/measured weight snapshots, production and sales tables do
-not exist yet. Every operational row carries organization and branch ownership.
+it and is not persisted (ADR 0040, ADR 0041). Production batches snapshot the
+presentation, average weight, estimated weight and optional measured weight, with
+optional raw inputs and explicit waste; confirmation posts net movements and
+correction posts linked reversals (ADR 0042, TD-019). Sales tables do not exist
+yet. Every operational row carries organization and branch ownership.
 
 ## 7. Frontend architecture
 
@@ -152,7 +155,7 @@ not exist yet. Every operational row carries organization and branch ownership.
 - The platform abstraction (`packages/app/src/platform`) hides Tauri/OS
   capabilities. Features never import Tauri.
 - Current routes: `/` (redirect), `/dashboard`, `/products`, `/purchases`,
-  `/inventory` (placeholder), `/settings`.
+  `/inventory`, `/production`, `/settings`.
 - The `/products` screen contains product list/create/edit, the presentation
   editor for processed products, and an append-only selling-price history dialog
   readable by every role and writable by administrators. `/purchases` contains

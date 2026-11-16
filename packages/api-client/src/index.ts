@@ -47,4 +47,12 @@ export {
   listPurchases,
   receivePurchase,
 } from './purchases.js';
+export {
+  confirmProductionBatch,
+  correctProductionBatch,
+  createProductionBatch,
+  discardProductionBatch,
+  getProductionBatch,
+  listProductionBatches,
+} from './production.js';
 export { createSupplier, listSuppliers, updateSupplier } from './suppliers.js';

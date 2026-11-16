@@ -29,6 +29,10 @@ export type PurchaseItemId = Brand<string, 'PurchaseItemId'>;
 export type PurchaseCorrectionId = Brand<string, 'PurchaseCorrectionId'>;
 export type StockAdjustmentId = Brand<string, 'StockAdjustmentId'>;
 export type InventoryWasteId = Brand<string, 'InventoryWasteId'>;
+export type ProductionBatchId = Brand<string, 'ProductionBatchId'>;
+export type ProductionInputId = Brand<string, 'ProductionInputId'>;
+export type ProductionOutputId = Brand<string, 'ProductionOutputId'>;
+export type ProductionWasteId = Brand<string, 'ProductionWasteId'>;
 
 export type OrganizationIdentifier =
   | OrganizationId
@@ -47,7 +51,11 @@ export type OrganizationIdentifier =
   | PurchaseItemId
   | PurchaseCorrectionId
   | StockAdjustmentId
-  | InventoryWasteId;
+  | InventoryWasteId
+  | ProductionBatchId
+  | ProductionInputId
+  | ProductionOutputId
+  | ProductionWasteId;
 
 export const asOrganizationId = (value: string): OrganizationId => value as OrganizationId;
 export const asUserId = (value: string): UserId => value as UserId;
@@ -69,3 +77,8 @@ export const asPurchaseCorrectionId = (value: string): PurchaseCorrectionId =>
   value as PurchaseCorrectionId;
 export const asStockAdjustmentId = (value: string): StockAdjustmentId => value as StockAdjustmentId;
 export const asInventoryWasteId = (value: string): InventoryWasteId => value as InventoryWasteId;
+export const asProductionBatchId = (value: string): ProductionBatchId => value as ProductionBatchId;
+export const asProductionInputId = (value: string): ProductionInputId => value as ProductionInputId;
+export const asProductionOutputId = (value: string): ProductionOutputId =>
+  value as ProductionOutputId;
+export const asProductionWasteId = (value: string): ProductionWasteId => value as ProductionWasteId;

@@ -18,6 +18,7 @@ import {
   DEVELOPMENT_BRANCHES,
   DEVELOPMENT_CURRENCY,
   DEVELOPMENT_EMPLOYEES,
+  DEVELOPMENT_INVENTORY_WASTE,
   DEVELOPMENT_MEASUREMENT_UNITS,
   DEVELOPMENT_ORGANIZATION_ID,
   DEVELOPMENT_ORGANIZATION_NAME,
@@ -26,6 +27,8 @@ import {
   DEVELOPMENT_PRODUCT_PRESENTATIONS,
   DEVELOPMENT_PRODUCT_PRICES,
   DEVELOPMENT_PRODUCTS,
+  DEVELOPMENT_STOCK_ADJUSTMENTS,
+  DEVELOPMENT_STOCK_MOVEMENTS,
   DEVELOPMENT_SUPPLIERS,
   DEVELOPMENT_TIMEZONE,
   DEVELOPMENT_USERS,
@@ -68,12 +71,15 @@ async function seedPostgres(db: PostgresJsDatabase<typeof pgSchema>): Promise<vo
   const {
     branches,
     employees,
+    inventoryWaste,
     measurementUnits,
     organizations,
     productCategories,
     productPresentations,
     productPriceHistory,
     products,
+    stockAdjustments,
+    stockMovements,
     suppliers,
     users,
   } = pgSchema;
@@ -282,18 +288,84 @@ async function seedPostgres(db: PostgresJsDatabase<typeof pgSchema>): Promise<vo
         },
       });
   }
+
+  for (const adjustment of DEVELOPMENT_STOCK_ADJUSTMENTS) {
+    const occurredAt = new Date(adjustment.occurredAt);
+    await db
+      .insert(stockAdjustments)
+      .values({
+        id: adjustment.id,
+        organizationId: DEVELOPMENT_ORGANIZATION_ID,
+        branchId: adjustment.branchId,
+        productId: adjustment.productId,
+        kind: adjustment.kind,
+        quantityDeltaMilli: adjustment.quantityDeltaMilli,
+        reason: adjustment.reason,
+        expectedQuantityMilli: adjustment.expectedQuantityMilli ?? null,
+        countedQuantityMilli: adjustment.countedQuantityMilli ?? null,
+        note: adjustment.note ?? null,
+        occurredAt,
+        recordedAt: occurredAt,
+        recordedByUserId: adjustment.recordedByUserId,
+      })
+      .onConflictDoNothing();
+  }
+
+  for (const waste of DEVELOPMENT_INVENTORY_WASTE) {
+    const occurredAt = new Date(waste.occurredAt);
+    await db
+      .insert(inventoryWaste)
+      .values({
+        id: waste.id,
+        organizationId: DEVELOPMENT_ORGANIZATION_ID,
+        branchId: waste.branchId,
+        productId: waste.productId,
+        quantityMilli: waste.quantityMilli,
+        reason: waste.reason,
+        note: waste.note ?? null,
+        occurredAt,
+        recordedAt: occurredAt,
+        recordedByUserId: waste.recordedByUserId,
+      })
+      .onConflictDoNothing();
+  }
+
+  for (const movement of DEVELOPMENT_STOCK_MOVEMENTS) {
+    const occurredAt = new Date(movement.occurredAt);
+    await db
+      .insert(stockMovements)
+      .values({
+        id: movement.id,
+        organizationId: DEVELOPMENT_ORGANIZATION_ID,
+        branchId: movement.branchId,
+        productId: movement.productId,
+        quantityDeltaMilli: movement.quantityDeltaMilli,
+        reason: movement.reason,
+        sourceType: movement.sourceType,
+        sourceId: movement.sourceId,
+        correctsMovementId: null,
+        occurredAt,
+        recordedAt: occurredAt,
+        recordedByUserId: movement.recordedByUserId,
+        note: movement.note ?? null,
+      })
+      .onConflictDoNothing();
+  }
 }
 
 async function seedSqlite(db: BetterSQLite3Database<typeof sqliteSchema>): Promise<void> {
   const {
     branches,
     employees,
+    inventoryWaste,
     measurementUnits,
     organizations,
     productCategories,
     productPresentations,
     productPriceHistory,
     products,
+    stockAdjustments,
+    stockMovements,
     suppliers,
     users,
   } = sqliteSchema;
@@ -501,6 +573,69 @@ async function seedSqlite(db: BetterSQLite3Database<typeof sqliteSchema>): Promi
           effectiveFrom: price.effectiveFrom,
         },
       });
+  }
+
+  for (const adjustment of DEVELOPMENT_STOCK_ADJUSTMENTS) {
+    const occurredAt = new Date(adjustment.occurredAt);
+    await db
+      .insert(stockAdjustments)
+      .values({
+        id: adjustment.id,
+        organizationId: DEVELOPMENT_ORGANIZATION_ID,
+        branchId: adjustment.branchId,
+        productId: adjustment.productId,
+        kind: adjustment.kind,
+        quantityDeltaMilli: adjustment.quantityDeltaMilli,
+        reason: adjustment.reason,
+        expectedQuantityMilli: adjustment.expectedQuantityMilli ?? null,
+        countedQuantityMilli: adjustment.countedQuantityMilli ?? null,
+        note: adjustment.note ?? null,
+        occurredAt,
+        recordedAt: occurredAt,
+        recordedByUserId: adjustment.recordedByUserId,
+      })
+      .onConflictDoNothing();
+  }
+
+  for (const waste of DEVELOPMENT_INVENTORY_WASTE) {
+    const occurredAt = new Date(waste.occurredAt);
+    await db
+      .insert(inventoryWaste)
+      .values({
+        id: waste.id,
+        organizationId: DEVELOPMENT_ORGANIZATION_ID,
+        branchId: waste.branchId,
+        productId: waste.productId,
+        quantityMilli: waste.quantityMilli,
+        reason: waste.reason,
+        note: waste.note ?? null,
+        occurredAt,
+        recordedAt: occurredAt,
+        recordedByUserId: waste.recordedByUserId,
+      })
+      .onConflictDoNothing();
+  }
+
+  for (const movement of DEVELOPMENT_STOCK_MOVEMENTS) {
+    const occurredAt = new Date(movement.occurredAt);
+    await db
+      .insert(stockMovements)
+      .values({
+        id: movement.id,
+        organizationId: DEVELOPMENT_ORGANIZATION_ID,
+        branchId: movement.branchId,
+        productId: movement.productId,
+        quantityDeltaMilli: movement.quantityDeltaMilli,
+        reason: movement.reason,
+        sourceType: movement.sourceType,
+        sourceId: movement.sourceId,
+        correctsMovementId: null,
+        occurredAt,
+        recordedAt: occurredAt,
+        recordedByUserId: movement.recordedByUserId,
+        note: movement.note ?? null,
+      })
+      .onConflictDoNothing();
   }
 }
 

@@ -7,22 +7,30 @@
 
 | Field                  | Value                                                            |
 | ---------------------- | ---------------------------------------------------------------- |
-| Current milestone      | M5 — Production (M4 complete, awaiting commit)                   |
-| Current task           | M4 complete; M5 not started                                      |
-| Overall project status | M4 branch inventory complete, including browser coverage         |
-| Completed milestones   | M1, M2, M3 and M4; the foundation prerequisite is also complete  |
-| In-progress milestones | None; M5 is the next milestone                                   |
+| Current milestone      | M5 — Production (complete in the working tree; pending commit)   |
+| Current task           | M5 verification and documentation closeout                       |
+| Overall project status | M5 production complete in the working tree; pending commit       |
+| Completed milestones   | A prerequisite, M1, M2, M3, M4 and M5 (working tree)             |
+| In-progress milestones | None; M5 closeout verification is in progress                    |
 | Blocked milestones     | M6 finalization is blocked on BR-013 (WhatsApp reporting format) |
-| Pending milestones     | M5, M6, M7, M8, M9                                               |
-| Last verified commit   | `c86c6c5` (M3 documentation closeout)                            |
+| Pending milestones     | M6, M7, M8, M9                                                   |
+| Last verified commit   | `8f5f326` (M4 branch inventory)                                  |
 | Last update date       | 2026-11-15                                                       |
-| Next recommended task  | Commit M4, then start M5 production                              |
+| Next recommended task  | Finish M5 verification, then commit after authorization          |
 
 ### Working tree at the time of this update
 
-M4 adds branch inventory on top of the M3 movement ledger. A branch/product
-balance is derived by summing its movements; no `stock_balances` cache table
-exists (ADR 0041, TD-018). Quantities are exact integer thousandths everywhere.
+M5 adds branch production on top of the M4 ledger. Batches record the preparer,
+registering operator, business date, tray counts, average-weight snapshots,
+optional measured weight, optional raw inputs and explicit waste. Confirmation
+appends one net movement per product and refuses negative stock; a confirmed
+batch can be fully reversed once through an audited correction. The `/production`
+screen, API, typed client, dual-engine persistence and tests are implemented.
+See ADR 0042 and TD-019.
+
+M4 remains the inventory foundation: a branch/product balance is derived by
+summing its movements; no `stock_balances` cache table exists (ADR 0041,
+TD-018). Quantities are exact integer thousandths everywhere.
 Operators can record signed manual adjustments, positive waste and physical
 counts; reconciliation stores expected and counted quantities and writes a
 movement only for a non-zero difference. Any operation that would leave negative
@@ -469,13 +477,13 @@ and `docs/workflows/PURCHASE_WORKFLOW.md`.
 
 ### Next action
 
-M3 is complete and committed as `13b8fcd`. Start M4 branch inventory.
+M4 is complete and committed as `8f5f326`. Start M5 production.
 
 ---
 
 ## M4 — Branch Inventory
 
-**Status: COMPLETED (awaiting commit)**
+**Status: COMPLETED and committed as `8f5f326`**
 
 ### Completed
 
@@ -500,7 +508,7 @@ M3 is complete and committed as `13b8fcd`. Start M4 branch inventory.
 
 ### Pending
 
-- [ ] Commit M4 when authorized.
+- [x] M4 committed as `8f5f326`.
 
 ### Validation
 
@@ -524,39 +532,71 @@ stock is a positive manual adjustment.
 
 ### Next action
 
-Commit M4, then start M5 production on top of the ledger.
+Start M5 production on top of the ledger.
 
 ---
 
 ## M5 — Production
 
-**Status: NOT_STARTED**
+**Status: COMPLETE in the working tree (pending commit).**
 
 ### Completed
 
-- [ ] Nothing.
+- [x] Production batch, input, output and waste domain model with
+      `DRAFT | CONFIRMED | CORRECTED` transitions.
+- [x] Employee preparer and registering operator identity.
+- [x] Tray count, average-weight snapshot, estimated weight and optional measured
+      weight with `ESTIMATED | MEASURED` basis.
+- [x] Optional raw consumption; at least one line across inputs, outputs or waste.
+- [x] Waste/losses as a separate line affecting branch stock.
+- [x] Confirmation appends one net movement per product to the M4 ledger and
+      refuses negative stock.
+- [x] Audited full correction with linked `CORRECTION` movements and a required
+      reason; draft discard via `DELETE`.
+- [x] PostgreSQL and SQLite schemas, migrations, repositories and registries.
+- [x] Validation schemas, use cases and six authenticated REST endpoints.
+- [x] Typed API client, React Query hooks, `/production` UI, dialogs and
+      English/Spanish copy.
+- [x] Domain, dual-engine integration, client, component and Playwright coverage.
+- [x] ADR 0042, TD-019, workflow, roadmap and continuity documentation.
 
 ### Pending
 
-- [ ] Batch/input/output model.
-- [ ] Employee preparer and operator identity.
-- [ ] Tray count, average-weight snapshot and estimated weight.
-- [ ] Optional raw consumption.
-- [ ] Waste/losses.
-- [ ] Inventory integration.
-- [ ] UI and tests.
+- [ ] Commit M5 after explicit authorization.
+- [ ] Execute the PostgreSQL half of the integration suite on a machine with a
+      server; it skips locally (SI-06).
 
 ### Validation
 
-No implementation and no tests.
+- `pnpm run format:check` — PASS.
+- `pnpm run typecheck` — PASS, 12/12 tasks.
+- `pnpm run lint` — PASS, 12/12 tasks and `BOUNDARY GUARD OK`.
+- `pnpm run guard:boundaries` — PASS.
+- `pnpm run test` — PASS, 12/12 tasks; 385 passed and 13 skipped.
+- `TEST_DATABASE_URL= pnpm --filter @inventory-u3/api run test:integration` —
+  PASS, 14 files, 90 passed and 13 skipped.
+- `pnpm run build` — PASS, 5/5 tasks; Vite chunk-size warnings only.
+- `pnpm run test:e2e` — PASS, 40 Chromium tests, including four production specs.
+- PostgreSQL integration cases were skipped because no server is available
+  (SI-06), not passed.
+- `apps/api/test/production.integration.test.ts` covers creation and ledger
+  equality, branch filtering, measured weight, correction audit/reversal,
+  duplicate confirmation, insufficient stock, draft discard, invalid references
+  and 404.
+- Component and Playwright tests cover form payloads, confirmation, correction
+  and discard.
 
 ### Notes
 
-Raw consumption is optional pending business confirmation.
+Raw consumption is optional. An input-only batch is valid in the domain even
+though operators normally register outputs. Production stores quantities and
+weights, not prices; valuation remains open (BQ-11, BQ-12). See ADR 0042 and
+TD-019.
 
 ### Next action
 
-Start after M1, M2 and M4.
+Finish verification and commit after authorization; then start M6 sales
+checkpoints only after BR-013 is resolved.
 
 ---
 

@@ -545,3 +545,291 @@ export const DEVELOPMENT_PRODUCT_PRICES: readonly DevelopmentProductPrice[] = [
     effectiveFrom: '2026-06-01',
   },
 ] as const;
+
+/** The seeded administrator records the illustrative inventory movements. */
+const DEVELOPMENT_ADMIN_USER_ID = DEVELOPMENT_USERS[0].id;
+
+const OPENING_STOCK_AT = '2026-11-10T12:00:00.000Z';
+const INVENTORY_WASTE_AT = '2026-11-13T18:30:00.000Z';
+const RECONCILIATION_AT = '2026-11-14T20:00:00.000Z';
+
+export interface DevelopmentStockAdjustment {
+  readonly id: string;
+  readonly branchId: string;
+  readonly productId: string;
+  readonly kind: 'MANUAL' | 'RECONCILIATION';
+  readonly quantityDeltaMilli: number;
+  readonly reason: string;
+  readonly expectedQuantityMilli?: number;
+  readonly countedQuantityMilli?: number;
+  readonly note?: string;
+  readonly occurredAt: string;
+  readonly recordedByUserId: string;
+}
+
+export interface DevelopmentInventoryWaste {
+  readonly id: string;
+  readonly branchId: string;
+  readonly productId: string;
+  readonly quantityMilli: number;
+  readonly reason: string;
+  readonly note?: string;
+  readonly occurredAt: string;
+  readonly recordedByUserId: string;
+}
+
+export interface DevelopmentStockMovement {
+  readonly id: string;
+  readonly branchId: string;
+  readonly productId: string;
+  readonly quantityDeltaMilli: number;
+  readonly reason: 'ADJUSTMENT' | 'WASTE';
+  readonly sourceType: 'ADJUSTMENT' | 'WASTE_REPORT';
+  readonly sourceId: string;
+  readonly occurredAt: string;
+  readonly recordedByUserId: string;
+  readonly note?: string;
+}
+
+interface OpeningStockLine {
+  readonly branchId: string;
+  readonly productId: string;
+  readonly quantityMilli: number;
+}
+
+const DEVELOPMENT_OPENING_STOCK: readonly OpeningStockLine[] = [
+  {
+    branchId: '22222222-2222-4222-8222-000000000001',
+    productId: '77777777-7777-4777-8777-000000000001',
+    quantityMilli: 45_500,
+  },
+  {
+    branchId: '22222222-2222-4222-8222-000000000001',
+    productId: '77777777-7777-4777-8777-000000000002',
+    quantityMilli: 32_000,
+  },
+  {
+    branchId: '22222222-2222-4222-8222-000000000001',
+    productId: '77777777-7777-4777-8777-000000000003',
+    quantityMilli: 28_750,
+  },
+  {
+    branchId: '22222222-2222-4222-8222-000000000001',
+    productId: '77777777-7777-4777-8777-000000000009',
+    quantityMilli: 60_000,
+  },
+  {
+    branchId: '22222222-2222-4222-8222-000000000001',
+    productId: '77777777-7777-4777-8777-000000000011',
+    quantityMilli: 24_500,
+  },
+  {
+    branchId: '22222222-2222-4222-8222-000000000001',
+    productId: '77777777-7777-4777-8777-000000000013',
+    quantityMilli: 40_000,
+  },
+  {
+    branchId: '22222222-2222-4222-8222-000000000001',
+    productId: '77777777-7777-4777-8777-000000000019',
+    quantityMilli: 12_500,
+  },
+  {
+    branchId: '22222222-2222-4222-8222-000000000002',
+    productId: '77777777-7777-4777-8777-000000000001',
+    quantityMilli: 18_000,
+  },
+  {
+    branchId: '22222222-2222-4222-8222-000000000002',
+    productId: '77777777-7777-4777-8777-000000000004',
+    quantityMilli: 9_500,
+  },
+  {
+    branchId: '22222222-2222-4222-8222-000000000002',
+    productId: '77777777-7777-4777-8777-000000000005',
+    quantityMilli: 6_250,
+  },
+  {
+    branchId: '22222222-2222-4222-8222-000000000002',
+    productId: '77777777-7777-4777-8777-000000000011',
+    quantityMilli: 14_000,
+  },
+  {
+    branchId: '22222222-2222-4222-8222-000000000002',
+    productId: '77777777-7777-4777-8777-000000000012',
+    quantityMilli: 19_750,
+  },
+  {
+    branchId: '22222222-2222-4222-8222-000000000002',
+    productId: '77777777-7777-4777-8777-000000000020',
+    quantityMilli: 7_500,
+  },
+  {
+    branchId: '22222222-2222-4222-8222-000000000003',
+    productId: '77777777-7777-4777-8777-000000000007',
+    quantityMilli: 16_000,
+  },
+  {
+    branchId: '22222222-2222-4222-8222-000000000003',
+    productId: '77777777-7777-4777-8777-000000000006',
+    quantityMilli: 11_000,
+  },
+  {
+    branchId: '22222222-2222-4222-8222-000000000003',
+    productId: '77777777-7777-4777-8777-000000000010',
+    quantityMilli: 22_500,
+  },
+  {
+    branchId: '22222222-2222-4222-8222-000000000003',
+    productId: '77777777-7777-4777-8777-000000000014',
+    quantityMilli: 8_000,
+  },
+  {
+    branchId: '22222222-2222-4222-8222-000000000003',
+    productId: '77777777-7777-4777-8777-000000000017',
+    quantityMilli: 30_000,
+  },
+  {
+    branchId: '22222222-2222-4222-8222-000000000003',
+    productId: '77777777-7777-4777-8777-000000000021',
+    quantityMilli: 5_500,
+  },
+];
+
+const DEVELOPMENT_STOCK_RECONCILIATIONS: readonly DevelopmentStockAdjustment[] = [
+  {
+    id: 'a2000000-0000-4000-8000-000000000001',
+    branchId: '22222222-2222-4222-8222-000000000001',
+    productId: '77777777-7777-4777-8777-000000000009',
+    kind: 'RECONCILIATION',
+    quantityDeltaMilli: -1_250,
+    reason: 'Weekly physical count',
+    expectedQuantityMilli: 60_000,
+    countedQuantityMilli: 58_750,
+    note: 'The count found 1.25 kg less than the ledger',
+    occurredAt: RECONCILIATION_AT,
+    recordedByUserId: DEVELOPMENT_ADMIN_USER_ID,
+  },
+  {
+    id: 'a2000000-0000-4000-8000-000000000002',
+    branchId: '22222222-2222-4222-8222-000000000002',
+    productId: '77777777-7777-4777-8777-000000000012',
+    kind: 'RECONCILIATION',
+    quantityDeltaMilli: 500,
+    reason: 'Weekly physical count',
+    expectedQuantityMilli: 19_750,
+    countedQuantityMilli: 20_250,
+    note: 'The count found 0.5 kg more than the ledger',
+    occurredAt: RECONCILIATION_AT,
+    recordedByUserId: DEVELOPMENT_ADMIN_USER_ID,
+  },
+  {
+    id: 'a2000000-0000-4000-8000-000000000003',
+    branchId: '22222222-2222-4222-8222-000000000003',
+    productId: '77777777-7777-4777-8777-000000000017',
+    kind: 'RECONCILIATION',
+    quantityDeltaMilli: 0,
+    reason: 'Weekly physical count',
+    expectedQuantityMilli: 30_000,
+    countedQuantityMilli: 30_000,
+    note: 'The count matched the ledger',
+    occurredAt: RECONCILIATION_AT,
+    recordedByUserId: DEVELOPMENT_ADMIN_USER_ID,
+  },
+];
+
+export const DEVELOPMENT_STOCK_ADJUSTMENTS: readonly DevelopmentStockAdjustment[] = [
+  ...DEVELOPMENT_OPENING_STOCK.map((line, index) => ({
+    id: `a1000000-0000-4000-8000-${String(index + 1).padStart(12, '0')}`,
+    branchId: line.branchId,
+    productId: line.productId,
+    kind: 'MANUAL' as const,
+    quantityDeltaMilli: line.quantityMilli,
+    reason: 'Opening stock',
+    note: 'Illustrative development opening balance',
+    occurredAt: OPENING_STOCK_AT,
+    recordedByUserId: DEVELOPMENT_ADMIN_USER_ID,
+  })),
+  ...DEVELOPMENT_STOCK_RECONCILIATIONS,
+];
+
+export const DEVELOPMENT_INVENTORY_WASTE: readonly DevelopmentInventoryWaste[] = [
+  {
+    id: 'a3000000-0000-4000-8000-000000000001',
+    branchId: '22222222-2222-4222-8222-000000000001',
+    productId: '77777777-7777-4777-8777-000000000002',
+    quantityMilli: 2_500,
+    reason: 'Damaged during handling',
+    note: 'Bruised bananas discarded before opening',
+    occurredAt: INVENTORY_WASTE_AT,
+    recordedByUserId: DEVELOPMENT_ADMIN_USER_ID,
+  },
+  {
+    id: 'a3000000-0000-4000-8000-000000000002',
+    branchId: '22222222-2222-4222-8222-000000000001',
+    productId: '77777777-7777-4777-8777-000000000013',
+    quantityMilli: 3_000,
+    reason: 'Wilted leaves',
+    note: 'Three lettuce heads discarded',
+    occurredAt: INVENTORY_WASTE_AT,
+    recordedByUserId: DEVELOPMENT_ADMIN_USER_ID,
+  },
+  {
+    id: 'a3000000-0000-4000-8000-000000000003',
+    branchId: '22222222-2222-4222-8222-000000000002',
+    productId: '77777777-7777-4777-8777-000000000005',
+    quantityMilli: 750,
+    reason: 'Mold detected',
+    note: 'Strawberries discarded after inspection',
+    occurredAt: INVENTORY_WASTE_AT,
+    recordedByUserId: DEVELOPMENT_ADMIN_USER_ID,
+  },
+  {
+    id: 'a3000000-0000-4000-8000-000000000004',
+    branchId: '22222222-2222-4222-8222-000000000003',
+    productId: '77777777-7777-4777-8777-000000000006',
+    quantityMilli: 1_000,
+    reason: 'Damaged during handling',
+    note: 'Grapes discarded after inspection',
+    occurredAt: INVENTORY_WASTE_AT,
+    recordedByUserId: DEVELOPMENT_ADMIN_USER_ID,
+  },
+  {
+    id: 'a3000000-0000-4000-8000-000000000005',
+    branchId: '22222222-2222-4222-8222-000000000003',
+    productId: '77777777-7777-4777-8777-000000000017',
+    quantityMilli: 4_000,
+    reason: 'Wilted bunches',
+    note: 'Four parsley bunches discarded',
+    occurredAt: INVENTORY_WASTE_AT,
+    recordedByUserId: DEVELOPMENT_ADMIN_USER_ID,
+  },
+];
+
+export const DEVELOPMENT_STOCK_MOVEMENTS: readonly DevelopmentStockMovement[] = [
+  ...DEVELOPMENT_STOCK_ADJUSTMENTS.filter((adjustment) => adjustment.quantityDeltaMilli !== 0).map(
+    (adjustment, index) => ({
+      id: `b1000000-0000-4000-8000-${String(index + 1).padStart(12, '0')}`,
+      branchId: adjustment.branchId,
+      productId: adjustment.productId,
+      quantityDeltaMilli: adjustment.quantityDeltaMilli,
+      reason: 'ADJUSTMENT' as const,
+      sourceType: 'ADJUSTMENT' as const,
+      sourceId: adjustment.id,
+      occurredAt: adjustment.occurredAt,
+      recordedByUserId: adjustment.recordedByUserId,
+      ...(adjustment.note === undefined ? {} : { note: adjustment.note }),
+    }),
+  ),
+  ...DEVELOPMENT_INVENTORY_WASTE.map((waste, index) => ({
+    id: `b2000000-0000-4000-8000-${String(index + 1).padStart(12, '0')}`,
+    branchId: waste.branchId,
+    productId: waste.productId,
+    quantityDeltaMilli: -waste.quantityMilli,
+    reason: 'WASTE' as const,
+    sourceType: 'WASTE_REPORT' as const,
+    sourceId: waste.id,
+    occurredAt: waste.occurredAt,
+    recordedByUserId: waste.recordedByUserId,
+    ...(waste.note === undefined ? {} : { note: waste.note }),
+  })),
+];

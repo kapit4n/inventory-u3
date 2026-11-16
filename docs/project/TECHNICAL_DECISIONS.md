@@ -477,3 +477,39 @@ averageWeightPerTray` and `estimatedValue = estimatedKg × sellingPricePerKg`.
   balance before posting compensating movements. A zero balance does not imply
   that no movements exist. A future cache or negative-stock override needs an
   explicit decision and migration rather than reinterpreting these rows.
+
+### TD-019 — Production batches snapshot tray weight and post one net movement per product
+
+- **Date:** 2026-11-15
+- **Status:** ACCEPTED and implemented in M5; recipes, partial corrections and
+  production valuation remain open (BQ-11, BQ-12).
+- **Context:** M5 records branch tray production on top of the M4 ledger. The
+  batch must preserve the preparer, operator, presentation and average weight
+  used at that time, while product presentations remain editable master data.
+  Raw consumption is optional when reliable, and waste must affect stock
+  separately. M6 and M7 will reuse the recorded weights.
+- **Decision:** Store batches with branch, business date, preparer employee,
+  registering user, note and `DRAFT | CONFIRMED | CORRECTED` status. Outputs
+  snapshot the presentation, `averageWeightPerTrayGrams` and
+  `estimatedWeightGrams = trayCount × averageWeight`, with optional
+  `measuredWeightGrams` and an `ESTIMATED | MEASURED` basis. Grams map 1:1 to
+  milli-kilograms. Inputs require active `RAW` products and the product inventory
+  unit; outputs require active `PROCESSED` products; waste may reference any
+  active product. Confirmation aggregates the net delta per product and appends
+  movements with source `PRODUCTION_BATCH` and reasons `PRODUCTION_INPUT`,
+  `PRODUCTION_OUTPUT` and `WASTE`; negative resulting stock is refused. A
+  correction is a single audited full reversal with `CORRECTION` movements linked
+  to the originals, actor, time and required reason; drafts can be discarded.
+  Reads use `inventory:read`; writes use `inventory:write`.
+- **Alternatives considered:** Read the current presentation weight when
+  displaying history; rejected because edits would change past production.
+  Store only estimated weight; rejected because tray count and the per-tray
+  snapshot are the reported evidence. Edit a confirmed batch; rejected because
+  it rewrites ledger history. Require input lines; rejected because consumption
+  is recorded only when reliable. Allow repeated corrections; rejected for M5
+  because it needs a new reversal-of-reversal model.
+- **Consequences:** Production and correction must be transactional with
+  movement writes. Later presentation edits cannot alter historical batches.
+  Sales checkpoints and closing can reuse snapshots. Recipes, partial
+  corrections and valuation require an explicit future decision, schema and
+  migration.

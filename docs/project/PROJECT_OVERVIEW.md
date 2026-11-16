@@ -3,7 +3,7 @@
 > Last verified: 2026-11-15. M1 is committed at `bfdc9cb`, M2-T1 at `814f397`,
 > M2-T2 at `6b50606`, M2-T3 at `5c96eeb`, M2-T4 at `992d6ea`, M2-T5 at
 > `c8526d0`, M2-T6/T7 with the sample seed at `cc70bfc`, M3 at `13b8fcd` and its
-> documentation closeout at `c86c6c5`. M4 is complete and awaiting commit. See
+> documentation closeout at `c86c6c5`, M4 at `8f5f326`. See
 > [IMPLEMENTATION_PROGRESS](../development/IMPLEMENTATION_PROGRESS.md).
 
 ## Purpose
@@ -87,10 +87,15 @@ product.** As of this document:
   movement ledger, adjustments, waste and reconciliation are audited, negative
   stock is refused, and `/inventory` supports the full branch stock workflow
   (ADR 0041, TD-018).
-- Estimated/measured weight snapshots and operational price consumption are
-  M5/M6 work.
-- No production, sales checkpoint, daily closing or report feature exists.
-  Employees and suppliers are master data only; they do not log in.
+- Production is implemented on `/production`: batches record the preparer,
+  registering operator, business date, tray counts, presentation and
+  average-weight snapshots, optional measured weight, optional raw inputs and
+  explicit waste. Confirmation writes one net movement per product to the M4
+  ledger and refuses negative stock; confirmed batches can be reversed once
+  through an audited correction (ADR 0042, TD-019). M5 is pending commit.
+- Operational price consumption is M6 work.
+- No sales checkpoint, daily closing or report feature exists. Employees and
+  suppliers are master data only; they do not log in.
 - The initial access boundary is documented in
   [ACCESS_MODEL.md](./ACCESS_MODEL.md): one organization-wide central operator,
   no branch employee login, and no branch-scoped authorization yet.
@@ -99,10 +104,13 @@ product.** As of this document:
   M2 are complete: branch, product catalog, measurement configuration, stock
   concepts, master data, product presentations, price history, the access note,
   technical docs and the dual-engine guard are done. M3 purchase registration,
-  receiving and audited corrections are complete. M4 branch inventory is
-  complete. M5 production is next. The sample seed carries three illustrative
+  receiving and audited corrections are complete. M4 branch inventory and M5
+  production are complete in the working tree. M6 sales checkpoints are next,
+  blocked on BR-013. The sample seed carries three illustrative
   branches until the real names are confirmed (BQ-19), employee sharing across
   branches remains open (BQ-20), and supplier detail fields remain open (BQ-21).
+  The seed also adds illustrative opening stock, waste and reconciliation data
+  so `/inventory` has balances and history in a fresh development database.
 
 The inventory business model in this documentation is **proposed**. It separates
 confirmed product requirements from proposed design and from open questions. Do

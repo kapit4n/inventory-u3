@@ -4,6 +4,7 @@ import { Button, cn } from '@inventory-u3/ui';
 import { useTranslation, type TranslationKey } from '../../i18n/index.js';
 import {
   Boxes,
+  ChefHat,
   Home,
   Package,
   PanelLeftClose,
@@ -41,6 +42,11 @@ const navItems: NavItem[] = [
     titleKey: 'common.nav.purchases',
     href: '/purchases',
     icon: ShoppingCart,
+  },
+  {
+    titleKey: 'common.nav.production',
+    href: '/production',
+    icon: ChefHat,
   },
 ];
 

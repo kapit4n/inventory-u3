@@ -6,5 +6,6 @@ export * from './employee/index.js';
 export * from './env/index.js';
 export * from './inventory/index.js';
 export * from './organization/index.js';
+export * from './production/index.js';
 export * from './purchase/index.js';
 export * from './supplier/index.js';

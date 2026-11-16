@@ -1,8 +1,8 @@
 # Domain
 
 > This file documents the domain **currently implemented in `packages/domain`**.
-> The proposed remainder of the business domain (stock balances, estimated/
-> measured weights, production, sales checkpoints) is documented in
+> The proposed remainder of the business domain (sales checkpoints, closing and
+> reporting) is documented in
 > [BUSINESS_DOMAIN_MODEL.md](./project/BUSINESS_DOMAIN_MODEL.md). Do not read a
 > proposed entity from that document as implemented code.
 
@@ -10,9 +10,10 @@
 organization, identity, session, branch, employee, supplier and product-catalog
 foundation, including the raw/processed kind, average-weight configuration and
 effective-dated selling prices. It also contains supplier purchases, immutable
-purchase items, audited purchase corrections, persisted append-only stock
-movements and the stock balance shape. Balance strategy and the remaining
-transactional entities arrive in later milestones.
+purchase items, audited purchase corrections, persisted append-only stock movements, derived balances,
+stock adjustments, inventory waste, reconciliation and production batches with
+immutable weight snapshots. Sales checkpoints and closing arrive in later
+milestones.
 
 ## Branch
 
@@ -217,11 +218,8 @@ implementations (ADR 0025).
 
 ## Not yet modeled
 
-- Prices, estimated/measured weights and historical snapshots
-- Persisted stock movements, balance strategy, reconciliation and adjustments
-- Suppliers and purchases
-- Production batches
 - Sales checkpoints and daily closing
 - Reports and exports
+- Branch transfers, cost valuation and production price snapshots
 
 These are product decisions for later milestones, not placeholders to guess at.

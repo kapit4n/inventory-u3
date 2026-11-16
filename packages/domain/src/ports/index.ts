@@ -17,6 +17,7 @@ import type {
   ProductCategoryId,
   ProductId,
   ProductPresentationId,
+  ProductionBatchId,
   PurchaseId,
   StockAdjustmentId,
   SessionId,
@@ -34,6 +35,11 @@ import type { ProductCategory } from '../product/product-category.js';
 import type { ProductPresentation } from '../product/product-presentation.js';
 import type { ProductPriceHistory } from '../product/product-price-history.js';
 import type { Product } from '../product/product.js';
+import type {
+  ProductionBatch,
+  ProductionConfirmation,
+  ProductionCorrection,
+} from '../production/production-batch.js';
 import type { PurchaseCorrection } from '../purchase/purchase-correction.js';
 import type { Purchase, PurchaseReceipt } from '../purchase/purchase.js';
 import type { InventoryWaste } from '../stock/inventory-waste.js';
@@ -64,6 +70,7 @@ export interface Repositories {
   readonly productPriceHistory: ProductPriceHistoryRepository;
   readonly purchases: PurchaseRepository;
   readonly purchaseCorrections: PurchaseCorrectionRepository;
+  readonly productionBatches: ProductionBatchRepository;
   readonly stockMovements: StockMovementRepository;
   readonly stockAdjustments: StockAdjustmentRepository;
   readonly inventoryWaste: InventoryWasteRepository;
@@ -193,6 +200,36 @@ export interface PurchaseRepository {
     purchaseId: PurchaseId,
     correction: { readonly correctedByUserId: UserId; readonly correctedAt: IsoDateTime },
   ): Promise<Purchase | undefined>;
+}
+
+export interface ProductionBatchRepository {
+  findById(
+    organizationId: OrganizationId,
+    productionBatchId: ProductionBatchId,
+  ): Promise<ProductionBatch | undefined>;
+  listByOrganization(organizationId: OrganizationId): Promise<readonly ProductionBatch[]>;
+  listByBranch(
+    organizationId: OrganizationId,
+    branchId: BranchId,
+  ): Promise<readonly ProductionBatch[]>;
+  create(productionBatch: ProductionBatch): Promise<ProductionBatch>;
+  /** Returns `undefined` when the batch is not a draft in this organization. */
+  markConfirmed(
+    organizationId: OrganizationId,
+    productionBatchId: ProductionBatchId,
+    confirmation: ProductionConfirmation,
+  ): Promise<ProductionBatch | undefined>;
+  /** Returns `undefined` when the batch is not confirmed in this organization. */
+  markCorrected(
+    organizationId: OrganizationId,
+    productionBatchId: ProductionBatchId,
+    correction: ProductionCorrection,
+  ): Promise<ProductionBatch | undefined>;
+  /** Removes a draft and its lines. Returns `false` when it is not a draft. */
+  deleteDraft(
+    organizationId: OrganizationId,
+    productionBatchId: ProductionBatchId,
+  ): Promise<boolean>;
 }
 
 export interface PurchaseCorrectionRepository {

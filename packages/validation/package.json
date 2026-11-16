@@ -12,7 +12,8 @@
     "./common": "./src/common/index.ts",
     "./employee": "./src/employee/index.ts",
     "./env": "./src/env/index.ts",
-    "./organization": "./src/organization/index.ts"
+    "./organization": "./src/organization/index.ts",
+    "./production": "./src/production/index.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",

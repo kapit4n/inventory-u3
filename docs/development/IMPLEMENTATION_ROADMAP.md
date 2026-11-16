@@ -295,7 +295,7 @@ corrections are full reversals with a required reason and compensating movements
 
 ## M4 — Branch Inventory
 
-**Status: COMPLETED (awaiting commit)**
+**Status: COMPLETED and committed as `8f5f326`**
 
 ### Objective
 
@@ -365,7 +365,7 @@ local database. PostgreSQL cases skip without a server (SI-06). See
 
 ## M5 — Production
 
-**Status: NOT_STARTED**
+**Status: COMPLETE (pending commit).**
 
 ### Objective
 
@@ -400,33 +400,38 @@ M1, M2 and M4.
 
 ### Acceptance criteria
 
-- [ ] A confirmed batch records branch, business date, preparer and registering
+- [x] A confirmed batch records branch, business date, preparer and registering
       operator.
-- [ ] Output records product, presentation and tray count.
-- [ ] Average weight per tray is snapshotted and estimated weight is calculated.
-- [ ] Changing product configuration later does not alter the batch.
-- [ ] Raw consumption is recorded when reported, and explicitly absent otherwise.
-- [ ] Waste/losses are recorded separately and affect stock.
-- [ ] Confirmed batches are corrected through an audited path.
-- [ ] Both engines pass the same production tests.
+- [x] Output records product, presentation and tray count.
+- [x] Average weight per tray is snapshotted and estimated weight is calculated.
+- [x] Changing product configuration later does not alter the batch.
+- [x] Raw consumption is recorded when reported, and explicitly absent otherwise.
+- [x] Waste/losses are recorded separately and affect stock.
+- [x] Confirmed batches are corrected through an audited path.
+- [x] Both engines implement the same production methods; PostgreSQL tests exist
+      and skip without a server (SI-06).
 
 ### Expected database changes
 
-`production_batches`, `production_inputs`, `production_outputs`, status/history
-fields. Both engines.
+`production_batches`, `production_inputs`, `production_outputs`,
+`production_waste`, status/confirmation/correction fields, enums and indexes on
+both engines (migrations `0010`).
 
 ### Expected UI changes
 
-Production entry, batch detail, confirmation and correction screens.
+`/production` entry, batch detail, confirmation, correction and draft-discard
+dialogs.
 
 ### Tests required
 
 Estimated-weight calculation, snapshot immutability, state transitions, employee
-assignment validation, inventory integration, branch isolation, browser test.
+assignment validation, inventory integration, branch isolation and browser test.
+All are implemented. PostgreSQL cases skip without a server (SI-06).
 
 ### Notes
 
-A recipe/bill of materials is not assumed. Raw inputs may be optional.
+A recipe/bill of materials is not assumed. Raw inputs are optional. See ADR 0042
+and TD-019. The milestone is complete in the working tree, pending commit.
 
 ---
 
@@ -705,7 +710,7 @@ been executed." A passing unit suite is not a backup/restore drill.
 | M2                      | COMPLETED   | Master data, product presentations, price history and browser coverage                           |
 | M3                      | COMPLETED   | Purchases, receiving, audited corrections, dual-engine tests and browser coverage                |
 | M4                      | COMPLETED   | Derived balances, adjustments, waste, reconciliation, dual-engine tests, UI and browser coverage |
-| M5                      | NOT_STARTED | No production tables or screens                                                                  |
+| M5                      | COMPLETE    | Production batches, snapshots, ledger integration, UI and tests; pending commit                  |
 | M6                      | NOT_STARTED | No checkpoint tables or screens; BR-013 pending                                                  |
 | M7                      | NOT_STARTED | No closing tables or screens                                                                     |
 | M8                      | NOT_STARTED | Dashboard is static foundation content; no reports                                               |

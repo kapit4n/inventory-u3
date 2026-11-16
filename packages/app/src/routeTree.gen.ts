@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as InventoryRouteImport } from './routes/inventory'
+import { Route as ProductionRouteImport } from './routes/production'
 import { Route as ProductsRouteImport } from './routes/products'
 import { Route as PurchasesRouteImport } from './routes/purchases'
 import { Route as SettingsRouteImport } from './routes/settings'
@@ -29,6 +30,11 @@ const DashboardRoute = DashboardRouteImport.update({
 const InventoryRoute = InventoryRouteImport.update({
   id: '/inventory',
   path: '/inventory',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProductionRoute = ProductionRouteImport.update({
+  id: '/production',
+  path: '/production',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProductsRoute = ProductsRouteImport.update({
@@ -51,6 +57,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
   '/inventory': typeof InventoryRoute
+  '/production': typeof ProductionRoute
   '/products': typeof ProductsRoute
   '/purchases': typeof PurchasesRoute
   '/settings': typeof SettingsRoute
@@ -59,6 +66,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
   '/inventory': typeof InventoryRoute
+  '/production': typeof ProductionRoute
   '/products': typeof ProductsRoute
   '/purchases': typeof PurchasesRoute
   '/settings': typeof SettingsRoute
@@ -68,6 +76,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
   '/inventory': typeof InventoryRoute
+  '/production': typeof ProductionRoute
   '/products': typeof ProductsRoute
   '/purchases': typeof PurchasesRoute
   '/settings': typeof SettingsRoute
@@ -75,15 +84,28 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/dashboard' | '/inventory' | '/products' | '/purchases' | '/settings'
+    | '/'
+    | '/dashboard'
+    | '/inventory'
+    | '/production'
+    | '/products'
+    | '/purchases'
+    | '/settings'
   fileRoutesByTo: FileRoutesByTo
   to:
-    '/' | '/dashboard' | '/inventory' | '/products' | '/purchases' | '/settings'
+    | '/'
+    | '/dashboard'
+    | '/inventory'
+    | '/production'
+    | '/products'
+    | '/purchases'
+    | '/settings'
   id:
     | '__root__'
     | '/'
     | '/dashboard'
     | '/inventory'
+    | '/production'
     | '/products'
     | '/purchases'
     | '/settings'
@@ -93,6 +115,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DashboardRoute: typeof DashboardRoute
   InventoryRoute: typeof InventoryRoute
+  ProductionRoute: typeof ProductionRoute
   ProductsRoute: typeof ProductsRoute
   PurchasesRoute: typeof PurchasesRoute
   SettingsRoute: typeof SettingsRoute
@@ -119,6 +142,13 @@ declare module '@tanstack/react-router' {
       path: '/inventory'
       fullPath: '/inventory'
       preLoaderRoute: typeof InventoryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/production': {
+      id: '/production'
+      path: '/production'
+      fullPath: '/production'
+      preLoaderRoute: typeof ProductionRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/products': {
@@ -149,6 +179,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DashboardRoute: DashboardRoute,
   InventoryRoute: InventoryRoute,
+  ProductionRoute: ProductionRoute,
   ProductsRoute: ProductsRoute,
   PurchasesRoute: PurchasesRoute,
   SettingsRoute: SettingsRoute,
