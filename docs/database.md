@@ -192,8 +192,8 @@ Seeded master data:
 | Stock         | 22 adjustments (19 opening balances and 3 reconciliations, one with no difference)                            |
 | Waste         | 5 positive waste reports                                                                                      |
 | Production    | 3 batches (1 draft, 1 confirmed, 1 corrected), 7 inputs, 3 outputs and 2 waste lines                          |
-| Sales         | 3 checkpoints (1 draft, 1 confirmed, 1 corrected) and 6 product lines                                         |
-| Movements     | 42 ledger rows (21 adjustment, 5 waste, 10 production and 6 sales/correction movements)                       |
+| Sales         | 10 checkpoints (3 draft, 5 confirmed, 2 corrected) and 24 product lines                                       |
+| Movements     | 57 ledger rows (21 adjustment, 5 waste reports, 10 production and 21 sales/correction movements)              |
 | Presentations | 6 trays for the processed products                                                                            |
 | Price history | 27 effective-dated selling-price rows (current prices from `2026-11-01`, some earlier rows from `2026-06-01`) |
 

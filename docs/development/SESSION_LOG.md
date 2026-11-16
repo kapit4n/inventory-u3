@@ -2280,3 +2280,37 @@ the append-only ledger, and support audited reversal.
 Read `AGENTS.md`, `PROJECT_OVERVIEW.md`, `IMPLEMENTATION_PROGRESS.md`,
 `CURRENT_TASK.md` and the M7 roadmap section. M6 is committed; start M7 daily
 closing.
+
+## Session 22 — 2026-11-16 — richer sales checkpoint seed
+
+### Objective
+
+Populate `/sales-checkpoints` with enough illustrative data to exercise the list,
+filters, statuses, both periods, all branches, raw and processed lines, and both
+correction states.
+
+### Work completed
+
+- Expanded `DEVELOPMENT_SALES_CHECKPOINTS` from 3 to 10 checkpoints and from 6
+  to 24 product lines, spanning 2026-11-12 through 2026-11-16.
+- Added examples for all three branches, morning and evening periods, three
+  drafts, five confirmed checkpoints and two corrected checkpoints.
+- Kept the existing example ids and appended ids `d1000000-...-0004` through
+  `...-0010` plus item ids through `d1100000-...-0024`.
+- Regenerated the local SQLite development database from migrations and seed so
+  stale pre-expansion ledger ids do not remain.
+- Updated seed counts in `docs/database.md` and the M6 verification records.
+
+### Validation
+
+- `pnpm --filter @inventory-u3/database run typecheck` — PASS.
+- `pnpm run db:migrate` — PASS on a clean SQLite database.
+- `pnpm run db:seed` — PASS on a clean SQLite database.
+- Clean seed totals: 10 checkpoints (3 draft, 5 confirmed, 2 corrected), 24
+  lines, 17 `SALES_CHECKPOINT` movements and 4 linked `CORRECTION` reversals.
+- No branch/product combination has a negative ledger balance.
+
+### Pending work
+
+- Commit the seed expansion when authorized.
+- M7 daily closing remains the next milestone.

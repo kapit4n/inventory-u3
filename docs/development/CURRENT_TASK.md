@@ -102,7 +102,7 @@ append-only stock ledger with audited correction.
 - `pnpm run build` — PASS, 5/5 tasks; Vite chunk-size warnings only.
 - `pnpm run test:e2e` — PASS, 44 Chromium tests, including four sales-checkpoint
   specs.
-- `pnpm run db:seed` — PASS on SQLite; 3 checkpoints, 6 items, 6 sales ledger
+- `pnpm run db:seed` — PASS on SQLite; 10 checkpoints, 24 items, 21 sales/correction
   movements and no negative balances.
 - PostgreSQL integration cases were skipped because no server is available
   (SI-06), not passed.
