@@ -55,6 +55,7 @@ export {
   listPurchases,
   receivePurchase,
 } from './purchases.js';
+export { getReport, type ReportFilters } from './reports.js';
 export {
   confirmProductionBatch,
   correctProductionBatch,

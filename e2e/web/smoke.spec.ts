@@ -1,5 +1,8 @@
 import { expect, test } from './fixtures/frozen-clock.js';
 
+import { installApi } from './fixtures/mock-api.js';
+import { EMPTY_REPORT } from './fixtures/report.js';
+
 /**
  * Web shell smoke tests.
  *
@@ -69,6 +72,10 @@ test.describe('Smoke (web shell)', () => {
 
   test('no console errors during startup', async ({ page }) => {
     const errors: string[] = [];
+    await installApi(page, {
+      'GET /api/v1/branches': { body: { items: [] } },
+      'GET /api/v1/reports/summary': { body: EMPTY_REPORT },
+    });
     page.on('console', (message) => {
       if (message.type() === 'error') {
         errors.push(message.text());

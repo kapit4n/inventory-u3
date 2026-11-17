@@ -51,6 +51,7 @@ import type {
 } from '../production/production-batch.js';
 import type { PurchaseCorrection } from '../purchase/purchase-correction.js';
 import type { Purchase, PurchaseReceipt } from '../purchase/purchase.js';
+import type { ReportQuery, ReportSource } from '../reporting/report.js';
 import type {
   SalesCheckpoint,
   SalesCheckpointConfirmation,
@@ -88,6 +89,7 @@ export interface Repositories {
   readonly productionBatches: ProductionBatchRepository;
   readonly salesCheckpoints: SalesCheckpointRepository;
   readonly dailyClosings: DailyClosingRepository;
+  readonly reports: ReportRepository;
   readonly stockMovements: StockMovementRepository;
   readonly stockAdjustments: StockAdjustmentRepository;
   readonly inventoryWaste: InventoryWasteRepository;
@@ -331,6 +333,15 @@ export interface DailyClosingRepository {
     dailyClosingId: DailyClosingId,
     reopening: DailyClosingReopening,
   ): Promise<DailyClosing | undefined>;
+}
+
+export interface ReportRepository {
+  readSources(
+    organizationId: OrganizationId,
+    query: ReportQuery,
+    startsAt: IsoDateTime,
+    endsAt: IsoDateTime,
+  ): Promise<ReportSource>;
 }
 
 export interface PurchaseCorrectionRepository {

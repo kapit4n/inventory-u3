@@ -134,6 +134,10 @@ reconciliation differences and closing stock, plus estimated revenue, optional
 unit cost, cost basis and position. Cost basis values are
 `LATEST_PURCHASE_PRICE | UNAVAILABLE`. See ADR 0044 and TD-021.
 
+M8 adds no report tables, views or migrations. Dashboard reports read the
+existing checkpoint, purchase, production, stock-movement and waste tables on
+both engines through one `ReportRepository` port (ADR 0045, TD-022).
+
 ## Migrations
 
 ```

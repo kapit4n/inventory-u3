@@ -14,6 +14,7 @@ import { SQLiteProductionBatchRepository } from './repositories/production-repos
 import { SQLiteProductRepository } from './repositories/product-repository.js';
 import { SQLitePurchaseCorrectionRepository } from './repositories/purchase-correction-repository.js';
 import { SQLitePurchaseRepository } from './repositories/purchase-repository.js';
+import { SQLiteReportRepository } from './repositories/report-repository.js';
 import { SQLiteSalesCheckpointRepository } from './repositories/sales-checkpoint-repository.js';
 import { SQLiteSessionRepository } from './repositories/session-repository.js';
 import { SQLiteStockAdjustmentRepository } from './repositories/stock-adjustment-repository.js';
@@ -35,6 +36,7 @@ export function sqliteRepositoriesFor(db: SqliteDatabase): Repositories {
     productionBatches: new SQLiteProductionBatchRepository(db),
     salesCheckpoints: new SQLiteSalesCheckpointRepository(db),
     dailyClosings: new SQLiteDailyClosingRepository(db),
+    reports: new SQLiteReportRepository(db),
     purchases: new SQLitePurchaseRepository(db),
     purchaseCorrections: new SQLitePurchaseCorrectionRepository(db),
     stockMovements: new SQLiteStockMovementRepository(db),

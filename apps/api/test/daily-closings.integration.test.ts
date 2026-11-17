@@ -186,6 +186,199 @@ describe('daily closing routes (SQLite)', () => {
     expect(fetched.json().items).toEqual(closing.items);
   });
 
+  it('builds a consolidated report with latest-purchase costing', async () => {
+    const token = await tokenFor('manager@inventory.test');
+    const response = await app.inject({
+      method: 'GET',
+      url: '/api/v1/reports/summary?from=2026-11-16&to=2026-11-16&granularity=day',
+      headers: auth(token),
+    });
+    expect(response.statusCode).toBe(200);
+    const report = response.json();
+
+    expect(report.range).toEqual({
+      from: '2026-11-16',
+      to: '2026-11-16',
+      granularity: 'day',
+      timezone: 'UTC',
+    });
+    expect(report.currency).toBe('USD');
+    expect(report.totals).toMatchObject({
+      salesTotalMinor: 1_400,
+      purchasesTotalMinor: 1_900,
+      estimatedCostMinor: 1_050,
+      estimatedGrossProfitMinor: 350,
+      missingCostProductCount: 1,
+      salesCheckpointCount: 1,
+      purchaseCount: 2,
+      productionBatchCount: 1,
+      productionTrayCount: 2,
+      productionEstimatedWeightGrams: 1_000,
+      wasteRecordCount: 1,
+      inventoryProductCount: 3,
+    });
+    expect(report.periods).toEqual([
+      {
+        periodStart: '2026-11-16',
+        periodEnd: '2026-11-16',
+        salesTotalMinor: 1_400,
+        purchasesTotalMinor: 1_900,
+        estimatedCostMinor: 1_050,
+        estimatedGrossProfitMinor: 350,
+        salesCheckpointCount: 1,
+        purchaseCount: 2,
+        productionBatchCount: 1,
+        productionTrayCount: 2,
+        productionEstimatedWeightGrams: 1_000,
+        wasteRecordCount: 1,
+      },
+    ]);
+    expect(report.salesByBranch).toEqual([
+      {
+        branchId: BRANCH_ID,
+        branchName: DEVELOPMENT_BRANCHES[0]!.name,
+        salesTotalMinor: 1_400,
+        estimatedCostMinor: 1_050,
+        estimatedGrossProfitMinor: 350,
+        checkpointCount: 1,
+        missingCostProductCount: 1,
+      },
+    ]);
+    expect(report.salesByProduct).toEqual([
+      {
+        productId: RAW_PRODUCT_ID,
+        productName: DEVELOPMENT_PRODUCTS[0]!.name,
+        productKind: 'RAW',
+        unitId: UNIT_KILOGRAM_ID,
+        unitCode: 'kg',
+        unitName: 'Kilogramo',
+        quantityMilli: 3_000,
+        salesTotalMinor: 900,
+        estimatedCostMinor: 1_050,
+        estimatedGrossProfitMinor: -150,
+        trayCount: 0,
+        estimatedWeightGrams: 0,
+        measuredWeightGrams: 0,
+      },
+      {
+        productId: PROCESSED_PRODUCT_ID,
+        productName: DEVELOPMENT_PRODUCTS[18]!.name,
+        productKind: 'PROCESSED',
+        unitId: UNIT_KILOGRAM_ID,
+        unitCode: 'kg',
+        unitName: 'Kilogramo',
+        quantityMilli: 1_000,
+        salesTotalMinor: 500,
+        estimatedCostMinor: 0,
+        estimatedGrossProfitMinor: 500,
+        trayCount: 2,
+        estimatedWeightGrams: 1_000,
+        measuredWeightGrams: 0,
+      },
+    ]);
+    expect(report.purchasesBySupplier).toEqual([
+      {
+        supplierId: SUPPLIER_ID,
+        supplierName: DEVELOPMENT_SUPPLIERS[0]!.name,
+        purchaseCount: 2,
+        totalMinor: 1_900,
+      },
+    ]);
+    expect(report.productionByProduct).toEqual([
+      {
+        productId: PROCESSED_PRODUCT_ID,
+        productName: DEVELOPMENT_PRODUCTS[18]!.name,
+        productKind: 'PROCESSED',
+        unitId: UNIT_KILOGRAM_ID,
+        unitCode: 'kg',
+        unitName: 'Kilogramo',
+        batchCount: 1,
+        trayCount: 2,
+        estimatedWeightGrams: 1_000,
+        measuredWeightGrams: 0,
+      },
+    ]);
+    expect(report.wasteByProduct).toEqual([
+      {
+        productId: RAW_PRODUCT_ID,
+        productName: DEVELOPMENT_PRODUCTS[0]!.name,
+        productKind: 'RAW',
+        unitId: UNIT_KILOGRAM_ID,
+        unitCode: 'kg',
+        unitName: 'Kilogramo',
+        source: 'INVENTORY',
+        quantityMilli: 500,
+        recordCount: 1,
+      },
+    ]);
+    expect(report.inventoryByProduct).toEqual([
+      {
+        branchId: BRANCH_ID,
+        branchName: DEVELOPMENT_BRANCHES[0]!.name,
+        productId: PROCESSED_PRODUCT_ID,
+        productName: DEVELOPMENT_PRODUCTS[18]!.name,
+        productKind: 'PROCESSED',
+        unitId: UNIT_KILOGRAM_ID,
+        unitCode: 'kg',
+        unitName: 'Kilogramo',
+        quantityMilli: 5_000,
+      },
+      {
+        branchId: BRANCH_ID,
+        branchName: DEVELOPMENT_BRANCHES[0]!.name,
+        productId: RAW_PRODUCT_ID,
+        productName: DEVELOPMENT_PRODUCTS[0]!.name,
+        productKind: 'RAW',
+        unitId: UNIT_KILOGRAM_ID,
+        unitCode: 'kg',
+        unitName: 'Kilogramo',
+        quantityMilli: 8_500,
+      },
+      {
+        branchId: OTHER_BRANCH_ID,
+        branchName: DEVELOPMENT_BRANCHES[1]!.name,
+        productId: RAW_PRODUCT_ID,
+        productName: DEVELOPMENT_PRODUCTS[0]!.name,
+        productKind: 'RAW',
+        unitId: UNIT_KILOGRAM_ID,
+        unitCode: 'kg',
+        unitName: 'Kilogramo',
+        quantityMilli: 5_000,
+      },
+    ]);
+  });
+
+  it('filters the report by branch and requires the reports permission', async () => {
+    const managerToken = await tokenFor('manager@inventory.test');
+    const response = await app.inject({
+      method: 'GET',
+      url: `/api/v1/reports/summary?from=2026-11-16&to=2026-11-16&branchId=${OTHER_BRANCH_ID}`,
+      headers: auth(managerToken),
+    });
+    expect(response.statusCode).toBe(200);
+    const report = response.json();
+    expect(report.range.branchId).toBe(OTHER_BRANCH_ID);
+    expect(report.totals).toMatchObject({
+      salesTotalMinor: 0,
+      purchasesTotalMinor: 1_200,
+      estimatedCostMinor: 0,
+      missingCostProductCount: 0,
+      salesCheckpointCount: 0,
+      purchaseCount: 1,
+      productionBatchCount: 0,
+      wasteRecordCount: 0,
+      inventoryProductCount: 1,
+    });
+
+    const staffToken = await tokenFor('staff@inventory.test');
+    const forbidden = await app.inject({
+      method: 'GET',
+      url: '/api/v1/reports/summary?from=2026-11-16&to=2026-11-16',
+      headers: auth(staffToken),
+    });
+    expect(forbidden.statusCode).toBe(403);
+  });
+
   it('refuses a second current closing for the same branch and date', async () => {
     const token = await tokenFor('staff@inventory.test');
     const duplicate = await createClosing(token);

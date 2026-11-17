@@ -9,6 +9,7 @@ import { expect, test } from './fixtures/frozen-clock.js';
 
 import { watchForConsoleErrors } from './fixtures/console-errors.js';
 import { installApi } from './fixtures/mock-api.js';
+import { EMPTY_REPORT } from './fixtures/report.js';
 
 const ORGANIZATION = {
   id: '11111111-1111-4111-8111-111111111111',
@@ -34,6 +35,7 @@ test.describe('Spanish', () => {
       'GET /api/v1/products': { body: { items: [] } },
       'GET /api/v1/measurement-units': { body: { items: [] } },
       'GET /api/v1/inventory': { body: { items: [] } },
+      'GET /api/v1/reports/summary': { body: EMPTY_REPORT },
     });
 
     await page.goto('/dashboard');

@@ -1,6 +1,6 @@
 # Inventory U3 — Known Issues
 
-> Last reviewed: 2026-11-16. Separate confirmed defects from suspected issues and
+> Last reviewed: 2026-11-17. Separate confirmed defects from suspected issues and
 > from intentional scope gaps. Do not close an item by assumption.
 
 ## 1. Confirmed bugs
@@ -35,7 +35,7 @@ reproduced and confirmed in this review. Add an item here only with evidence
 | Production batches           | Draft, confirmed and corrected branch batches are implemented with preparer/operator identity, tray counts, weight snapshots, optional raw inputs, waste, ledger integration, API/client/UI and tests on both engines. PostgreSQL integration cases still skip without a server (SI-06).                                                              |
 | Sales checkpoints            | Aggregate checkpoints, weight/price snapshots, ledger integration, API/client/UI and tests are implemented on both engines (ADR 0043, TD-020). BR-013/BQ-02/BQ-17 still block final WhatsApp fields, configurable periods and no-sales. PostgreSQL integration cases still skip without a server (SI-06).                                             |
 | Daily closing                | Versioned daily closings, latest-purchase costing, warnings, API/client/UI and tests are implemented on both engines (ADR 0044, TD-021). Day bounds use the organization timezone until BQ-16; unit mismatches report `UNAVAILABLE` cost until BQ-10; seeded data has no purchases. PostgreSQL integration cases still skip without a server (SI-06). |
-| Consolidated reports         | Not implemented. `/dashboard` shows static foundation content.                                                                                                                                                                                                                                                                                        |
+| Consolidated reports         | `/dashboard` now shows on-demand source reports with branch/date/granularity filters, estimated profit and CSV export (ADR 0045, TD-022). BR-013/BQ-02/BQ-10/BQ-14/BQ-16/BQ-17 remain open; report-query performance is unmeasured.                                                                                                                   |
 | User administration          | Not implemented, although `users:read`/`users:manage` permissions exist.                                                                                                                                                                                                                                                                              |
 | Branch-specific access       | Documented in `docs/project/ACCESS_MODEL.md`; no assignment, authorization or UI gate is implemented.                                                                                                                                                                                                                                                 |
 | Audit log                    | Not implemented.                                                                                                                                                                                                                                                                                                                                      |
@@ -69,8 +69,8 @@ These are roadmap work, not defects. See
   production, sales-checkpoint and daily-closing flows exists. The reusable
   branch selector still has no dedicated component test.
 - User-to-branch assignment and branch-scoped authorization tests (M9).
-- Estimated/measured weight, snapshot and price-history tests exist for
-  production, sales and closing; consolidated report tests wait for M8.
+- Estimated/measured weight, snapshot, price-history and consolidated report
+  tests exist for production, sales, closing and dashboard reporting.
 - Stock movement, balance, adjustment, waste, reconciliation, purchase,
   production, sales-checkpoint and daily-closing domain, repository, route,
   client, component and browser tests exist. PostgreSQL cases still skip locally.
@@ -100,6 +100,8 @@ These are copied from the source of truth in
 | BQ-13 | Is one supplier delivery shared across branches, or a separate purchase per branch?    | M3                                           |
 | BQ-14 | Are purchase prices tax-inclusive, and are taxes/freight part of cost?                 | M3/M7                                        |
 | BQ-15 | Is partial receiving allowed?                                                          | M3                                           |
+| BQ-16 | Does every branch day start/end at local midnight?                                     | M7/M8                                        |
+| BQ-17 | Is an explicit "no sales" checkpoint required?                                         | M6/M8                                        |
 | BQ-21 | Which supplier contact, tax and payment details are required beyond the name?          | M3                                           |
 
 ## 7. Architecture risks
@@ -112,7 +114,7 @@ These are copied from the source of truth in
 | R-04 | Historical snapshots get recomputed by a later "fix".                                      | Explicit immutability tests; snapshot fields in the model.                               |
 | R-05 | Cost/profit reporting is treated as exact when it is estimated.                            | Label estimates in UI and reports; latest-purchase cost is confirmed (ADR 0044, TD-021). |
 | R-06 | Business logic leaks into React components under schedule pressure.                        | Boundary guard; domain-first tasks.                                                      |
-| R-07 | The static dashboard placeholder is mistaken for an implemented feature.                   | This documentation and honest status labels.                                             |
+| R-07 | On-demand reports are mistaken for immutable period snapshots.                             | Label estimates, keep ADR 0045/TD-022 and clarify that closings remain daily snapshots.  |
 
 ## 8. Workarounds
 

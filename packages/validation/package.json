@@ -15,6 +15,7 @@
     "./env": "./src/env/index.ts",
     "./organization": "./src/organization/index.ts",
     "./production": "./src/production/index.ts",
+    "./report": "./src/report/index.ts",
     "./sales-checkpoint": "./src/sales-checkpoint/index.ts"
   },
   "scripts": {

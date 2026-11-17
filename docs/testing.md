@@ -77,6 +77,10 @@ The current specs cover:
   waste and reconciliation payloads
 - production creation, confirmation, correction and draft discard on
   `/production`
+- sales-checkpoint creation, confirmation, correction and draft discard
+- daily-closing review, confirmation and reopening with an audit reason
+- dashboard report rendering, CSV download and filter-driven refetch on
+  `/dashboard`
 
 The mock API dispatches by method and pathname and fails loudly for unknown
 paths, so a wrong base URL does not silently reach the network.

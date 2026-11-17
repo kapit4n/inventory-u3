@@ -2,8 +2,8 @@
 
 > Canonical business roadmap. It supersedes the generic item/stock sequence in
 > the old [`docs/roadmap.md`](../roadmap.md), which now points here.
-> Last reviewed: 2026-11-13 after M3 (supplier purchases and receiving), which
-> is complete.
+> Last reviewed: 2026-11-17 after M8 (dashboard and reports), which is verified
+> in the working tree and pending commit.
 
 Status values are used exactly as follows:
 
@@ -514,7 +514,7 @@ resolved. The milestone itself is implemented; the reporting contract is not.
 
 ## M7 — Daily Closing
 
-**Status: COMPLETE — implementation and verification green; pending commit.**
+**Status: COMPLETED; committed as `e04bafa`.**
 
 ### Objective
 
@@ -589,7 +589,7 @@ per-product breakdown and source warnings.
 
 ## M8 — Dashboard and Reports
 
-**Status: NOT_STARTED**
+**Status: COMPLETE — implementation and verification green; pending commit.**
 
 ### Objective
 
@@ -615,41 +615,49 @@ M3–M7 with enough confirmed data to report on.
 
 ### Tasks
 
-- Report query and API design.
-- Consolidated and branch-level filters.
-- Dashboard summary cards and charts/tables.
-- Period selection (daily/weekly/monthly).
-- CSV export via the platform abstraction.
-- Tests and documentation.
+- [x] Report query and API design.
+- [x] Consolidated and branch-level filters.
+- [x] Dashboard summary cards and report tables.
+- [x] Period selection (daily/weekly/monthly).
+- [x] CSV export via the platform abstraction.
+- [x] Tests and documentation.
 
 ### Acceptance criteria
 
-- [ ] Owner can view consolidated totals across branches.
-- [ ] Owner can filter to one branch.
-- [ ] Sales by branch and product match checkpoint data.
-- [ ] Purchase/supplier and production reports match source records.
-- [ ] Estimated kilograms and revenue are labeled estimated.
-- [ ] Waste/damage is distinguishable from sales.
-- [ ] Daily/weekly/monthly periods use the organization timezone.
-- [ ] Export produces a usable file without giving the UI database access.
+- [x] Owner can view consolidated totals across branches.
+- [x] Owner can filter to one branch.
+- [x] Sales by branch and product match checkpoint data.
+- [x] Purchase/supplier and production reports match source records.
+- [x] Estimated kilograms and revenue are labeled estimated.
+- [x] Waste/damage is distinguishable from sales.
+- [x] Daily/weekly/monthly periods use the organization timezone.
+- [x] Export produces a usable file without giving the UI database access.
 
 ### Expected database changes
 
-Likely none beyond indexes or report-support views; any schema change goes to
-both engines.
+No new tables, views or migrations. The report reads existing source tables on
+both engines through one repository port.
 
 ### Expected UI changes
 
-Dashboard and report screens, filters, tables and export actions.
+`/dashboard` now has summary cards, sales-by-branch/product, purchases,
+production, inventory, waste and estimated-profit tables, date/branch/granularity
+filters, and a CSV export action.
 
 ### Tests required
 
 Query-correctness tests with fixture data, period-boundary tests, branch filters,
-API tests, browser tests.
+API tests, component tests and browser tests.
 
 ### Notes
 
-Do not build reports before the underlying records exist and are confirmed.
+Reports are computed on demand from source records rather than stored as report
+snapshots (ADR 0045, TD-022). Confirmed checkpoints and batches, received
+purchases, the stock ledger and both waste sources are the sources of truth.
+Estimated cost reuses the M7 latest-purchase rule with a same-unit guard.
+BR-013, BQ-02, BQ-10, BQ-14, BQ-16 and BQ-17 remain open; no WhatsApp contract,
+configurable period rule, unit conversion, tax/freight treatment, branch
+business-day boundary or no-sales marker was invented.
 
 ---
 
@@ -728,6 +736,6 @@ been executed." A passing unit suite is not a backup/restore drill.
 | M4                      | COMPLETED   | Derived balances, adjustments, waste, reconciliation, dual-engine tests, UI and browser coverage |
 | M5                      | COMPLETE    | Production batches, snapshots, ledger integration, UI and tests; committed as `7441653`          |
 | M6                      | COMPLETED   | Generic checkpoints, snapshots, ledger integration, UI and tests; committed as `52e39a3`         |
-| M7                      | COMPLETE    | Versioned closings, latest-purchase costing, warnings, UI, tests; pending commit                 |
-| M8                      | NOT_STARTED | Dashboard is static foundation content; no reports                                               |
+| M7                      | COMPLETED   | Versioned closings, latest-purchase costing, warnings, UI, tests; committed as `e04bafa`         |
+| M8                      | COMPLETE    | Consolidated reports, filters, estimated profit, CSV export, UI and tests; pending commit        |
 | M9                      | NOT_STARTED | No CI, branch permissions, audit log or backup drill                                             |

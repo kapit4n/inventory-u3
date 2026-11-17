@@ -5,20 +5,32 @@
 
 ## Summary
 
-| Field                  | Value                                                      |
-| ---------------------- | ---------------------------------------------------------- |
-| Current milestone      | M7 — Daily Closing (complete; pending commit)              |
-| Current task           | Commit M7, then start M8 consolidated reporting            |
-| Overall project status | M7 verified end-to-end; reporting contract still open      |
-| Completed milestones   | A prerequisite, M1, M2, M3, M4, M5, M6 and M7              |
-| In-progress milestones | M6/M7 follow-ups blocked on BR-013/BQ-02/BQ-10/BQ-16/BQ-17 |
-| Blocked milestones     | Final WhatsApp fields on BR-013; period and unit work open |
-| Pending milestones     | M8, M9                                                     |
-| Last verified commit   | `52e39a3` (M6); M7 verified in the working tree            |
-| Last update date       | 2026-11-16                                                 |
-| Next recommended task  | Commit M7, then start M8                                   |
+| Field                  | Value                                                         |
+| ---------------------- | ------------------------------------------------------------- |
+| Current milestone      | M8 — Dashboard and Reports (complete; pending commit)         |
+| Current task           | Commit M8, then start M9 quality and operational hardening    |
+| Overall project status | M8 verified end-to-end; reporting contract still open         |
+| Completed milestones   | A prerequisite and M1 through M7; M8 complete and verified    |
+| In-progress milestones | M6/M7/M8 follow-ups blocked on BR-013/BQ-02/BQ-10/BQ-16/BQ-17 |
+| Blocked milestones     | Final WhatsApp fields on BR-013; period and unit work open    |
+| Pending milestones     | M9                                                            |
+| Last verified commit   | `e04bafa` (M7); M8 verified in the working tree               |
+| Last update date       | 2026-11-17                                                    |
+| Next recommended task  | Commit M8, then start M9                                      |
 
 ### State at the time of this update
+
+M8 replaces the static `/dashboard` with on-demand consolidated reports. One
+domain report builder and one repository port are implemented by both engines.
+The report aggregates confirmed sales checkpoints and production batches,
+received purchases, inventory movements and both waste sources for a required
+`from`/`to` range, with optional branch filter and `day | week | month`
+granularity. Estimated profit reuses the M7 latest-purchase cost rule and counts
+missing same-unit costs. Periods use the organization timezone, with Monday week
+starts and month starts on day one. The UI has a seven-day default range,
+summary cards, detail tables, filters and a localized CSV export saved through
+the platform abstraction. See ADR 0045 and TD-022. No report tables or
+migrations were added.
 
 M7 adds versioned daily closings on top of M3–M6. A closing belongs to one
 branch and business date and snapshots opening, purchasing, production, sales,
@@ -101,32 +113,32 @@ master-data list queries so the expanded page stays console-error free.
 
 ## Verification for this update
 
-M7 changes the domain, application use cases, both repository implementations,
-validation, API routes, REST client, React UI, tests, database schema, migrations
-and documentation.
+M8 changes the domain, application use cases, both repository implementations,
+validation, API routes, REST client, React UI, tests and documentation. It adds
+no schema, migration or seed changes.
 
-| Command                                                                   | Result                                                              |
-| ------------------------------------------------------------------------- | ------------------------------------------------------------------- |
-| `pnpm run format:check`                                                   | PASS after the final Prettier pass                                  |
-| `pnpm run typecheck`                                                      | PASS — 12/12 tasks                                                  |
-| `pnpm run lint`                                                           | PASS — 12/12 tasks, `BOUNDARY GUARD OK`; one React Compiler warning |
-| `pnpm run guard:boundaries`                                               | PASS — `BOUNDARY GUARD OK`                                          |
-| `pnpm run test`                                                           | PASS — 12/12 tasks, 426 passed, 13 skipped                          |
-| `TEST_DATABASE_URL= pnpm --filter @inventory-u3/api run test:integration` | PASS — 16 files, 107 passed, 13 skipped                             |
-| `pnpm run build`                                                          | PASS — 5/5 tasks; Vite chunk-size warnings only                     |
-| `pnpm run db:migrate`                                                     | PASS — SQLite migrations applied through `0012`                     |
-| `pnpm run db:seed`                                                        | PASS — SQLite seed completed                                        |
-| `pnpm run test:e2e`                                                       | PASS — 46 Chromium tests, including two daily-closing specs         |
+| Command                                                                   | Result                                                               |
+| ------------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| `pnpm run format:check`                                                   | PASS                                                                 |
+| `pnpm run typecheck`                                                      | PASS — 12/12 tasks                                                   |
+| `pnpm run lint`                                                           | PASS — 12/12 tasks, `BOUNDARY GUARD OK`; one React Compiler warning  |
+| `pnpm run guard:boundaries`                                               | PASS — `BOUNDARY GUARD OK`                                           |
+| `pnpm run test`                                                           | PASS — 12/12 tasks, 437 passed, 13 skipped                           |
+| `TEST_DATABASE_URL= pnpm --filter @inventory-u3/api run test:integration` | PASS — 16 files, 109 passed, 13 skipped                              |
+| `pnpm run build`                                                          | PASS — 5/5 tasks; Vite chunk-size warnings only                      |
+| `pnpm run db:migrate`                                                     | NOT RERUN — M8 adds no schema change; local SQLite remains at `0012` |
+| `pnpm run db:seed`                                                        | NOT RERUN — M8 adds no seed change                                   |
+| `pnpm run test:e2e`                                                       | PASS — 48 Chromium tests, including two dashboard specs              |
 
-Current test counts: domain 136, api-client 51, app 96, API 133 passed + 13
-skipped, database 6 and desktop 4 — 426 passed and 13 skipped in total, plus 46
+Current test counts: domain 143, api-client 51, app 98, API 135 passed + 13
+skipped, database 6 and desktop 4 — 437 passed and 13 skipped in total, plus 48
 browser tests. The skipped tests are PostgreSQL repository cases, which require a
 reachable `TEST_DATABASE_URL`.
 
-The local SQLite seed contains 10 sales checkpoints, 24 lines and 57 ledger rows,
-with no negative branch/product balance. It contains no purchases, so a closing
-created from the seed reports `missingCostProductCount` until purchase fixtures
-are added.
+The local SQLite seed still contains 10 sales checkpoints, 24 lines and 57 ledger
+rows, with no negative branch/product balance. It contains no purchases, so M7
+closings and M8 cost estimates report `missingCostProductCount` until purchase
+fixtures are added.
 
 PostgreSQL integration tests were not executed because no PostgreSQL server is
 available on this machine. This is a known environment limitation, not a pass.
@@ -699,7 +711,7 @@ M6 is complete and committed; M7 daily closing followed.
 
 ## M7 — Daily Closing
 
-**Status: COMPLETE — verified; pending commit.**
+**Status: COMPLETED; committed as `e04bafa`.**
 
 ### Completed
 
@@ -731,7 +743,6 @@ M6 is complete and committed; M7 daily closing followed.
       server; it skips locally (SI-06).
 - [ ] Optional seed purchases so a seeded closing demonstrates available cost.
 - [ ] Optional record-level drill-down links from the closing summary.
-- [ ] Commit authorization.
 
 ### Validation
 
@@ -763,34 +774,76 @@ Branch timezones and non-midnight business days remain open (BQ-16). See ADR
 
 ### Next action
 
-Commit M7 when authorized, then start M8 consolidated reporting.
+M7 was committed as `e04bafa`; M8 consolidated reporting followed.
 
 ---
 
 ## M8 — Dashboard and Reports
 
-**Status: NOT_STARTED**
+**Status: COMPLETE — implementation and verification green; pending commit.**
 
 ### Completed
 
-- [ ] Nothing.
+- [x] Pure domain report builder with consolidated totals, section rows, branch
+      filters, period grouping and capped detail rows.
+- [x] One `ReportRepository.readSources(...)` port with SQLite and PostgreSQL
+      implementations and registrations.
+- [x] Application use case, Zod query/response schemas and authenticated
+      `GET /api/v1/reports/summary` with HTTP 422 validation errors.
+- [x] Typed API client, React Query hook and `/dashboard` UI with date, branch
+      and granularity filters.
+- [x] Sales by branch/product, purchases by supplier/product, production by
+      product, remaining inventory, waste/damage, checkpoint counts and
+      estimated profit sections.
+- [x] Daily/weekly/monthly grouping in the organization timezone; weeks start
+      Monday and months start on day one.
+- [x] Latest-purchase estimated cost with same-unit guard and missing-cost count.
+- [x] Localized CSV export through `usePlatform().saveFile`, with currency-aware
+      minor-unit scaling.
+- [x] English/Spanish dashboard copy and empty/error states.
+- [x] Domain, SQLite integration, component and Chromium browser coverage.
+- [x] ADR 0045, TD-022, roadmap and continuity documentation.
 
 ### Pending
 
-- [ ] Consolidated dashboard.
-- [ ] Sales/purchases/production/inventory/waste reports.
-- [ ] Estimated profit reporting.
-- [ ] Daily/weekly/monthly periods.
-- [ ] Export.
-- [ ] Tests.
+- [ ] Resolve BR-013 before treating WhatsApp/report fields as final.
+- [ ] Resolve BQ-02 before making checkpoint/report periods configurable.
+- [ ] Resolve BQ-10 before converting mismatched purchase and item units.
+- [ ] Resolve BQ-14 before treating tax/freight as part of cost.
+- [ ] Resolve BQ-16 for branch or non-midnight business-day boundaries.
+- [ ] Resolve BQ-17 for no-sales reporting.
+- [ ] Measure report-query performance in M9 before adding indexes or
+      materialization.
+- [ ] Execute PostgreSQL integration cases on a machine with a server (SI-06).
+- [ ] Commit authorization.
 
 ### Validation
 
-No implementation and no tests. `/dashboard` is static foundation content.
+- `pnpm run format:check` — PASS.
+- `pnpm run typecheck` — PASS, 12/12 tasks.
+- `pnpm run lint` — PASS, 12/12 tasks and `BOUNDARY GUARD OK`; one pre-existing
+  React Compiler warning for React Hook Form `watch()`.
+- `pnpm run guard:boundaries` — PASS.
+- `pnpm run test` — PASS, 12/12 tasks; 437 passed and 13 skipped.
+- `TEST_DATABASE_URL= pnpm --filter @inventory-u3/api run test:integration` —
+  PASS, 16 files, 109 passed and 13 skipped.
+- `pnpm run build` — PASS, 5/5 tasks; Vite chunk-size warnings only.
+- `pnpm run test:e2e` — PASS, 48 Chromium tests, including two dashboard specs.
+- PostgreSQL integration cases were skipped because no server is available
+  (SI-06), not passed.
+
+### Notes
+
+Reports are computed on demand from source records rather than stored as report
+snapshots (ADR 0045, TD-022). Confirmed checkpoints and batches, received
+purchases, the stock ledger and both waste sources are the sources of truth.
+Estimated cost reuses the M7 latest-purchase rule and remains labeled estimated.
+No WhatsApp contract, configurable period rule, unit conversion, tax/freight
+treatment, branch business-day boundary or no-sales marker was invented.
 
 ### Next action
 
-Start only when the source records exist and are confirmed.
+Commit M8, then start M9 quality, permissions and operational hardening.
 
 ---
 

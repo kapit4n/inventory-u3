@@ -2427,3 +2427,126 @@ reopening, with API/client/UI and tests.
 Read `AGENTS.md`, `PROJECT_OVERVIEW.md`, `IMPLEMENTATION_PROGRESS.md`,
 `CURRENT_TASK.md` and the M8 roadmap section. Commit M7 when authorized, then
 start M8 consolidated reporting.
+
+---
+
+## Session 24 — 2026-11-17 — M8 dashboard and reports
+
+### Objective
+
+Implement and verify M8 consolidated reports on `/dashboard`, covering range and
+branch filters, day/week/month periods, estimated profitability and CSV export,
+then update continuity documentation for the completed milestone.
+
+### Work performed
+
+- Added a pure domain report builder with consolidated totals, section rows,
+  period grouping and branch filtering.
+- Added one report repository port with SQLite and PostgreSQL implementations.
+- Added the report use case, Zod query/response schemas, authenticated report
+  route and typed API client.
+- Replaced the static dashboard with a report page containing summary cards,
+  detail tables, filters, empty/error states and CSV export.
+- Reused the M7 latest-purchase cost rule with same-unit guard and missing-cost
+  count; estimated profit and kilograms are labeled.
+- Added domain, integration, component and browser tests for report correctness,
+  API behavior, export and filter refetching.
+- Fixed CSV money scaling to use currency fraction digits instead of a hardcoded
+  division by 100.
+- Recorded ADR 0045 and TD-022 and updated the roadmap, progress, current task
+  and continuity documents.
+
+### Files changed
+
+- `packages/domain/src/reporting/report.ts`
+- `packages/domain/src/reporting/report.test.ts`
+- `packages/domain/src/reporting/index.ts`
+- `packages/domain/src/index.ts`
+- `packages/domain/src/ports/index.ts`
+- `apps/api/src/application/report/dashboard-report.ts`
+- `apps/api/src/http/routes/reports.ts`
+- `apps/api/src/app.ts`
+- `apps/api/src/infrastructure/persistence/repositories/report-repository.ts`
+- `apps/api/src/infrastructure/persistence/sqlite/repositories/report-repository.ts`
+- `apps/api/src/infrastructure/persistence/postgres/unit-of-work.ts`
+- `apps/api/src/infrastructure/persistence/sqlite/repositories.ts`
+- `apps/api/test/daily-closings.integration.test.ts`
+- `packages/validation/src/report/index.ts`
+- `packages/validation/src/index.ts`
+- `packages/api-client/src/reports.ts`
+- `packages/api-client/src/index.ts`
+- `packages/app/src/features/dashboard/queries/report-query.ts`
+- `packages/app/src/features/dashboard/report-csv.ts`
+- `packages/app/src/features/dashboard/components/dashboard-page.tsx`
+- `packages/app/src/features/dashboard/components/dashboard-page.test.tsx`
+- `packages/app/src/routes/dashboard.tsx`
+- `packages/app/src/i18n/locales/en/dashboard.ts`
+- `packages/app/src/i18n/locales/es/dashboard.ts`
+- `e2e/web/dashboard.spec.ts`
+- `e2e/web/fixtures/report.ts`
+- `e2e/web/i18n.spec.ts`
+- `e2e/web/smoke.spec.ts`
+- `docs/decisions/0045-reports-computed-from-source-records.md`
+- `docs/decisions/README.md`
+- `docs/project/TECHNICAL_DECISIONS.md`
+- `docs/development/IMPLEMENTATION_ROADMAP.md`
+- `docs/development/IMPLEMENTATION_PROGRESS.md`
+- `docs/development/CURRENT_TASK.md`
+- `docs/development/SESSION_LOG.md`
+
+### Technical decisions
+
+- Reports are computed on demand from source records; no report snapshot tables,
+  views or migrations were added (ADR 0045, TD-022).
+- One domain builder and one repository port are implemented twice, once per
+  engine, with no third database abstraction.
+- Sales use confirmed checkpoints, production uses confirmed batches and
+  purchases use received purchases.
+- Inventory is the ledger balance before the end of `to`; waste combines
+  inventory and production waste with source labels.
+- Periods use the organization timezone, Monday week starts and month day one.
+- Estimated cost reuses the M7 latest-purchase rule with a same-unit guard and
+  missing-cost count.
+- CSV is generated in the app and saved through the platform abstraction; money
+  uses the captured currency's fraction digits.
+
+### Validation
+
+- `pnpm run format:check` — PASS.
+- `pnpm run typecheck` — PASS, 12/12 tasks.
+- `pnpm run lint` — PASS, 12/12 tasks and `BOUNDARY GUARD OK`; one pre-existing
+  React Compiler warning for React Hook Form `watch()`.
+- `pnpm run guard:boundaries` — PASS.
+- `pnpm run test` — PASS, 12/12 tasks; 437 passed and 13 skipped.
+- `TEST_DATABASE_URL= pnpm --filter @inventory-u3/api run test:integration` —
+  PASS, 16 files, 109 passed and 13 skipped.
+- `pnpm run build` — PASS, 5/5 tasks; Vite chunk-size warnings only.
+- `pnpm run test:e2e` — PASS, 48 Chromium tests, including two dashboard specs.
+- `pnpm run db:migrate` and `pnpm run db:seed` were not rerun because M8 adds no
+  schema or seed change.
+
+### Problems found
+
+- A component assertion expected `$1,400.00` from `1400` minor units; the correct
+  rendered value is `$14.00` for the seeded currency.
+- The E2E helper initially selected the first report request, so a later filter
+  change could be asserted against stale query data; it now selects the latest.
+- E2E selects use element ids rather than nonexistent test ids.
+- Full typecheck exposed an unused test import and a `saveFile` mock tuple type;
+  both were fixed before the final green run.
+- Smoke and i18n specs needed an empty report fixture because `/dashboard` now
+  makes an API request during startup/shell navigation.
+
+### Pending work
+
+- Commit M8 when authorized.
+- Resolve BR-013/BQ-02/BQ-10/BQ-14/BQ-16/BQ-17 before treating final reporting
+  semantics as confirmed.
+- Measure report-query performance in M9.
+- Run PostgreSQL integration cases on a machine with a server (SI-06).
+
+### Next session
+
+Read `AGENTS.md`, `PROJECT_OVERVIEW.md`, `IMPLEMENTATION_PROGRESS.md`,
+`CURRENT_TASK.md` and the M9 roadmap section. Commit M8 if still pending, then
+begin M9 quality, permissions and operational hardening.
