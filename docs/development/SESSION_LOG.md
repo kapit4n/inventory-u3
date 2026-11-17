@@ -2314,3 +2314,116 @@ correction states.
 
 - Commit the seed expansion when authorized.
 - M7 daily closing remains the next milestone.
+
+## Session 23 — 2026-11-16 — M7 daily closing
+
+### Objective
+
+Implement M7 daily closing end-to-end: versioned branch/day snapshots, estimated
+revenue/cost/profit, readiness warnings, review/confirmation and audited
+reopening, with API/client/UI and tests.
+
+### Work completed
+
+- Accepted the confirmed **latest received purchase price** cost basis and wrote
+  ADR 0044 / TD-021; moved BQ-04 to confirmed resolutions.
+- Added `DailyClosingId`, daily-closing domain/model/transitions, snapshot item
+  building, latest-purchase costing, missing-cost and negative-stock warnings,
+  and the `DailyClosingRepository` port.
+- Added dual-engine `daily_closings` / `daily_closing_items` schemas and
+  migrations `0012`; registered PostgreSQL and SQLite repositories.
+- Added snapshot/create/review/confirm/reopen use cases and six authenticated
+  routes with validation returning 422 for malformed requests.
+- Added typed API client, query/mutation hooks, English/Spanish copy and the
+  `/daily-closings` page with filters, create, summary/readiness/item detail and
+  review/confirm/reopen actions; added the sidebar entry.
+- Added domain tests (7), SQLite integration tests (7), component tests (2) and
+  Chromium E2E tests (2).
+- Fixed the detail dialog reset effect so lint no longer fails; remounting by
+  closing id resets local action state.
+- Applied SQLite migration `0012` to the local database and reseeded.
+- Updated AGENTS, ADR/TD, workflow, database, roadmap, progress, current task,
+  project overview, state, known issues, open questions and this log.
+
+### Files
+
+- `packages/domain/src/daily-closing/*`, `packages/domain/src/ports/index.ts`,
+  `packages/domain/src/index.ts`
+- `packages/types/src/identifiers.ts`
+- `database/schema/daily-closings.ts`,
+  `database/schema/sqlite/daily-closings.ts`, enum/schema barrels, migration
+  `0012` files/journals/snapshots
+- `apps/api/src/application/daily-closing/*`,
+  `apps/api/src/http/routes/daily-closings.ts`, `apps/api/src/app.ts`
+- `apps/api/src/infrastructure/persistence/repositories/daily-closing-repository.ts`,
+  the SQLite twin and both repository registries
+- `apps/api/test/daily-closings.integration.test.ts`
+- `packages/validation/src/daily-closing/*`, package barrel and export map
+- `packages/api-client/src/daily-closings.ts` and its tests
+- `packages/app/src/features/daily-closings/*`,
+  `packages/app/src/routes/daily-closings.tsx`,
+  `packages/app/src/routeTree.gen.ts`, sidebar and i18n catalogues
+- `e2e/web/daily-closings.spec.ts`
+- `docs/decisions/0044-daily-closings-snapshot-and-version.md`,
+  `docs/project/TECHNICAL_DECISIONS.md`,
+  `docs/workflows/DAILY_CLOSING_WORKFLOW.md`, roadmap, progress, current task,
+  database, project overview, state, known issues, open questions and this log
+
+### Technical decisions
+
+- Revenue comes from confirmed sales-checkpoint snapshots, never current prices.
+- Cost uses the latest received purchase in the same branch with
+  `deliveryDate <= businessDate`, ordered by delivery date, received time and
+  purchase id, and only when its unit equals the item unit.
+- Missing same-unit cost is `UNAVAILABLE` with zero cost and a warning; unit
+  conversion is not applied while BQ-10 is open.
+- Confirmed closings are immutable. Reopening marks the version `REOPENED` and
+  creates a new draft linked by `previousClosingId`.
+- Day bounds use local midnight in the organization timezone until BQ-16.
+- Negative closing stock and missing sources are warnings, not creation
+  blockers.
+- Seed purchases were not added; a seeded closing therefore demonstrates
+  missing cost rather than an invented purchase history.
+
+### Validation
+
+- `pnpm run format:check` — PASS after the final Prettier pass.
+- `pnpm run typecheck` — PASS, 12/12 tasks.
+- `pnpm run lint` — PASS, 12/12 tasks and `BOUNDARY GUARD OK`; one React Compiler
+  warning for React Hook Form `watch()` in the create dialog.
+- `pnpm run guard:boundaries` — PASS.
+- `pnpm run test` — PASS, 12/12 tasks; 426 passed and 13 skipped.
+- `TEST_DATABASE_URL= pnpm --filter @inventory-u3/api run test:integration` —
+  PASS, 16 files, 107 passed and 13 skipped.
+- `pnpm run build` — PASS, 5/5 tasks; Vite chunk-size warnings only.
+- `pnpm run test:e2e` — PASS, 46 Chromium tests, including two daily-closing
+  specs.
+- `pnpm run db:migrate` — PASS, SQLite applied through `0012`.
+- `pnpm run db:seed` — PASS on SQLite; 10 checkpoints, 24 lines, 57 ledger rows
+  and no negative balances; no purchases are seeded.
+
+### Problems found
+
+- Detail-dialog action state was reset in an effect whose synchronous
+  `setState` failed lint; the dialog now remounts by closing id from the page.
+- The client initially compared domain error codes that the API maps away.
+  Duplicate creation is detected by HTTP 409, and domain refusals by
+  `DOMAIN_RULE_VIOLATION`.
+- Route validation was aligned from 400 to 422 with sales checkpoints.
+- Test fixtures had to use the real movement reasons and adjustment kinds
+  (`PURCHASE_RECEIPT`, `PRODUCTION_BATCH`, `SALES_CHECKPOINT`, `ADJUSTMENT`,
+  `WASTE_REPORT`, `MANUAL`, `RECONCILIATION`).
+
+### Pending work
+
+- Commit M7 when authorized.
+- Resolve BQ-16/BQ-10/BQ-14 for business-day boundaries, unit conversion and
+  tax/freight treatment; BR-013/BQ-02/BQ-17 remain open for final reporting.
+- Optionally add seed purchases and record-level drill-down links.
+- Run PostgreSQL integration cases on a machine with a server (SI-06).
+
+### Next session
+
+Read `AGENTS.md`, `PROJECT_OVERVIEW.md`, `IMPLEMENTATION_PROGRESS.md`,
+`CURRENT_TASK.md` and the M8 roadmap section. Commit M7 when authorized, then
+start M8 consolidated reporting.

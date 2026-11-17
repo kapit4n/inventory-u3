@@ -1,10 +1,11 @@
 # Inventory U3 — Project Overview
 
-> Last verified: 2026-11-15. M1 is committed at `bfdc9cb`, M2-T1 at `814f397`,
+> Last verified: 2026-11-16. M1 is committed at `bfdc9cb`, M2-T1 at `814f397`,
 > M2-T2 at `6b50606`, M2-T3 at `5c96eeb`, M2-T4 at `992d6ea`, M2-T5 at
 > `c8526d0`, M2-T6/T7 with the sample seed at `cc70bfc`, M3 at `13b8fcd` and its
-> documentation closeout at `c86c6c5`, M4 at `8f5f326`. See
-> [IMPLEMENTATION_PROGRESS](../development/IMPLEMENTATION_PROGRESS.md).
+> documentation closeout at `c86c6c5`, M4 at `8f5f326`, M5 at `7441653` and M6 at
+> `52e39a3`. M7 daily closing is verified in the working tree and pending commit.
+> See [IMPLEMENTATION_PROGRESS](../development/IMPLEMENTATION_PROGRESS.md).
 
 ## Purpose
 
@@ -99,7 +100,12 @@ product.** As of this document:
   tray weight and the effective selling price, then confirm into the M4 ledger
   with audited reversal (ADR 0043, TD-020). BR-013 still blocks the final
   WhatsApp reporting fields.
-- No daily closing or report feature exists. Employees and suppliers are master
+- Daily closing is implemented on `/daily-closings`: versioned branch/day
+  snapshots consolidate purchases, production, sales, waste, inventory
+  differences and remaining stock; revenue comes from confirmed sales snapshots,
+  and estimated cost uses the latest received purchase price with
+  `UNAVAILABLE` warnings for missing same-unit cost (ADR 0044, TD-021).
+- M8 consolidated reports do not exist yet. Employees and suppliers are master
   data only; they do not log in.
 - The initial access boundary is documented in
   [ACCESS_MODEL.md](./ACCESS_MODEL.md): one organization-wide central operator,
@@ -111,8 +117,9 @@ product.** As of this document:
   technical docs and the dual-engine guard are done. M3 purchase registration,
   receiving and audited corrections are complete. M4 branch inventory and M5
   production are complete and committed. M6 sales checkpoints are implemented
-  end-to-end, with the reporting contract still blocked on BR-013. The sample
-  seed carries three illustrative
+  end-to-end, with the reporting contract still blocked on BR-013. M7 daily
+  closing is implemented and verified, pending commit; M8 reports remain. The
+  sample seed carries three illustrative
   branches until the real names are confirmed (BQ-19), employee sharing across
   branches remains open (BQ-20), and supplier detail fields remain open (BQ-21).
   The seed also adds illustrative opening stock, waste and reconciliation data

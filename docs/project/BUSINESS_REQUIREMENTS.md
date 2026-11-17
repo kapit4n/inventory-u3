@@ -131,10 +131,12 @@ The unresolved questions are tracked in
 2. Are the 12:00 and 20:00 checkpoints fixed, configurable, or just typical?
 3. Are checkpoint corrections allowed after submission? Who may correct them,
    and what audit evidence is required?
-4. How is the estimated cost of goods calculated for daily closing: latest
-   purchase price, weighted average, or another basis?
-5. Is raw-material consumption always recorded, or only when the branch reports
+4. Is raw-material consumption always recorded, or only when the branch reports
    reliable quantities?
-6. Do all three branches share the same product catalogue and prices, or are
+5. Do all three branches share the same product catalogue and prices, or are
    prices branch-specific?
-7. When do branch users need application access, and what may they see?
+6. When do branch users need application access, and what may they see?
+
+The estimated cost of goods for daily closing is confirmed as the latest
+received purchase price when the purchase unit matches the item unit; otherwise
+it is reported as unavailable (ADR 0044, TD-021).

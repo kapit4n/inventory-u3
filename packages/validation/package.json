@@ -10,6 +10,7 @@
     "./auth": "./src/auth/index.ts",
     "./branch": "./src/branch/index.ts",
     "./common": "./src/common/index.ts",
+    "./daily-closing": "./src/daily-closing/index.ts",
     "./employee": "./src/employee/index.ts",
     "./env": "./src/env/index.ts",
     "./organization": "./src/organization/index.ts",

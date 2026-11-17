@@ -10,7 +10,8 @@
 ## Current status
 
 - **Foundation prerequisite:** complete.
-- **Business roadmap:** M1–M6 are COMPLETED; M7–M9 are NOT_STARTED.
+- **Business roadmap:** M1–M7 are COMPLETED; M7 is pending commit; M8–M9 are
+  NOT_STARTED.
 - **Branch master data:** entity, dual-engine schema, migrations and repositories
   are implemented. `GET/POST/PUT /api/v1/branches`, the Settings management
   section and the reusable active-branch selector are implemented. Three
@@ -53,19 +54,30 @@
   fully reversed once through an audited correction. The `/production` UI, API,
   typed client, dual-engine persistence and tests are implemented (ADR 0042,
   TD-019). M5 is committed as `7441653`.
+- **Sales checkpoints:** aggregate branch/date/period checkpoints snapshot
+  weight and effective selling price, confirm into the stock ledger and support
+  one audited reversal. `/sales-checkpoints`, API/client and dual-engine
+  persistence are implemented (ADR 0043, TD-020); BR-013/BQ-02/BQ-17 remain open.
+  M6 is committed as `52e39a3`.
+- **Daily closing:** versioned branch/day snapshots consolidate purchases,
+  production, sales, waste, inventory differences and stock. Cost uses the
+  latest received purchase price, missing cost is flagged and reopening creates
+  a new draft version. `/daily-closings`, API/client and dual-engine persistence
+  are implemented (ADR 0044, TD-021); BQ-16/BQ-10/BQ-14 remain open. M7 is
+  verified and pending commit.
 - **Access model:** documented in `docs/project/ACCESS_MODEL.md`; one
   organization-wide central operator initially. Branch users and assignment
   tables remain unimplemented.
 - **Technical docs and guard:** the database, backend, testing and architecture
-  references describe M1 through M5. The boundary guard checks dependency
+  references describe M1 through M7. The boundary guard checks dependency
   direction, database access, thin shells, domain Node built-ins, schema-table
   parity and migration-journal parity.
-- **Next task:** resolve BR-013, then start M6 sales checkpoints. Real branch
+- **Next task:** commit M7, then start M8 consolidated reporting. Real branch
   names wait for BQ-19; real master data replaces the sample seed when confirmed.
 - **Commits:** M1 closeout `bfdc9cb`; M2-T1 `814f397`; M2-T2 `6b50606`; M2-T3
   `5c96eeb`; M2-T4 `992d6ea`; M2-T5 `c8526d0`; M2-T6/T7 with the sample seed
   `cc70bfc`; M3 `13b8fcd`; M3 docs closeout `c86c6c5`; M4 `8f5f326`; M5
-  `7441653`.
+  `7441653`; M6 `52e39a3`; M6 seed `8382e54`.
 
 The previous verification records are preserved in
 [SESSION_LOG.md](../development/SESSION_LOG.md) (Sessions 0–19).

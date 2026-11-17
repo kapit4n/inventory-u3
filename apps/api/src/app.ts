@@ -19,6 +19,7 @@ import { registerAuth } from './http/plugins/auth.js';
 import { registerAuthRoutes } from './http/routes/auth.js';
 import { registerBranchRoutes } from './http/routes/branches.js';
 import { registerEmployeeRoutes } from './http/routes/employees.js';
+import { registerDailyClosingRoutes } from './http/routes/daily-closings.js';
 import { registerDevAuthRoutes } from './http/routes/dev-auth.js';
 import { registerHealthRoutes } from './http/routes/health.js';
 import { registerInventoryRoutes } from './http/routes/inventory.js';
@@ -181,6 +182,15 @@ export async function buildServer(env: EnvSource = process.env): Promise<Invento
     productPresentations: connection.repositories.productPresentations,
     productPriceHistory: connection.repositories.productPriceHistory,
     measurementUnits: connection.repositories.measurementUnits,
+    unitOfWork: connection.unitOfWork,
+    clock: systemClock,
+    ids: uuidGenerator,
+  });
+
+  await registerDailyClosingRoutes(app, {
+    dailyClosings: connection.repositories.dailyClosings,
+    branches: connection.repositories.branches,
+    organizations: connection.repositories.organizations,
     unitOfWork: connection.unitOfWork,
     clock: systemClock,
     ids: uuidGenerator,

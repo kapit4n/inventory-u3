@@ -443,8 +443,9 @@ averageWeightPerTray` and `estimatedValue = estimatedKg × sellingPricePerKg`.
 ### TD-018 — Branch stock is a derived exact ledger; adjustments, waste and reconciliation are audited
 
 - **Date:** 2026-11-15
-- **Status:** ACCEPTED and implemented in M4; unit conversion, transfers,
-  negative-stock overrides and cost valuation remain open (BQ-10, BQ-12, BQ-04).
+- **Status:** ACCEPTED and implemented in M4; unit conversion, transfers and
+  negative-stock overrides remain open (BQ-10, BQ-12). Cost valuation was
+  resolved in M7 as latest received purchase price (ADR 0044, TD-021).
 - **Context:** M3 receiving and purchase corrections already append stock
   movements, but M4 must expose branch stock, adjust it, record waste and
   reconcile physical counts. BQ-07 and BQ-08 needed a decision before a table
@@ -549,3 +550,40 @@ averageWeightPerTray` and `estimatedValue = estimatedKg × sellingPricePerKg`.
   revenue. Confirmation and correction must be transactional with movement
   writes. The WhatsApp reporting layer and period configuration still require
   product confirmation before they are final.
+
+### TD-021 — Daily closings snapshot the day and reopen as a new version
+
+- **Date:** 2026-11-16
+- **Status:** ACCEPTED and implemented in M7; BQ-16 business-day boundaries,
+  BQ-10 unit conversion, BQ-02 periods and BR-013 reporting remain open.
+- **Context:** M7 consolidates branch purchases, production, sales, waste,
+  inventory differences and remaining stock. The sources are append-only or
+  already snapshotted, but prices and master data can change later. The business
+  confirmed latest received purchase price as the estimated cost basis.
+  Confirmed closings must remain reviewable and auditable.
+- **Decision:** Store one row per organization/branch/business date/version and
+  item rows keyed by product. The current closing is the highest version.
+  Statuses are `DRAFT | REVIEWED | CONFIRMED | REOPENED`; only a confirmed
+  closing can be reopened, with a required reason. Reopening marks the old row
+  `REOPENED` and creates a new `DRAFT` version linked by `previousClosingId`
+  instead of editing snapshots. Day bounds are local midnight in the
+  organization timezone. Opening stock and movement categories come from the
+  ledger; revenue comes from confirmed sales-checkpoint snapshots; purchases,
+  production and waste counts come from their source rows. Cost uses the latest
+  received purchase for the product in the branch with
+  `deliveryDate <= businessDate`, ordered by delivery date, received time and
+  purchase id, and only when its unit equals the item unit. Missing cost is
+  `UNAVAILABLE` with zero cost and a `missingCostProductCount` warning.
+  Cost of sales uses `floor((quantityMilli × unitPriceMinor + 500) / 1000)`.
+  Negative closing stock and missing sources are warnings, not creation
+  blockers. Reads use `inventory:read`; mutations use `inventory:write`.
+- **Alternatives considered:** Recompute closings from current records; rejected
+  because history would change. Mutate a confirmed closing on reopen; rejected
+  because it erases the reviewed evidence. Refuse creation when data is missing;
+  rejected because the operator needs to see the gaps. Use weighted average,
+  FIFO or manual cost; rejected by the confirmed M7 cost basis. Convert units;
+  rejected while BQ-10 is unresolved.
+- **Consequences:** Confirmed versions stay immutable and corrections appear as
+  a new version. Cost and profit remain estimates and must be labeled. Mismatched
+  units surface as missing cost instead of a guessed conversion. Branch
+  timezones and non-midnight business days need a future decision.

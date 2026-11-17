@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as DailyClosingsRouteImport } from './routes/daily-closings'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as InventoryRouteImport } from './routes/inventory'
 import { Route as ProductionRouteImport } from './routes/production'
@@ -21,6 +22,11 @@ import { Route as SettingsRouteImport } from './routes/settings'
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DailyClosingsRoute = DailyClosingsRouteImport.update({
+  id: '/daily-closings',
+  path: '/daily-closings',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardRoute = DashboardRouteImport.update({
@@ -61,6 +67,7 @@ const SettingsRoute = SettingsRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/daily-closings': typeof DailyClosingsRoute
   '/dashboard': typeof DashboardRoute
   '/inventory': typeof InventoryRoute
   '/production': typeof ProductionRoute
@@ -71,6 +78,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/daily-closings': typeof DailyClosingsRoute
   '/dashboard': typeof DashboardRoute
   '/inventory': typeof InventoryRoute
   '/production': typeof ProductionRoute
@@ -82,6 +90,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/daily-closings': typeof DailyClosingsRoute
   '/dashboard': typeof DashboardRoute
   '/inventory': typeof InventoryRoute
   '/production': typeof ProductionRoute
@@ -94,6 +103,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/daily-closings'
     | '/dashboard'
     | '/inventory'
     | '/production'
@@ -104,6 +114,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/daily-closings'
     | '/dashboard'
     | '/inventory'
     | '/production'
@@ -114,6 +125,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/daily-closings'
     | '/dashboard'
     | '/inventory'
     | '/production'
@@ -125,6 +137,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  DailyClosingsRoute: typeof DailyClosingsRoute
   DashboardRoute: typeof DashboardRoute
   InventoryRoute: typeof InventoryRoute
   ProductionRoute: typeof ProductionRoute
@@ -141,6 +154,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/daily-closings': {
+      id: '/daily-closings'
+      path: '/daily-closings'
+      fullPath: '/daily-closings'
+      preLoaderRoute: typeof DailyClosingsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dashboard': {
@@ -197,6 +217,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  DailyClosingsRoute: DailyClosingsRoute,
   DashboardRoute: DashboardRoute,
   InventoryRoute: InventoryRoute,
   ProductionRoute: ProductionRoute,

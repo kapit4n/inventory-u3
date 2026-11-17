@@ -8,6 +8,7 @@
 
 import type {
   BranchId,
+  DailyClosingId,
   EmployeeId,
   InventoryWasteId,
   IsoDate,
@@ -27,6 +28,13 @@ import type {
 } from '@inventory-u3/types';
 
 import type { Branch } from '../branch/branch.js';
+import type {
+  DailyClosing,
+  DailyClosingConfirmation,
+  DailyClosingReopening,
+  DailyClosingReview,
+  DailyClosingSources,
+} from '../daily-closing/daily-closing.js';
 import type { Employee } from '../employee/employee.js';
 import type { Supplier } from '../supplier/supplier.js';
 import type { AuthenticatedUser, Session, UserWithCredentials } from '../organization/auth.js';
@@ -79,6 +87,7 @@ export interface Repositories {
   readonly purchaseCorrections: PurchaseCorrectionRepository;
   readonly productionBatches: ProductionBatchRepository;
   readonly salesCheckpoints: SalesCheckpointRepository;
+  readonly dailyClosings: DailyClosingRepository;
   readonly stockMovements: StockMovementRepository;
   readonly stockAdjustments: StockAdjustmentRepository;
   readonly inventoryWaste: InventoryWasteRepository;
@@ -274,6 +283,54 @@ export interface SalesCheckpointRepository {
     organizationId: OrganizationId,
     salesCheckpointId: SalesCheckpointId,
   ): Promise<boolean>;
+}
+
+export interface DailyClosingRepository {
+  findById(
+    organizationId: OrganizationId,
+    dailyClosingId: DailyClosingId,
+  ): Promise<DailyClosing | undefined>;
+  /** Highest version for the branch and business date, including a reopened version. */
+  findCurrent(
+    organizationId: OrganizationId,
+    branchId: BranchId,
+    businessDate: IsoDate,
+  ): Promise<DailyClosing | undefined>;
+  listByOrganization(organizationId: OrganizationId): Promise<readonly DailyClosing[]>;
+  listByBranch(
+    organizationId: OrganizationId,
+    branchId: BranchId,
+  ): Promise<readonly DailyClosing[]>;
+  /**
+   * Aggregates the evidence a closing snapshot needs. The interval is
+   * `[startsAt, endsAt)`, resolved in the organization timezone by the caller.
+   */
+  readSources(
+    organizationId: OrganizationId,
+    branchId: BranchId,
+    businessDate: IsoDate,
+    startsAt: IsoDateTime,
+    endsAt: IsoDateTime,
+  ): Promise<DailyClosingSources>;
+  create(dailyClosing: DailyClosing): Promise<DailyClosing>;
+  /** Returns `undefined` when the closing is not a draft in this organization. */
+  markReviewed(
+    organizationId: OrganizationId,
+    dailyClosingId: DailyClosingId,
+    review: DailyClosingReview,
+  ): Promise<DailyClosing | undefined>;
+  /** Returns `undefined` when the closing is not draft or reviewed in this organization. */
+  markConfirmed(
+    organizationId: OrganizationId,
+    dailyClosingId: DailyClosingId,
+    confirmation: DailyClosingConfirmation,
+  ): Promise<DailyClosing | undefined>;
+  /** Returns `undefined` when the closing is not confirmed in this organization. */
+  markReopened(
+    organizationId: OrganizationId,
+    dailyClosingId: DailyClosingId,
+    reopening: DailyClosingReopening,
+  ): Promise<DailyClosing | undefined>;
 }
 
 export interface PurchaseCorrectionRepository {

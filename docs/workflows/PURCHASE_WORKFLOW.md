@@ -82,8 +82,10 @@ stock movement is created before receiving.
 - Changing a product's current master data does not rewrite past purchases.
 - A separate purchase-price history table is not needed in M3; received
   `purchase_items` are the history.
-- Later cost calculations may use the latest, weighted-average or another basis.
-  That basis is **PENDING** and belongs to daily closing (M7, BQ-04).
+- Later cost calculations use received `purchase_items`; M7 daily closing uses
+  the latest received purchase price for the product in the branch when the unit
+  matches (ADR 0044, TD-021). Weighted-average or FIFO costing is not
+  implemented.
 
 ## 7. Correction semantics
 

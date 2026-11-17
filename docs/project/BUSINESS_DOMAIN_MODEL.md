@@ -30,55 +30,55 @@ Organization
 ```
 
 `Organization`, `Branch`, the organization-wide catalog and purchase records
-are implemented. Stock balances and the production/sales/closing records below
-the branch remain proposed.
+are implemented, as are the branch inventory, production, sales-checkpoint and
+daily-closing records below the branch. Audit logging and branch-scoped user
+assignment remain proposed.
 
 ## 2. Entity inventory
 
 ### Implemented today
 
-| Entity                | Purpose                                       | Evidence                                               |
-| --------------------- | --------------------------------------------- | ------------------------------------------------------ |
-| Organization          | Tenant boundary: name, timezone, currency     | `packages/domain/src/organization/organization.ts`     |
-| Branch                | Organization-owned physical business location | `packages/domain/src/branch/branch.ts`                 |
-| MeasurementUnit       | Organization-owned code/name for a unit       | `packages/domain/src/product/measurement-unit.ts`      |
-| ProductCategory       | Organization-owned product grouping           | `packages/domain/src/product/product-category.ts`      |
-| Product               | Organization-owned item with explicit units   | `packages/domain/src/product/product.ts`               |
-| ProductPresentation   | Product packaging with average weight         | `packages/domain/src/product/product-presentation.ts`  |
-| ProductPriceHistory   | Effective-dated selling price per product     | `packages/domain/src/product/product-price-history.ts` |
-| Employee              | Branch-owned preparer identity; no login      | `packages/domain/src/employee/employee.ts`             |
-| Supplier              | Organization-wide provider of deliveries      | `packages/domain/src/supplier/supplier.ts`             |
-| Purchase              | Multi-line supplier delivery for one branch   | `packages/domain/src/purchase/purchase.ts`             |
-| PurchaseItem          | Product, quantity, unit and purchase price    | `packages/domain/src/purchase/purchase.ts`             |
-| PurchaseCorrection    | Audited full reversal of a received purchase  | `packages/domain/src/purchase/purchase-correction.ts`  |
-| StockMovement         | Persisted append-only stock change            | `packages/domain/src/stock/stock-movement.ts`          |
-| User                  | Organization-scoped login account             | `packages/domain/src/organization/auth.ts`             |
-| Role                  | `ADMINISTRATOR`, `MANAGER`, `STAFF`           | `packages/domain/src/organization/roles.ts`            |
-| Permission            | Domain permission values checked by the API   | `packages/domain/src/organization/roles.ts`            |
-| Session               | Opaque bearer session, stored as a token hash | `packages/domain/src/organization/auth.ts`             |
-| Organization settings | Name, timezone, currency update rules         | `packages/domain/src/organization/organization.ts`     |
-| StockBalance          | Derived on-hand read model, never stored      | `packages/domain/src/stock/stock-balance.ts`           |
+| Entity                | Purpose                                       | Evidence                                                   |
+| --------------------- | --------------------------------------------- | ---------------------------------------------------------- |
+| Organization          | Tenant boundary: name, timezone, currency     | `packages/domain/src/organization/organization.ts`         |
+| Branch                | Organization-owned physical business location | `packages/domain/src/branch/branch.ts`                     |
+| MeasurementUnit       | Organization-owned code/name for a unit       | `packages/domain/src/product/measurement-unit.ts`          |
+| ProductCategory       | Organization-owned product grouping           | `packages/domain/src/product/product-category.ts`          |
+| Product               | Organization-owned item with explicit units   | `packages/domain/src/product/product.ts`                   |
+| ProductPresentation   | Product packaging with average weight         | `packages/domain/src/product/product-presentation.ts`      |
+| ProductPriceHistory   | Effective-dated selling price per product     | `packages/domain/src/product/product-price-history.ts`     |
+| Employee              | Branch-owned preparer identity; no login      | `packages/domain/src/employee/employee.ts`                 |
+| Supplier              | Organization-wide provider of deliveries      | `packages/domain/src/supplier/supplier.ts`                 |
+| Purchase              | Multi-line supplier delivery for one branch   | `packages/domain/src/purchase/purchase.ts`                 |
+| PurchaseItem          | Product, quantity, unit and purchase price    | `packages/domain/src/purchase/purchase.ts`                 |
+| PurchaseCorrection    | Audited full reversal of a received purchase  | `packages/domain/src/purchase/purchase-correction.ts`      |
+| StockMovement         | Persisted append-only stock change            | `packages/domain/src/stock/stock-movement.ts`              |
+| User                  | Organization-scoped login account             | `packages/domain/src/organization/auth.ts`                 |
+| Role                  | `ADMINISTRATOR`, `MANAGER`, `STAFF`           | `packages/domain/src/organization/roles.ts`                |
+| Permission            | Domain permission values checked by the API   | `packages/domain/src/organization/roles.ts`                |
+| Session               | Opaque bearer session, stored as a token hash | `packages/domain/src/organization/auth.ts`                 |
+| Organization settings | Name, timezone, currency update rules         | `packages/domain/src/organization/organization.ts`         |
+| StockBalance          | Derived on-hand read model, never stored      | `packages/domain/src/stock/stock-balance.ts`               |
+| StockAdjustment       | Audited manual adjustment or count correction | `packages/domain/src/stock/stock-adjustment.ts`            |
+| InventoryWaste        | Audited positive waste report                 | `packages/domain/src/stock/inventory-waste.ts`             |
+| ProductionBatch       | Branch production with inputs and outputs     | `packages/domain/src/production/production-batch.ts`       |
+| SalesCheckpoint       | Aggregate branch/date/period sales report     | `packages/domain/src/sales-checkpoint/sales-checkpoint.ts` |
+| DailyClosing          | Versioned reviewed end-of-day summary         | `packages/domain/src/daily-closing/daily-closing.ts`       |
 
 `StockMovement` is persisted from M3 receiving, corrections and M4 adjustments,
 waste and reconciliation. `StockBalance` is a derived read model summed from
 those movements; there is deliberately no balance table (ADR 0041). Negative
 stock is refused and there is no override (BQ-08 resolved). Manual adjustments,
 inventory waste and physical-count reconciliation are implemented and audited.
+M5 production, M6 sales checkpoints and M7 daily closings store their own
+snapshots and integrate with the ledger where they create movements.
 
-### Proposed for the business milestones
+### Proposed for the remaining milestones
 
-| Entity               | Purpose                                                              | Milestone | Key relationships                                          |
-| -------------------- | -------------------------------------------------------------------- | --------- | ---------------------------------------------------------- |
-| StockBalance         | Derived current quantity per branch/product; never stored            | M4 done   | belongs to Branch and Product                              |
-| InventoryAdjustment  | Manual adjustment or reconciliation with audit evidence              | M4 done   | belongs to Branch and Product                              |
-| ProductionBatch      | A branch's production of processed products for a date               | M5        | belongs to Branch; has inputs and outputs                  |
-| ProductionInput      | Raw product consumed by a production batch                           | M5        | belongs to ProductionBatch; references Product             |
-| ProductionOutput     | Finished product and tray count produced by a batch                  | M5        | belongs to ProductionBatch; references ProductPresentation |
-| SalesCheckpoint      | Aggregate sales report for a branch, date and checkpoint period      | M6        | belongs to Branch; has SalesCheckpointItems                |
-| SalesCheckpointItem  | Aggregate quantity sold for one product, with weight/price snapshots | M6        | belongs to SalesCheckpoint; references Product             |
-| DailyClosing         | Reviewed end-of-day summary for a branch                             | M7        | belongs to Branch; consolidates the day's records          |
-| AuditLog             | Append-only record of significant changes and corrections            | M9        | actor, action, entity, before/after payload, time          |
-| UserBranchAssignment | Future mapping of an application user to allowed branch(es)          | M9        | User to Branch                                             |
+| Entity               | Purpose                                                     | Milestone | Key relationships                                 |
+| -------------------- | ----------------------------------------------------------- | --------- | ------------------------------------------------- |
+| AuditLog             | Append-only record of significant changes and corrections   | M9        | actor, action, entity, before/after payload, time |
+| UserBranchAssignment | Future mapping of an application user to allowed branch(es) | M9        | User to Branch                                    |
 
 Names are deliberately domain-specific. If implementation chooses different
 names, update this table and the ADR before writing code.
@@ -86,8 +86,8 @@ names, update this table and the ADR before writing code.
 ## 3. Raw products vs processed products
 
 The distinction is central to measurement and to which workflow applies. It is
-implemented as the required `ProductKind` (`RAW` or `PROCESSED`); the production
-and sales workflows that consume it are not.
+implemented as the required `ProductKind` (`RAW` or `PROCESSED`) and is consumed
+by the production, sales-checkpoint and daily-closing workflows.
 
 ### Raw product
 

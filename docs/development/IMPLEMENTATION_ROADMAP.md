@@ -514,7 +514,7 @@ resolved. The milestone itself is implemented; the reporting contract is not.
 
 ## M7 — Daily Closing
 
-**Status: NOT_STARTED**
+**Status: COMPLETE — implementation and verification green; pending commit.**
 
 ### Objective
 
@@ -542,22 +542,25 @@ M3, M4, M5 and M6; cost-basis decision.
 
 ### Tasks
 
-- Closing aggregation queries and snapshots.
-- Cost-basis decision and calculation.
-- Status workflow and reopening audit.
-- Closing summary UI with drill-down.
-- Tests and documentation.
+- [x] Closing aggregation queries and snapshots.
+- [x] Cost-basis decision and calculation.
+- [x] Status workflow and reopening audit.
+- [x] Closing summary UI with item-level breakdown.
+- [x] Tests and documentation.
 
 ### Acceptance criteria
 
-- [ ] One closing per branch/business date, with audited reopening.
-- [ ] All required daily sources are represented or explicitly flagged missing.
-- [ ] Revenue uses sales snapshots, not current prices.
-- [ ] Cost uses the confirmed cost basis and is labeled estimated.
-- [ ] Gross profit is calculated and labeled estimated.
-- [ ] Confirmed closing snapshots do not change when master data changes.
-- [ ] Inventory differences and waste are visible.
-- [ ] Both engines pass the same tests.
+- [x] One current closing per branch/business date, with audited versioned
+      reopening.
+- [x] All required daily sources are represented or explicitly flagged missing.
+- [x] Revenue uses sales snapshots, not current prices.
+- [x] Cost uses the confirmed latest-purchase-price basis and is labeled
+      estimated.
+- [x] Gross profit is calculated and labeled estimated.
+- [x] Confirmed closing snapshots do not change when master data changes.
+- [x] Inventory differences and waste are visible.
+- [x] Both engines implement the same methods and share the same tests;
+      PostgreSQL cases skip without a server (SI-06).
 
 ### Expected database changes
 
@@ -565,8 +568,8 @@ M3, M4, M5 and M6; cost-basis decision.
 
 ### Expected UI changes
 
-Closing readiness checklist, summary dashboard, drill-down, confirm/reopen
-actions with reasons.
+Closing readiness checklist, summary dashboard, item-level breakdown,
+confirm/reopen actions with reasons.
 
 ### Tests required
 
@@ -575,7 +578,12 @@ immutability, status transitions, cost calculation, both engines, browser test.
 
 ### Notes
 
-The cost basis is **PENDING**. Do not choose one silently.
+M7 implements latest received purchase price as the cost basis (ADR 0044,
+TD-021). Missing same-unit purchases surface as `UNAVAILABLE` cost instead of a
+guess; unit conversion remains BQ-10. Day bounds use the organization timezone
+until BQ-16 is confirmed. Record-level drill-down links to purchases, production,
+sales and inventory remain a possible follow-up; the detail dialog provides the
+per-product breakdown and source warnings.
 
 ---
 
@@ -720,6 +728,6 @@ been executed." A passing unit suite is not a backup/restore drill.
 | M4                      | COMPLETED   | Derived balances, adjustments, waste, reconciliation, dual-engine tests, UI and browser coverage |
 | M5                      | COMPLETE    | Production batches, snapshots, ledger integration, UI and tests; committed as `7441653`          |
 | M6                      | COMPLETED   | Generic checkpoints, snapshots, ledger integration, UI and tests; committed as `52e39a3`         |
-| M7                      | NOT_STARTED | No closing tables or screens                                                                     |
+| M7                      | COMPLETE    | Versioned closings, latest-purchase costing, warnings, UI, tests; pending commit                 |
 | M8                      | NOT_STARTED | Dashboard is static foundation content; no reports                                               |
 | M9                      | NOT_STARTED | No CI, branch permissions, audit log or backup drill                                             |

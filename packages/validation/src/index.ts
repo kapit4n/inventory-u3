@@ -2,6 +2,7 @@ export * from './auth/index.js';
 export * from './branch/index.js';
 export * from './catalog/index.js';
 export * from './common/index.js';
+export * from './daily-closing/index.js';
 export * from './employee/index.js';
 export * from './env/index.js';
 export * from './inventory/index.js';

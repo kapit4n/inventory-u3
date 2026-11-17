@@ -5,20 +5,33 @@
 
 ## Summary
 
-| Field                  | Value                                                        |
-| ---------------------- | ------------------------------------------------------------ |
-| Current milestone      | M7 — Daily Closing (next)                                    |
-| Current task           | Start M7 after committed M6 verification                     |
-| Overall project status | M6 committed end-to-end; reporting contract still open       |
-| Completed milestones   | A prerequisite, M1, M2, M3, M4, M5 and M6                    |
-| In-progress milestones | M6 follow-ups blocked on BR-013/BQ-02/BQ-17                  |
-| Blocked milestones     | Final WhatsApp fields on BR-013; BQ-02/BQ-17 affect M6 scope |
-| Pending milestones     | M7, M8, M9                                                   |
-| Last verified commit   | `52e39a3` (M6 sales checkpoints)                             |
-| Last update date       | 2026-11-16                                                   |
-| Next recommended task  | Start M7 daily closing                                       |
+| Field                  | Value                                                      |
+| ---------------------- | ---------------------------------------------------------- |
+| Current milestone      | M7 — Daily Closing (complete; pending commit)              |
+| Current task           | Commit M7, then start M8 consolidated reporting            |
+| Overall project status | M7 verified end-to-end; reporting contract still open      |
+| Completed milestones   | A prerequisite, M1, M2, M3, M4, M5, M6 and M7              |
+| In-progress milestones | M6/M7 follow-ups blocked on BR-013/BQ-02/BQ-10/BQ-16/BQ-17 |
+| Blocked milestones     | Final WhatsApp fields on BR-013; period and unit work open |
+| Pending milestones     | M8, M9                                                     |
+| Last verified commit   | `52e39a3` (M6); M7 verified in the working tree            |
+| Last update date       | 2026-11-16                                                 |
+| Next recommended task  | Commit M7, then start M8                                   |
 
 ### State at the time of this update
+
+M7 adds versioned daily closings on top of M3–M6. A closing belongs to one
+branch and business date and snapshots opening, purchasing, production, sales,
+waste, adjustments, corrections, reconciliation differences and closing stock.
+Revenue comes from confirmed sales-checkpoint snapshots; estimated cost uses the
+latest received purchase price for the product in the branch when the purchase
+unit equals the item unit. Missing cost is `UNAVAILABLE`, zero cost and counted
+as a warning. Review, confirmation and reopening keep the confirmed snapshot:
+reopening marks it `REOPENED` and creates a new draft version linked by
+`previousClosingId`. The `/daily-closings` screen, API, typed client,
+dual-engine persistence and tests are implemented. Day bounds use the
+organization timezone until BQ-16 is confirmed; unit conversion remains BQ-10.
+See ADR 0044 and TD-021.
 
 M6 adds aggregate branch sales on top of the M4 ledger. A checkpoint belongs to
 one branch, business date and provisional `MORNING | EVENING` period. Lines
@@ -88,29 +101,32 @@ master-data list queries so the expanded page stays console-error free.
 
 ## Verification for this update
 
-M3 changes the domain, both repository implementations, validation, API routes,
-REST client, React UI, tests, database schema, migrations and documentation.
+M7 changes the domain, application use cases, both repository implementations,
+validation, API routes, REST client, React UI, tests, database schema, migrations
+and documentation.
 
-| Command                                                                   | Result                                                   |
-| ------------------------------------------------------------------------- | -------------------------------------------------------- |
-| `pnpm run format:check`                                                   | PASS                                                     |
-| `pnpm run typecheck`                                                      | PASS — 12/12 tasks                                       |
-| `pnpm run lint`                                                           | PASS — 12/12 tasks, `BOUNDARY GUARD OK`                  |
-| `pnpm run guard:boundaries`                                               | PASS — `BOUNDARY GUARD OK`                               |
-| `pnpm run test`                                                           | PASS — 12/12 tasks, 361 passed, 13 skipped               |
-| `TEST_DATABASE_URL= pnpm --filter @inventory-u3/api run test:integration` | PASS — 13 files, 82 passed, 13 skipped                   |
-| `pnpm run build`                                                          | PASS — 5/5 tasks; Vite chunk-size warnings only          |
-| `pnpm run db:migrate`                                                     | PASS — SQLite migrations applied through `0009`          |
-| `pnpm run test:e2e`                                                       | PASS — 36 Chromium tests, including four inventory specs |
+| Command                                                                   | Result                                                              |
+| ------------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| `pnpm run format:check`                                                   | PASS after the final Prettier pass                                  |
+| `pnpm run typecheck`                                                      | PASS — 12/12 tasks                                                  |
+| `pnpm run lint`                                                           | PASS — 12/12 tasks, `BOUNDARY GUARD OK`; one React Compiler warning |
+| `pnpm run guard:boundaries`                                               | PASS — `BOUNDARY GUARD OK`                                          |
+| `pnpm run test`                                                           | PASS — 12/12 tasks, 426 passed, 13 skipped                          |
+| `TEST_DATABASE_URL= pnpm --filter @inventory-u3/api run test:integration` | PASS — 16 files, 107 passed, 13 skipped                             |
+| `pnpm run build`                                                          | PASS — 5/5 tasks; Vite chunk-size warnings only                     |
+| `pnpm run db:migrate`                                                     | PASS — SQLite migrations applied through `0012`                     |
+| `pnpm run db:seed`                                                        | PASS — SQLite seed completed                                        |
+| `pnpm run test:e2e`                                                       | PASS — 46 Chromium tests, including two daily-closing specs         |
 
-Current test counts: domain 110, api-client 45, app 88, API 108 passed + 13
-skipped, database 6 and desktop 4 — 361 passed and 13 skipped in total, plus 36
-browser tests. Migration `0009` was also validated against the existing local
-database: 6 `RECEIVING` movements total `118500`, 2 `CORRECTION` movements total
-`-45000`, net `73500`, and both new tables plus the new branch/product index
-exist. The skipped tests are PostgreSQL repository cases, which require a
-reachable `TEST_DATABASE_URL`. All commands above were re-run after the final
-Prettier pass.
+Current test counts: domain 136, api-client 51, app 96, API 133 passed + 13
+skipped, database 6 and desktop 4 — 426 passed and 13 skipped in total, plus 46
+browser tests. The skipped tests are PostgreSQL repository cases, which require a
+reachable `TEST_DATABASE_URL`.
+
+The local SQLite seed contains 10 sales checkpoints, 24 lines and 57 ledger rows,
+with no negative branch/product balance. It contains no purchases, so a closing
+created from the seed reports `missingCostProductCount` until purchase fixtures
+are added.
 
 PostgreSQL integration tests were not executed because no PostgreSQL server is
 available on this machine. This is a known environment limitation, not a pass.
@@ -677,37 +693,77 @@ intentionally refused while BQ-10 is open. See ADR 0043 and TD-020.
 
 ### Next action
 
-Authorize the M6 commit, then start M7 daily closing.
+M6 is complete and committed; M7 daily closing followed.
 
 ---
 
 ## M7 — Daily Closing
 
-**Status: NOT_STARTED**
+**Status: COMPLETE — verified; pending commit.**
 
 ### Completed
 
-- [ ] Nothing.
+- [x] Daily-closing domain model with version, status and snapshot transitions.
+- [x] Opening, purchased, produced, sold, waste, adjustment, correction,
+      reconciliation and closing quantities per product.
+- [x] Estimated revenue from confirmed sales snapshots.
+- [x] Latest received purchase-price costing with same-unit guard and
+      `UNAVAILABLE` missing-cost fallback.
+- [x] Estimated cost and gross profit with integer-safe rounding.
+- [x] Readiness warnings for missing purchases, production drafts, unreceived
+      purchases, waste, inventory differences, negative stock and missing cost.
+- [x] Review, confirmation and audited reopening that creates a new version.
+- [x] PostgreSQL and SQLite schemas, migrations `0012`, repositories and
+      registries.
+- [x] Validation schemas, snapshot/create/review/confirm/reopen use cases and six
+      authenticated REST endpoints.
+- [x] Typed API client, React Query hooks, `/daily-closings` UI and
+      English/Spanish copy.
+- [x] Domain, SQLite integration, component and Playwright coverage.
+- [x] ADR 0044, TD-021, workflow, database, roadmap and continuity documentation.
 
 ### Pending
 
-- [ ] Aggregation of purchases, production, sales, waste and stock.
-- [ ] Estimated revenue, cost and gross profit.
-- [ ] Review/confirm/reopen workflow.
-- [ ] Audit history.
-- [ ] UI and tests.
+- [ ] Resolve BQ-16 for branch or non-midnight business-day boundaries.
+- [ ] Resolve BQ-10 before converting mismatched purchase and item units.
+- [ ] Resolve BQ-14 for tax/freight treatment in cost.
+- [ ] Execute the PostgreSQL half of the integration suite on a machine with a
+      server; it skips locally (SI-06).
+- [ ] Optional seed purchases so a seeded closing demonstrates available cost.
+- [ ] Optional record-level drill-down links from the closing summary.
+- [ ] Commit authorization.
 
 ### Validation
 
-No implementation and no tests.
+- `pnpm run format:check` — PASS after the final Prettier pass.
+- `pnpm run typecheck` — PASS, 12/12 tasks.
+- `pnpm run lint` — PASS, 12/12 tasks and `BOUNDARY GUARD OK`; one React Compiler
+  warning for React Hook Form `watch()` in the create dialog.
+- `pnpm run guard:boundaries` — PASS.
+- `pnpm run test` — PASS, 12/12 tasks; 426 passed and 13 skipped.
+- `TEST_DATABASE_URL= pnpm --filter @inventory-u3/api run test:integration` —
+  PASS, 16 files, 107 passed and 13 skipped.
+- `pnpm run build` — PASS, 5/5 tasks; Vite chunk-size warnings only.
+- `pnpm run test:e2e` — PASS, 46 Chromium tests, including two daily-closing
+  specs.
+- `pnpm run db:migrate` — PASS on SQLite through `0012`.
+- `pnpm run db:seed` — PASS on SQLite; 10 checkpoints, 24 lines, 57 ledger rows
+  and no negative balances. The seed has no purchases, so closing cost is
+  reported as missing.
+- PostgreSQL integration cases were skipped because no server is available
+  (SI-06), not passed.
 
 ### Notes
 
-Cost basis is undecided. Do not hardcode one.
+M7 implements the confirmed latest-purchase-price cost basis. Revenue is never
+recomputed from current prices. Confirmed versions are immutable; reopening
+creates a new draft. Missing same-unit cost is surfaced rather than guessed.
+Branch timezones and non-midnight business days remain open (BQ-16). See ADR
+0044 and TD-021.
 
 ### Next action
 
-Start after M3–M6 and the cost-basis decision.
+Commit M7 when authorized, then start M8 consolidated reporting.
 
 ---
 

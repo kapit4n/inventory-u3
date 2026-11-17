@@ -4,6 +4,7 @@ import { Button, cn } from '@inventory-u3/ui';
 import { useTranslation, type TranslationKey } from '../../i18n/index.js';
 import {
   Boxes,
+  CalendarCheck,
   ChefHat,
   Home,
   Package,
@@ -53,6 +54,11 @@ const navItems: NavItem[] = [
     titleKey: 'common.nav.salesCheckpoints',
     href: '/sales-checkpoints',
     icon: ShoppingBasket,
+  },
+  {
+    titleKey: 'common.nav.dailyClosings',
+    href: '/daily-closings',
+    icon: CalendarCheck,
   },
 ];
 

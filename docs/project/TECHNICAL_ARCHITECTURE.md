@@ -203,18 +203,14 @@ workflow API exists yet.
 
 The existing foundation is reusable. Branch, employee, supplier, category,
 measurement-unit and product entities, their dual-engine persistence, API routes
-and UI now exist, as do presentation and price-history API, typed-client and
-product-screen support. The following are not designed or built:
+and UI now exist, as do presentation and price-history support. The stock
+ledger, purchasing, inventory adjustments, production, sales checkpoints and
+daily closing are also implemented. The following are still not built:
 
-1. Estimated/measured weight snapshots and operational price consumption.
-2. Persisted stock ledger, balance strategy and reconciliation.
-3. Purchase receiving and auditable correction model.
-4. Production batch inputs/outputs and snapshot fields.
-5. Aggregate sales checkpoint model and snapshot fields.
-6. Daily closing aggregation and review state.
-7. Consolidated reporting queries and dashboard.
-8. Branch-aware authorization and audit history.
-9. CI pipeline; there is currently no `.github/` workflow.
+1. Consolidated reporting queries, dashboard and export.
+2. Branch-aware authorization and audit history.
+3. CI pipeline; there is currently no `.github/` workflow.
+4. Backup/restore and other operational hardening.
 
 These gaps are sequenced in
 [IMPLEMENTATION_ROADMAP.md](../development/IMPLEMENTATION_ROADMAP.md). Do not

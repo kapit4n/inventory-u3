@@ -8,6 +8,8 @@
 import { pgEnum } from 'drizzle-orm/pg-core';
 
 import {
+  DAILY_CLOSING_COST_BASES,
+  DAILY_CLOSING_STATUSES,
   ORGANIZATION_ROLES,
   PRODUCT_KINDS,
   PRODUCT_PRICE_BASES,
@@ -22,6 +24,11 @@ import {
   STOCK_MOVEMENT_SOURCE_TYPES,
 } from '@inventory-u3/domain';
 
+export const dailyClosingStatusEnum = pgEnum('daily_closing_status', DAILY_CLOSING_STATUSES);
+export const dailyClosingCostBasisEnum = pgEnum(
+  'daily_closing_cost_basis',
+  DAILY_CLOSING_COST_BASES,
+);
 export const organizationRoleEnum = pgEnum('organization_role', ORGANIZATION_ROLES);
 export const productKindEnum = pgEnum('product_kind', PRODUCT_KINDS);
 export const productPriceBasisEnum = pgEnum('product_price_basis', PRODUCT_PRICE_BASES);
@@ -48,6 +55,8 @@ export const stockMovementSourceTypeEnum = pgEnum(
 );
 
 export const DATABASE_ENUM_VALUES = {
+  dailyClosingStatus: DAILY_CLOSING_STATUSES,
+  dailyClosingCostBasis: DAILY_CLOSING_COST_BASES,
   organizationRole: ORGANIZATION_ROLES,
   productKind: PRODUCT_KINDS,
   productPriceBasis: PRODUCT_PRICE_BASES,

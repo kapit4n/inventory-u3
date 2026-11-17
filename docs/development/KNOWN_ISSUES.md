@@ -1,6 +1,6 @@
 # Inventory U3 — Known Issues
 
-> Last reviewed: 2026-11-12. Separate confirmed defects from suspected issues and
+> Last reviewed: 2026-11-16. Separate confirmed defects from suspected issues and
 > from intentional scope gaps. Do not close an item by assumption.
 
 ## 1. Confirmed bugs
@@ -23,23 +23,23 @@ reproduced and confirmed in this review. Add an item here only with evidence
 
 ## 3. Incomplete features (expected at this stage)
 
-| Area                         | State                                                                                                                                                                                                                                                                                                                                      |
-| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Branch master data           | Entity, dual-engine persistence, list/create/edit API, Settings UI and active-branch selector implemented. The seed now carries three illustrative development branches; the real branch names remain open (BQ-19).                                                                                                                        |
-| Catalog identity             | Units, categories, products and presentations have domain, dual-engine persistence, API, typed client, UI and tests. Category and unit management is in Settings; products use `/products` and expose the presentation editor for processed products (TD-015). The development seed carries an illustrative fruit-and-vegetable catalogue. |
-| Raw/processed products       | Product kind implemented; production/sales workflows that use it are not.                                                                                                                                                                                                                                                                  |
-| Average weight per tray      | Configured weight is implemented on presentations; production outputs snapshot the average weight, estimate and optional measured weight with a weight basis (ADR 0042, TD-019).                                                                                                                                                           |
-| Product prices and history   | Effective-dated, append-only selling prices are implemented in the domain, both engines, API, typed client, `/products` UI and tests.                                                                                                                                                                                                      |
-| Suppliers and purchases      | Supplier master data and M3 purchase registration, receiving, cancellation, audited full reversal and `/purchases` UI are implemented and tested. Partial receiving, taxes, freight, shared deliveries and supplier payment details remain open (BQ-10, BQ-13, BQ-14, BQ-15, BQ-21).                                                       |
-| Stock movements and balances | Append-only exact-thousandth movements drive derived branch balances. Receiving, corrections, manual adjustments, waste and reconciliation are implemented with authenticated routes, typed client, `/inventory` UI and tests on both engines (ADR 0041, TD-018). PostgreSQL integration cases still skip without a server (SI-06).        |
-| Production batches           | Draft, confirmed and corrected branch batches are implemented with preparer/operator identity, tray counts, weight snapshots, optional raw inputs, waste, ledger integration, API/client/UI and tests on both engines. PostgreSQL integration cases still skip without a server (SI-06).                                                   |
-| Sales checkpoints            | Not implemented.                                                                                                                                                                                                                                                                                                                           |
-| Daily closing                | Not implemented.                                                                                                                                                                                                                                                                                                                           |
-| Consolidated reports         | Not implemented. `/dashboard` shows static foundation content.                                                                                                                                                                                                                                                                             |
-| User administration          | Not implemented, although `users:read`/`users:manage` permissions exist.                                                                                                                                                                                                                                                                   |
-| Branch-specific access       | Documented in `docs/project/ACCESS_MODEL.md`; no assignment, authorization or UI gate is implemented.                                                                                                                                                                                                                                      |
-| Audit log                    | Not implemented.                                                                                                                                                                                                                                                                                                                           |
-| Inventory UI                 | `/inventory` is implemented with branch selection, stock balances, movement history and adjustment, waste and reconciliation dialogs.                                                                                                                                                                                                      |
+| Area                         | State                                                                                                                                                                                                                                                                                                                                                 |
+| ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Branch master data           | Entity, dual-engine persistence, list/create/edit API, Settings UI and active-branch selector implemented. The seed now carries three illustrative development branches; the real branch names remain open (BQ-19).                                                                                                                                   |
+| Catalog identity             | Units, categories, products and presentations have domain, dual-engine persistence, API, typed client, UI and tests. Category and unit management is in Settings; products use `/products` and expose the presentation editor for processed products (TD-015). The development seed carries an illustrative fruit-and-vegetable catalogue.            |
+| Raw/processed products       | Product kind implemented; production/sales workflows that use it are not.                                                                                                                                                                                                                                                                             |
+| Average weight per tray      | Configured weight is implemented on presentations; production outputs snapshot the average weight, estimate and optional measured weight with a weight basis (ADR 0042, TD-019).                                                                                                                                                                      |
+| Product prices and history   | Effective-dated, append-only selling prices are implemented in the domain, both engines, API, typed client, `/products` UI and tests.                                                                                                                                                                                                                 |
+| Suppliers and purchases      | Supplier master data and M3 purchase registration, receiving, cancellation, audited full reversal and `/purchases` UI are implemented and tested. Partial receiving, taxes, freight, shared deliveries and supplier payment details remain open (BQ-10, BQ-13, BQ-14, BQ-15, BQ-21).                                                                  |
+| Stock movements and balances | Append-only exact-thousandth movements drive derived branch balances. Receiving, corrections, manual adjustments, waste and reconciliation are implemented with authenticated routes, typed client, `/inventory` UI and tests on both engines (ADR 0041, TD-018). PostgreSQL integration cases still skip without a server (SI-06).                   |
+| Production batches           | Draft, confirmed and corrected branch batches are implemented with preparer/operator identity, tray counts, weight snapshots, optional raw inputs, waste, ledger integration, API/client/UI and tests on both engines. PostgreSQL integration cases still skip without a server (SI-06).                                                              |
+| Sales checkpoints            | Aggregate checkpoints, weight/price snapshots, ledger integration, API/client/UI and tests are implemented on both engines (ADR 0043, TD-020). BR-013/BQ-02/BQ-17 still block final WhatsApp fields, configurable periods and no-sales. PostgreSQL integration cases still skip without a server (SI-06).                                             |
+| Daily closing                | Versioned daily closings, latest-purchase costing, warnings, API/client/UI and tests are implemented on both engines (ADR 0044, TD-021). Day bounds use the organization timezone until BQ-16; unit mismatches report `UNAVAILABLE` cost until BQ-10; seeded data has no purchases. PostgreSQL integration cases still skip without a server (SI-06). |
+| Consolidated reports         | Not implemented. `/dashboard` shows static foundation content.                                                                                                                                                                                                                                                                                        |
+| User administration          | Not implemented, although `users:read`/`users:manage` permissions exist.                                                                                                                                                                                                                                                                              |
+| Branch-specific access       | Documented in `docs/project/ACCESS_MODEL.md`; no assignment, authorization or UI gate is implemented.                                                                                                                                                                                                                                                 |
+| Audit log                    | Not implemented.                                                                                                                                                                                                                                                                                                                                      |
+| Inventory UI                 | `/inventory` is implemented with branch selection, stock balances, movement history and adjustment, waste and reconciliation dialogs.                                                                                                                                                                                                                 |
 
 These are roadmap work, not defects. See
 [IMPLEMENTATION_ROADMAP.md](./IMPLEMENTATION_ROADMAP.md).
@@ -65,18 +65,15 @@ These are roadmap work, not defects. See
 - Organization-deactivation authorization (see SI-01).
 - Session cleanup/retention behaviour (see SI-02).
 - PostgreSQL parity on this machine (skipped, not passed).
-- Browser E2E for master-data, product, presentation, price and purchase flows
-  now exists in `e2e/web/master-data.spec.ts`, `e2e/web/products.spec.ts` and
-  `e2e/web/purchases.spec.ts`. The reusable branch selector still has no
-  dedicated component test. Stock balance, adjustment and inventory UI tests wait
-  for M4.
+- Browser E2E for master-data, product, presentation, price, purchase,
+  production, sales-checkpoint and daily-closing flows exists. The reusable
+  branch selector still has no dedicated component test.
 - User-to-branch assignment and branch-scoped authorization tests (M9).
-- Estimated/measured weight, snapshot and price-history tests, because those
-  fields do not exist yet.
-- Stock movement domain and repository tests exist; balance, adjustment, waste
-  and reconciliation tests await M4. Purchase domain, repository, route, client,
-  component and browser tests exist. Production, sales and closing domains do not
-  exist yet.
+- Estimated/measured weight, snapshot and price-history tests exist for
+  production, sales and closing; consolidated report tests wait for M8.
+- Stock movement, balance, adjustment, waste, reconciliation, purchase,
+  production, sales-checkpoint and daily-closing domain, repository, route,
+  client, component and browser tests exist. PostgreSQL cases still skip locally.
 - Boundary-guard regression tests; the current checks are exercised manually and by running the guard.
 - Backup/restore drill.
 - Performance/load tests for movement and report queries.
@@ -90,7 +87,6 @@ These are copied from the source of truth in
 | ----- | -------------------------------------------------------------------------------------- | -------------------------------------------- |
 | BQ-01 | What exact fields/format do branch employees report through WhatsApp? (BR-013)         | M6                                           |
 | BQ-02 | Are the 12:00/20:00 checkpoints fixed, configurable or typical?                        | M6                                           |
-| BQ-04 | What is the estimated cost basis for daily closing?                                    | M7                                           |
 | BQ-05 | Is raw-material consumption always recorded, or only when reliable?                    | M5                                           |
 | BQ-06 | Are product prices and average weights organization-wide or branch-specific?           | M2                                           |
 | BQ-07 | Are inventory weights derived from a movement ledger or maintained as a balance cache? | Resolved: derived ledger (ADR 0041, TD-018). |
@@ -108,15 +104,15 @@ These are copied from the source of truth in
 
 ## 7. Architecture risks
 
-| Risk | Description                                                                                | Mitigation                                                                     |
-| ---- | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------ |
-| R-01 | Encoding an unconfirmed WhatsApp report format into the schema.                            | Keep BR-013 PENDING; build the generic checkpoint model, not the final fields. |
-| R-02 | Two engines drift because every schema change and repository method must be written twice. | Enforce parity in review and tests; ADR 0025.                                  |
-| R-03 | Branch isolation regressions once operational tables exist.                                | Add cross-branch/cross-organization tests in every milestone.                  |
-| R-04 | Historical snapshots get recomputed by a later "fix".                                      | Explicit immutability tests; snapshot fields in the model.                     |
-| R-05 | Cost/profit reporting is treated as exact when it is estimated.                            | Label estimates in UI and reports; confirm cost basis.                         |
-| R-06 | Business logic leaks into React components under schedule pressure.                        | Boundary guard; domain-first tasks.                                            |
-| R-07 | The static dashboard placeholder is mistaken for an implemented feature.                   | This documentation and honest status labels.                                   |
+| Risk | Description                                                                                | Mitigation                                                                               |
+| ---- | ------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------- |
+| R-01 | Encoding an unconfirmed WhatsApp report format into the schema.                            | Keep BR-013 PENDING; build the generic checkpoint model, not the final fields.           |
+| R-02 | Two engines drift because every schema change and repository method must be written twice. | Enforce parity in review and tests; ADR 0025.                                            |
+| R-03 | Branch isolation regressions once operational tables exist.                                | Add cross-branch/cross-organization tests in every milestone.                            |
+| R-04 | Historical snapshots get recomputed by a later "fix".                                      | Explicit immutability tests; snapshot fields in the model.                               |
+| R-05 | Cost/profit reporting is treated as exact when it is estimated.                            | Label estimates in UI and reports; latest-purchase cost is confirmed (ADR 0044, TD-021). |
+| R-06 | Business logic leaks into React components under schedule pressure.                        | Boundary guard; domain-first tasks.                                                      |
+| R-07 | The static dashboard placeholder is mistaken for an implemented feature.                   | This documentation and honest status labels.                                             |
 
 ## 8. Workarounds
 

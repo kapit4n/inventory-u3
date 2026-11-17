@@ -35,6 +35,7 @@ export type ProductionOutputId = Brand<string, 'ProductionOutputId'>;
 export type ProductionWasteId = Brand<string, 'ProductionWasteId'>;
 export type SalesCheckpointId = Brand<string, 'SalesCheckpointId'>;
 export type SalesCheckpointItemId = Brand<string, 'SalesCheckpointItemId'>;
+export type DailyClosingId = Brand<string, 'DailyClosingId'>;
 
 export type OrganizationIdentifier =
   | OrganizationId
@@ -59,7 +60,8 @@ export type OrganizationIdentifier =
   | ProductionOutputId
   | ProductionWasteId
   | SalesCheckpointId
-  | SalesCheckpointItemId;
+  | SalesCheckpointItemId
+  | DailyClosingId;
 
 export const asOrganizationId = (value: string): OrganizationId => value as OrganizationId;
 export const asUserId = (value: string): UserId => value as UserId;
@@ -89,3 +91,4 @@ export const asProductionWasteId = (value: string): ProductionWasteId => value a
 export const asSalesCheckpointId = (value: string): SalesCheckpointId => value as SalesCheckpointId;
 export const asSalesCheckpointItemId = (value: string): SalesCheckpointItemId =>
   value as SalesCheckpointItemId;
+export const asDailyClosingId = (value: string): DailyClosingId => value as DailyClosingId;

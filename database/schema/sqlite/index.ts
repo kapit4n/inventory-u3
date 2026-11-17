@@ -7,6 +7,7 @@
  */
 
 export * from './branch.js';
+export * from './daily-closings.js';
 export * from './catalog.js';
 export * from './employee.js';
 export * from './inventory.js';

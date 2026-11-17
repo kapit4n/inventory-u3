@@ -31,6 +31,7 @@ ADRs retained for the Inventory U3 foundation:
 | 0041 | Stock balances derive from the append-only ledger                   |
 | 0042 | Production snapshots drive the stock ledger                         |
 | 0043 | Sales checkpoints snapshot weight and price before posting ledger   |
+| 0044 | Daily closings snapshot the day and reopen as a new version         |
 
 Numbering gaps are intentional: dental-specific decisions were removed with the
 business domain rather than rewritten as if they had been made for this product.

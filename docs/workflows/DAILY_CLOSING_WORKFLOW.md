@@ -1,20 +1,21 @@
 # Daily Closing Workflow
 
-> Implementation status: **NOT_IMPLEMENTED.** No closing table exists. This is the
-> design target for M7.
+> Implementation status: **IMPLEMENTED in M7.** Reads `inventory:read`; create,
+> review, confirm and reopen require `inventory:write`. Confirmed snapshots are
+> immutable; reopening creates a new version. See ADR 0044 and TD-021.
 
 ## 1. Scope
 
 Daily closing is the reviewed end-of-day snapshot for one branch. It consolidates
-the day's purchases, production, sales checkpoints, waste and remaining stock,
-and presents estimated revenue, cost and gross profit.
+the day's purchases, production, sales checkpoints, waste, inventory differences
+and remaining stock, and presents estimated revenue, cost and gross profit.
 
 It is a **review and confirmation** workflow, not a new source of transactional
 truth. The underlying records remain the evidence.
 
-## 2. Confirmed scope
+## 2. Implemented scope
 
-M7 must cover, per branch and business date:
+M7 covers, per branch and business date:
 
 - opening inventory;
 - purchases and receiving;
@@ -29,102 +30,124 @@ M7 must cover, per branch and business date:
 - review and confirmation;
 - auditable reopening and corrections (BR-023, BR-024).
 
-## 3. Proposed model
+## 3. Implemented model
 
-```text
-DailyClosing
-  id
-  organizationId
-  branchId
-  businessDate
-  status                (OPEN | REVIEWED | CONFIRMED | REOPENED)
-  openedInventory       (snapshot / computed references)
-  purchasesTotal        (minor units, snapshot)
-  productionSummary     (trays and estimated kg, snapshot)
-  salesTotal            (minor units, snapshot)
-  remainingStock        (snapshot)
-  wasteTotal            (snapshot)
-  inventoryDifference   (snapshot)
-  estimatedRevenue      (minor units)
-  estimatedCost         (minor units)
-  estimatedGrossProfit  (minor units)
-  reviewedByUserId
-  confirmedByUserId
-  confirmedAt
-  reopenedAt / reopenReason
-```
+A closing row stores organization, branch, business date, version, optional
+`previousClosingId`, status, currency, source counts/totals, estimated totals,
+warning counts and review/confirmation/reopening audit fields.
 
-The exact columns are **PROPOSED**. Snapshotting is important: a confirmed
-closing must not silently change when a product price or a prior record is edited.
+Statuses are `DRAFT | REVIEWED | CONFIRMED | REOPENED`. Each version is stored
+separately with a unique organization/branch/date/version key. The current
+closing is the highest version. A reopened confirmed row keeps its snapshot and
+is marked `REOPENED`; a new `DRAFT` version points back to it.
 
-## 4. Proposed workflow
+Each product item stores:
+
+- opening, purchased, produced, sold, waste, adjustment and correction
+  quantities in integer thousandths;
+- the reconciliation difference;
+- closing quantity = opening + in-day movement total;
+- estimated revenue from confirmed sales snapshots;
+- optional unit cost and cost basis (`LATEST_PURCHASE_PRICE | UNAVAILABLE`);
+- estimated cost of sales and a stable position.
+
+Snapshot totals include purchases, production tray/weight summaries, sales,
+waste record count, unreceived purchase count, production draft count,
+inventory-difference product count, missing-cost product count and negative-stock
+product count.
+
+## 4. Workflow
 
 1. Operator selects branch and business date.
-2. The system gathers the day's confirmed purchases, production and sales
-   checkpoints, plus unresolved drafts and warnings.
-3. The system computes opening stock, remaining stock, waste and differences.
-4. The system computes estimated revenue from sales snapshots.
-5. The system computes estimated cost from a defined cost basis (PENDING).
-6. The system computes estimated gross profit = revenue − cost.
-7. The operator reviews warnings (missing checkpoints, negative stock, unreceived
-   purchases, unconfirmed production).
-8. The operator confirms the closing; the snapshot is stored with actor/time.
-9. Reopening requires a reason and is audited. A reopened closing must not erase
-   the previous confirmed values.
+2. The API computes day bounds as local midnight to the next local midnight in
+   the organization timezone, then reads the branch's source records.
+3. The system computes opening stock from movements before the day, the day's
+   movement categories, confirmed sales revenue, purchase and production
+   summaries, waste and reconciliation differences.
+4. The system computes estimated cost from the latest received purchase price.
+5. The operator opens the closing, reviews the summary, readiness checklist and
+   item breakdown, then reviews and/or confirms it.
+6. Reopening requires a reason. The confirmed version becomes `REOPENED` and a
+   new draft version is created. The operator can change the underlying records
+   and create another closing version.
+
+An empty day can produce a closing; source gaps appear as warnings rather than
+blocking creation.
 
 ## 5. Cost and profit rules
 
-Estimated revenue can be computed from sales snapshots. Estimated cost is more
-fragile and needs a confirmed basis. Candidate bases (none accepted yet):
+- **Cost basis:** latest received purchase price for the product in the same
+  branch with `deliveryDate <= businessDate`, ordered by delivery date, received
+  time and purchase id.
+- The purchase unit must equal the closing item unit. Otherwise, or when there
+  is no such purchase, the item cost basis is `UNAVAILABLE` and cost is zero.
+- Cost of sales uses
+  `floor((soldQuantityMilli × unitPriceMinor + 500) / 1000)`.
+- Estimated revenue comes from confirmed sales-checkpoint snapshots for the
+  business date, not current prices.
+- Estimated gross profit = estimated revenue − estimated cost.
+- Cost and gross profit are **estimates** and must be labeled as such.
 
-- latest purchase price per product;
-- weighted-average purchase price for a period;
-- FIFO consumption;
-- a manually entered cost.
+BQ-14 still asks whether purchase prices are tax-inclusive and whether taxes or
+freight belong in cost; M7 uses the stored unit price only.
 
-Do not encode a cost method until the business confirms one. The gross profit is
-an **estimate** and must be labeled as such.
+## 6. Validation and warnings
 
-## 6. Validation rules (proposed)
+- One current closing per branch and business date; versions preserve history.
+- A duplicate create for the same branch/date is refused with HTTP 409.
+- Review requires `DRAFT`; confirmation requires `DRAFT` or `REVIEWED`; reopening
+  requires `CONFIRMED`.
+- Reopen reasons are trimmed and must be 1–500 characters.
+- Monetary totals use integer minor units in the organization currency.
+- Closing quantities are exact integer thousandths; a negative closing quantity
+  is flagged, not silently corrected.
+- Warnings cover missing purchases, production drafts, unreceived purchases,
+  waste records, inventory differences, negative stock and missing cost.
+- Unit conversion is not applied (BQ-10).
 
-- One closing per branch and business date, unless reopened with audit history.
-- A closing cannot be confirmed while required daily records are missing, unless
-  an explicit override with reason is recorded.
-- Currency must match the organization/price context.
-- Monetary totals use integer minor units.
-- Estimated and measured values are not mixed silently.
-- Reopening and correction must preserve the previous snapshot.
+## 7. UI
 
-## 7. UI expectations (M7)
+`/daily-closings` provides:
 
-- Branch + business date selector.
-- Readiness checklist: purchases, production, checkpoints, waste.
-- Summary cards for revenue, cost and estimated gross profit.
-- Drill-down from each summary to the underlying records.
-- Warnings for inventory differences and missing data.
-- Confirm and reopen actions with reasons.
+- branch and business-date filters;
+- current closing list with status, version, revenue, cost, profit and warning
+  count;
+- a create action for operators with `inventory:write`;
+- a detail dialog with the summary, readiness checklist and item-level
+  breakdown;
+- review, confirm and reopen actions with a required reason.
 
-## 8. Tests required
+## 8. Tests
 
-- Aggregation tests for mixed days (raw + processed, multiple checkpoints).
-- Snapshot tests: changing master data after confirmation does not alter closing.
-- State transition tests for open → reviewed → confirmed → reopened.
-- Branch isolation and date-boundary tests using the organization timezone.
-- Cost-basis tests once the method is confirmed.
-- Repository and integration tests on both engines.
-- Browser test for the review and confirm flow.
+- Domain snapshot, cost, transition, empty-day and validation tests.
+- SQLite integration tests for aggregation, costing, duplicate refusal,
+  review/confirm/reopen versioning, branch isolation, persistence and errors.
+- Component tests for the list, detail, review, confirmation, reopening,
+  duplicate handling and required reason.
+- Chromium browser tests for opening a closing and walking the review/confirm/
+  reopen flow.
+- PostgreSQL integration cases exist and skip when no server is available
+  (SI-06).
 
 ## 9. Dependencies and open questions
 
 Depends on M3 (purchases), M4 (inventory), M5 (production) and M6 (sales).
 
+Resolved for M7:
+
+- Estimated cost basis is the latest received purchase price.
+
 Open:
 
-1. What is the estimated cost basis? (latest, weighted average, FIFO, manual)
-2. Who reviews and who confirms a closing?
-3. What time does a business day start and end in each branch?
-4. Are missing checkpoints a block or a warning?
-5. Can a closing be confirmed before all three branches are entered?
-6. Is opening inventory carried from the previous closing or from stock movements?
-7. How are inventory differences valued for profit?
-8. Are losses/waste valued at cost or at sale price for reporting?
+1. Does the business day start/end at local midnight for every branch? M7
+   assumes the organization timezone (BQ-16).
+2. Are unit conversions required between purchase and inventory units? Until
+   resolved, mismatches surface as `UNAVAILABLE` cost (BQ-10).
+3. Are purchase prices tax-inclusive and do taxes/freight belong in cost?
+   (BQ-14)
+4. Which final WhatsApp reporting fields and periods are required? (BR-013,
+   BQ-02)
+5. Who reviews and who confirms a closing? M7 records the authenticated actor
+   for both actions.
+6. How should inventory differences and waste be valued for profit? M7 reports
+   quantities and counts; cost of sales is based on sold quantity.

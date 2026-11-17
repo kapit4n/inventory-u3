@@ -123,6 +123,17 @@ weight. Confirmation appends negative `SALES_CHECKPOINT` movements sourced by
 `SALES_CHECKPOINT`; correction writes linked `CORRECTION` movements. See the
 sales-checkpoint workflow and TD-020.
 
+`daily_closings` stores one versioned snapshot per branch and business date with
+`DRAFT | REVIEWED | CONFIRMED | REOPENED` status, organization currency, source
+counts/totals, estimated revenue/cost/profit, warning counts and review,
+confirmation and reopening audit fields. The organization/branch/date/version
+key is unique; reopening marks the confirmed row and creates a new draft linked
+by `previous_closing_id`. `daily_closing_items` stores product quantities for
+opening, purchasing, production, sales, waste, adjustments, corrections,
+reconciliation differences and closing stock, plus estimated revenue, optional
+unit cost, cost basis and position. Cost basis values are
+`LATEST_PURCHASE_PRICE | UNAVAILABLE`. See ADR 0044 and TD-021.
+
 ## Migrations
 
 ```
@@ -130,7 +141,7 @@ database/migrations/          PostgreSQL migrations + journal
 database/migrations-sqlite/   SQLite migrations + journal
 ```
 
-Both journals currently contain twelve entries, `0000` through `0011`; `0002` adds
+Both journals currently contain thirteen entries, `0000` through `0012`; `0002` adds
 branches and the catalog, `0003` adds product kind and average weight, `0004`
 adds employees with organization and branch references, `0005` adds
 organization-wide suppliers, `0006` adds effective-dated product price history,
@@ -141,7 +152,9 @@ to integer thousandths, adds `stock_adjustments` and `inventory_waste`, and adds
 the branch/product movement index; `0010` adds the production status/weight-basis
 enums and the four production tables with their indexes; `0011` adds the sales
 checkpoint status/period/weight-basis enums and the two sales-checkpoint tables
-with their indexes and period uniqueness. M2-T4 and M2-T5 did not
+with their indexes and period uniqueness; `0012` adds the daily-closing
+status/cost-basis enums and the two closing snapshot tables with their version,
+branch/date and product keys. M2-T4 and M2-T5 did not
 change the schema
 because the catalog and product tables already carried the needed ownership,
 unique keys and active-state columns. The SQLite `0008` migration rebuilds
@@ -193,9 +206,14 @@ Seeded master data:
 | Waste         | 5 positive waste reports                                                                                      |
 | Production    | 3 batches (1 draft, 1 confirmed, 1 corrected), 7 inputs, 3 outputs and 2 waste lines                          |
 | Sales         | 10 checkpoints (3 draft, 5 confirmed, 2 corrected) and 24 product lines                                       |
+| Daily closing | 0 seeded; operators create versioned snapshots. No purchases are seeded, so estimated cost is `UNAVAILABLE`   |
 | Movements     | 57 ledger rows (21 adjustment, 5 waste reports, 10 production and 21 sales/correction movements)              |
 | Presentations | 6 trays for the processed products                                                                            |
 | Price history | 27 effective-dated selling-price rows (current prices from `2026-11-01`, some earlier rows from `2026-06-01`) |
+
+The seed deliberately contains no purchases, so a seeded daily closing shows
+`missingCostProductCount` rather than an invented cost. Add purchase fixtures if
+a development demo needs available latest-purchase cost.
 
 Development users:
 

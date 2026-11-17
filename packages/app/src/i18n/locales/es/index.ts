@@ -1,6 +1,7 @@
 import { auth } from './auth.js';
 import { branches } from './branches.js';
 import { common } from './common.js';
+import { dailyClosings } from './daily-closings.js';
 import { dashboard } from './dashboard.js';
 import { employees } from './employees.js';
 import { inventory } from './inventory.js';
@@ -17,6 +18,7 @@ export const es = {
   ...common,
   ...auth,
   ...branches,
+  ...dailyClosings,
   ...dashboard,
   ...employees,
   ...inventory,

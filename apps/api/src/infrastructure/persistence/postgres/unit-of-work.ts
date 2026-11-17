@@ -1,6 +1,7 @@
 import type { Repositories, UnitOfWork } from '@inventory-u3/domain';
 
 import type { InventoryDatabase } from './connection.js';
+import { DrizzleDailyClosingRepository } from '../repositories/daily-closing-repository.js';
 import { DrizzleBranchRepository } from '../repositories/branch-repository.js';
 import { DrizzleEmployeeRepository } from '../repositories/employee-repository.js';
 import { DrizzleInventoryWasteRepository } from '../repositories/inventory-waste-repository.js';
@@ -33,6 +34,7 @@ export function repositoriesFor(db: InventoryDatabase): Repositories {
     productPriceHistory: new DrizzleProductPriceHistoryRepository(db),
     productionBatches: new DrizzleProductionBatchRepository(db),
     salesCheckpoints: new DrizzleSalesCheckpointRepository(db),
+    dailyClosings: new DrizzleDailyClosingRepository(db),
     purchases: new DrizzlePurchaseRepository(db),
     purchaseCorrections: new DrizzlePurchaseCorrectionRepository(db),
     stockMovements: new DrizzleStockMovementRepository(db),

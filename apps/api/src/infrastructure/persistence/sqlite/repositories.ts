@@ -1,6 +1,7 @@
 import type { Repositories } from '@inventory-u3/domain';
 
 import type { SqliteDatabase } from './connection.js';
+import { SQLiteDailyClosingRepository } from './repositories/daily-closing-repository.js';
 import { SQLiteBranchRepository } from './repositories/branch-repository.js';
 import { SQLiteEmployeeRepository } from './repositories/employee-repository.js';
 import { SQLiteInventoryWasteRepository } from './repositories/inventory-waste-repository.js';
@@ -33,6 +34,7 @@ export function sqliteRepositoriesFor(db: SqliteDatabase): Repositories {
     productPriceHistory: new SQLiteProductPriceHistoryRepository(db),
     productionBatches: new SQLiteProductionBatchRepository(db),
     salesCheckpoints: new SQLiteSalesCheckpointRepository(db),
+    dailyClosings: new SQLiteDailyClosingRepository(db),
     purchases: new SQLitePurchaseRepository(db),
     purchaseCorrections: new SQLitePurchaseCorrectionRepository(db),
     stockMovements: new SQLiteStockMovementRepository(db),

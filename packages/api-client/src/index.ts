@@ -28,6 +28,14 @@ export {
   updateProductCategory,
   updateProductPresentation,
 } from './catalog.js';
+export {
+  confirmDailyClosing,
+  createDailyClosing,
+  getDailyClosing,
+  listDailyClosings,
+  reopenDailyClosing,
+  reviewDailyClosing,
+} from './daily-closings.js';
 export { createEmployee, listEmployees, updateEmployee } from './employees.js';
 export {
   adjustStock,
