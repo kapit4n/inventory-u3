@@ -4,8 +4,7 @@
 > M2-T2 at `6b50606`, M2-T3 at `5c96eeb`, M2-T4 at `992d6ea`, M2-T5 at
 > `c8526d0`, M2-T6/T7 with the sample seed at `cc70bfc`, M3 at `13b8fcd` and its
 > documentation closeout at `c86c6c5`, M4 at `8f5f326`, M5 at `7441653`, M6 at
-> `52e39a3` and M7 at `e04bafa`. M8 dashboard and reports is verified in the
-> working tree and pending commit.
+> `52e39a3`, M7 at `e04bafa`, and M8 at `9099246`.
 > See [IMPLEMENTATION_PROGRESS](../development/IMPLEMENTATION_PROGRESS.md).
 
 ## Purpose
@@ -122,8 +121,8 @@ product.** As of this document:
   receiving and audited corrections are complete. M4 branch inventory and M5
   production are complete and committed. M6 sales checkpoints are implemented
   end-to-end, with the reporting contract still blocked on BR-013. M7 daily
-  closing is committed as `e04bafa`; M8 dashboard and reports are implemented
-  and verified, pending commit. The
+  closing is committed as `e04bafa`; M8 dashboard and reports are committed as
+  `9099246`. The
   sample seed carries three illustrative
   branches until the real names are confirmed (BQ-19), employee sharing across
   branches remains open (BQ-20), and supplier detail fields remain open (BQ-21).

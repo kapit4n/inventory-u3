@@ -40,9 +40,9 @@ adjustments, waste and reconciliation are audited, negative stock is refused, an
 M6 sales checkpoints are complete and committed as `52e39a3`; the final WhatsApp
 reporting fields remain blocked on BR-013. M7 daily closing is complete and
 committed as `e04bafa` (versioned snapshots, latest-purchase costing, audited
-reopening). M8 dashboard and reporting is complete and verified in the working
-tree (on-demand consolidated reports, day/week/month periods, estimated profit,
-CSV export) and is pending commit; M9 hardening is next.
+reopening). M8 dashboard and reporting is complete and committed as `9099246`
+(on-demand consolidated reports, day/week/month periods, estimated profit, CSV
+export); M9 hardening is next.
 
 - Canonical roadmap: `docs/development/IMPLEMENTATION_ROADMAP.md`.
 - Current task and status: `docs/development/CURRENT_TASK.md` and

@@ -10,8 +10,7 @@
 ## Current status
 
 - **Foundation prerequisite:** complete.
-- **Business roadmap:** M1–M7 are COMPLETED; M8 is complete and verified,
-  pending commit; M9 is NOT_STARTED.
+- **Business roadmap:** M1–M8 are COMPLETED; M9 is NOT_STARTED.
 - **Branch master data:** entity, dual-engine schema, migrations and repositories
   are implemented. `GET/POST/PUT /api/v1/branches`, the Settings management
   section and the reusable active-branch selector are implemented. Three
@@ -69,7 +68,7 @@
   reports with date, branch and day/week/month filters, estimated profit and CSV
   export. One domain builder and repository port are implemented on both engines
   (ADR 0045, TD-022). BR-013/BQ-02/BQ-10/BQ-14/BQ-16/BQ-17 remain open. M8 is
-  verified and pending commit.
+  committed as `9099246`.
 - **Access model:**
   documented in `docs/project/ACCESS_MODEL.md`; one
   organization-wide central operator initially. Branch users and assignment
@@ -78,14 +77,13 @@
   references describe M1 through M8. The boundary guard checks dependency
   direction, database access, thin shells, domain Node built-ins, schema-table
   parity and migration-journal parity.
-- **Next task:** commit M8, then start M9 quality, permissions and operational
-  hardening. Real branch names wait for BQ-19; real master data replaces the
-  sample seed when confirmed.
+- **Next task:** start M9 quality, permissions and operational hardening. Real
+  branch names wait for BQ-19; real master data replaces the sample seed when
+  confirmed.
 - **Commits:** M1 closeout `bfdc9cb`; M2-T1 `814f397`; M2-T2 `6b50606`; M2-T3
   `5c96eeb`; M2-T4 `992d6ea`; M2-T5 `c8526d0`; M2-T6/T7 with the sample seed
   `cc70bfc`; M3 `13b8fcd`; M3 docs closeout `c86c6c5`; M4 `8f5f326`; M5
-  `7441653`; M6 `52e39a3`; M6 seed `8382e54`; M7 `e04bafa`. M8 is verified and
-  pending commit.
+  `7441653`; M6 `52e39a3`; M6 seed `8382e54`; M7 `e04bafa`; M8 `9099246`.
 
 The previous verification records are preserved in
 [SESSION_LOG.md](../development/SESSION_LOG.md) (Sessions 0–19).

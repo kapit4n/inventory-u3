@@ -2539,7 +2539,7 @@ then update continuity documentation for the completed milestone.
 
 ### Pending work
 
-- Commit M8 when authorized.
+- M8 was committed as `9099246`.
 - Resolve BR-013/BQ-02/BQ-10/BQ-14/BQ-16/BQ-17 before treating final reporting
   semantics as confirmed.
 - Measure report-query performance in M9.
@@ -2548,5 +2548,5 @@ then update continuity documentation for the completed milestone.
 ### Next session
 
 Read `AGENTS.md`, `PROJECT_OVERVIEW.md`, `IMPLEMENTATION_PROGRESS.md`,
-`CURRENT_TASK.md` and the M9 roadmap section. Commit M8 if still pending, then
-begin M9 quality, permissions and operational hardening.
+`CURRENT_TASK.md` and the M9 roadmap section. Begin M9 quality, permissions and
+operational hardening; ask for BQ-09 input before branch access work.

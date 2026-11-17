@@ -2,8 +2,8 @@
 
 > Canonical business roadmap. It supersedes the generic item/stock sequence in
 > the old [`docs/roadmap.md`](../roadmap.md), which now points here.
-> Last reviewed: 2026-11-17 after M8 (dashboard and reports), which is verified
-> in the working tree and pending commit.
+> Last reviewed: 2026-11-17 after M8 (dashboard and reports), which is committed
+> as `9099246`.
 
 Status values are used exactly as follows:
 
@@ -589,7 +589,7 @@ per-product breakdown and source warnings.
 
 ## M8 — Dashboard and Reports
 
-**Status: COMPLETE — implementation and verification green; pending commit.**
+**Status: COMPLETED; committed as `9099246`.**
 
 ### Objective
 
@@ -737,5 +737,5 @@ been executed." A passing unit suite is not a backup/restore drill.
 | M5                      | COMPLETE    | Production batches, snapshots, ledger integration, UI and tests; committed as `7441653`          |
 | M6                      | COMPLETED   | Generic checkpoints, snapshots, ledger integration, UI and tests; committed as `52e39a3`         |
 | M7                      | COMPLETED   | Versioned closings, latest-purchase costing, warnings, UI, tests; committed as `e04bafa`         |
-| M8                      | COMPLETE    | Consolidated reports, filters, estimated profit, CSV export, UI and tests; pending commit        |
+| M8                      | COMPLETED   | Consolidated reports, filters, estimated profit, CSV export, UI and tests; committed `9099246`   |
 | M9                      | NOT_STARTED | No CI, branch permissions, audit log or backup drill                                             |

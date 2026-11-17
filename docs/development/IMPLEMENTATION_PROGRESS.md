@@ -5,18 +5,18 @@
 
 ## Summary
 
-| Field                  | Value                                                         |
-| ---------------------- | ------------------------------------------------------------- |
-| Current milestone      | M8 — Dashboard and Reports (complete; pending commit)         |
-| Current task           | Commit M8, then start M9 quality and operational hardening    |
-| Overall project status | M8 verified end-to-end; reporting contract still open         |
-| Completed milestones   | A prerequisite and M1 through M7; M8 complete and verified    |
-| In-progress milestones | M6/M7/M8 follow-ups blocked on BR-013/BQ-02/BQ-10/BQ-16/BQ-17 |
-| Blocked milestones     | Final WhatsApp fields on BR-013; period and unit work open    |
-| Pending milestones     | M9                                                            |
-| Last verified commit   | `e04bafa` (M7); M8 verified in the working tree               |
-| Last update date       | 2026-11-17                                                    |
-| Next recommended task  | Commit M8, then start M9                                      |
+| Field                  | Value                                                             |
+| ---------------------- | ----------------------------------------------------------------- |
+| Current milestone      | M9 — Quality, Permissions and Operational Hardening (not started) |
+| Current task           | Plan M9; confirm branch-access rules before implementation        |
+| Overall project status | M8 committed end-to-end; reporting contract still open            |
+| Completed milestones   | A prerequisite and M1 through M8                                  |
+| In-progress milestones | M6/M7/M8 follow-ups blocked on BR-013/BQ-02/BQ-10/BQ-16/BQ-17     |
+| Blocked milestones     | Final WhatsApp fields on BR-013; period and unit work open        |
+| Pending milestones     | M9                                                                |
+| Last verified commit   | `9099246` (M8)                                                    |
+| Last update date       | 2026-11-17                                                        |
+| Next recommended task  | Start M9 planning; resolve BQ-09 before branch access work        |
 
 ### State at the time of this update
 
@@ -780,7 +780,7 @@ M7 was committed as `e04bafa`; M8 consolidated reporting followed.
 
 ## M8 — Dashboard and Reports
 
-**Status: COMPLETE — implementation and verification green; pending commit.**
+**Status: COMPLETED; committed as `9099246`.**
 
 ### Completed
 
@@ -815,7 +815,7 @@ M7 was committed as `e04bafa`; M8 consolidated reporting followed.
 - [ ] Measure report-query performance in M9 before adding indexes or
       materialization.
 - [ ] Execute PostgreSQL integration cases on a machine with a server (SI-06).
-- [ ] Commit authorization.
+- [x] M8 committed as `9099246`.
 
 ### Validation
 
@@ -843,7 +843,8 @@ treatment, branch business-day boundary or no-sales marker was invented.
 
 ### Next action
 
-Commit M8, then start M9 quality, permissions and operational hardening.
+Start M9 quality, permissions and operational hardening. Resolve BQ-09 before
+implementing branch access.
 
 ---
 

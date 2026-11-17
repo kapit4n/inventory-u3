@@ -2,92 +2,83 @@
 
 > Last updated: 2026-11-17.
 >
-> **M8 dashboard and reports is COMPLETE and verified; pending commit.** M7 daily
-> closing is committed as `e04bafa`, M6 as `52e39a3`, M5 as `7441653`, M4 as
-> `8f5f326` and M1–M3 are complete. BR-013, BQ-02, BQ-10, BQ-14, BQ-16 and BQ-17
-> still limit final reporting semantics.
+> **M8 dashboard and reports is COMPLETE and committed as `9099246`.** The next
+> milestone is **M9 — Quality, Permissions and Operational Hardening**, which is
+> NOT_STARTED. M7 is committed as `e04bafa`, M6 as `52e39a3`, M5 as `7441653`, M4
+> as `8f5f326` and M1–M3 are complete. BR-013, BQ-02, BQ-09, BQ-10, BQ-14,
+> BQ-16 and BQ-17 still limit final business semantics.
 
 ## Task identity
 
-| Field        | Value                                                        |
-| ------------ | ------------------------------------------------------------ |
-| Milestone    | M8 — Dashboard and Reports                                   |
-| Task ID      | M8 (all planned tasks)                                       |
-| Task         | Consolidated reporting, periods, estimated profit and export |
-| Status       | COMPLETE — verified; pending commit authorization            |
-| Dependencies | M3, M4, M5, M6 and M7                                        |
-| Blocks       | M9 quality, permissions and operational hardening            |
+| Field        | Value                                                |
+| ------------ | ---------------------------------------------------- |
+| Milestone    | M9 — Quality, Permissions and Operational Hardening  |
+| Task ID      | M9 (planning)                                        |
+| Task         | Confirm scope, decide open access rules, then harden |
+| Status       | NOT_STARTED                                          |
+| Dependencies | M1 through M8                                        |
+| Blocks       | Release readiness                                    |
 
 ## Objective
 
-Give the owner a consolidated view across all three branches and the detail
-reports needed to run the business, with day/week/month periods and a usable CSV
-export that does not give React database access.
+Harden the product for real operational use: expand critical business-flow
+coverage, define and implement branch-scoped access, add an audit history,
+exercise backup and recovery on both engines, measure report/movement query
+performance, add CI and prepare release documentation.
 
-## Completed scope
+## Scope from the roadmap
 
-- Accepted ADR 0045 / TD-022: reports are computed on demand from source records.
-- Added a pure domain report builder with totals, section rows, branch filters,
-  period grouping and capped detail rows.
-- Added `ReportRepository.readSources(...)` with SQLite and PostgreSQL
-  implementations and registrations.
-- Added a report use case, Zod schemas and `GET /api/v1/reports/summary` behind
-  `reports:read`; malformed queries return HTTP 422.
-- Added a typed API client, React Query hook and `/dashboard` page with date,
-  branch and granularity filters.
-- Added sales-by-branch/product, purchase/supplier, production, inventory, waste
-  and estimated-profit sections.
-- Reused the M7 latest-purchase cost rule with a same-unit guard and
-  missing-cost count; profit remains labeled estimated.
-- Grouped periods in the organization timezone; weeks start Monday and months
-  start on day one.
-- Added localized EN/ES copy, empty states, error states and CSV export through
-  `usePlatform().saveFile`.
-- Added domain, SQLite integration, component and Chromium browser tests.
-- Updated ADR/TD, roadmap and continuity documentation.
+- Automated tests across the business flows.
+- Business-rule validation.
+- Branch-specific access control and user-branch assignment.
+- Append-only audit history.
+- SQLite and PostgreSQL backup/restore procedures and drills.
+- Performance and reliability checks for movement and report queries.
+- Security review.
+- CI pipeline and release checklist.
 
-## Implemented constraints
+## Constraints
 
-- `from` and `to` are required ISO dates; `branchId` is optional and
-  `granularity` defaults to `day`.
-- Sales come from confirmed checkpoints, production from confirmed batches and
-  purchases from received purchases.
-- Inventory is the ledger balance before the end of `to`; waste combines
-  inventory waste and production waste with their source labels.
-- Waste is bounded by the report's lower and upper day bounds; period assignment
-  uses the organization timezone and the local date of `occurredAt`.
-- Estimated cost uses the latest received purchase with
-  `deliveryDate <= sale businessDate`, ordered by delivery date, received time
-  and purchase id. A unit mismatch yields zero cost and increments the
-  missing-cost count.
-- No report tables, views or migrations were added.
-- CSV money formatting uses the captured currency's fraction digits, not a
-  hardcoded `/100` assumption.
+- Do not start a feature that belongs to an earlier milestone; M1–M8 are closed.
+- Do not invent branch-user rules. BQ-09 asks when branch employees/managers need
+  access and what they may see; it is an OPEN QUESTION.
+- Do not claim backup/restore, performance or CI acceptance without actually
+  executing the check.
+- Keep the 25 non-negotiable architectural rules and run
+  `pnpm run guard:boundaries`.
+- Two engines remain explicit; any new table, index or repository method must be
+  implemented in both schema trees and both repository implementations.
+- No offline synchronization, GraphQL, Redux, microservices or new database.
 
 ## Out of scope
 
-- Final WhatsApp fields, order, mandatory fields and labels (BR-013).
-- Configurable or time-derived checkpoint/report periods (BQ-02).
-- Unit conversion between purchase, inventory, production and sales units
-  (BQ-10).
-- Tax/freight treatment in cost (BQ-14).
-- Branch timezones or non-midnight business days (BQ-16).
-- A no-sales checkpoint or reporting marker (BQ-17).
-- Report-specific indexes, materialization or performance targets; measure in M9.
-- Record-level drill-down links from report rows.
+- Changing completed M1–M8 behavior except where an M9 hardening requirement
+  explicitly demands it.
+- Final WhatsApp fields, order and labels (BR-013).
+- Configurable checkpoint/report periods (BQ-02).
+- Unit conversion (BQ-10), tax/freight treatment (BQ-14), branch business-day
+  boundaries (BQ-16) or no-sales marker (BQ-17) without product decisions.
+- Guessing names/codes of the three real branches (BQ-19).
+- Inventing supplier details (BQ-21).
 
 ## Acceptance criteria
 
-- [x] Owner can view consolidated totals across branches.
-- [x] Owner can filter to one branch.
-- [x] Sales by branch and product match checkpoint data.
-- [x] Purchase/supplier and production reports match source records.
-- [x] Estimated kilograms and revenue are labeled estimated.
-- [x] Waste/damage is distinguishable from sales.
-- [x] Daily/weekly/monthly periods use the organization timezone.
-- [x] Export produces a usable file without giving the UI database access.
+- [ ] Critical business rules have automated tests.
+- [ ] A branch user can only access assigned branches.
+- [ ] Significant corrections are auditable end to end.
+- [ ] Backup and restore have been exercised for both engines.
+- [ ] Report and movement queries meet an agreed performance target.
+- [ ] CI runs typecheck, lint, tests, build and boundary guard.
+- [ ] Release documentation exists and no known critical issue is open.
 
-## Verification
+## Current blocker
+
+BQ-09 blocks meaningful branch-scoped authorization work. Ask for product input
+before designing `user_branch_assignments` or branch-permission behavior. Work
+that does not depend on BQ-09, such as CI, backup drills, audit review and
+performance measurement, can be planned independently.
+
+## Verification baseline from M8
 
 - `pnpm run format:check` — PASS.
 - `pnpm run typecheck` — PASS, 12/12 tasks.
@@ -102,8 +93,8 @@ export that does not give React database access.
 - PostgreSQL integration cases were skipped because no server is available
   (SI-06), not passed.
 
-## Next task
+## Next action
 
-Commit M8, then start M9 quality, permissions and operational hardening. Resolve
-BR-013, BQ-02, BQ-10, BQ-14, BQ-16 and BQ-17 before treating final reporting
-semantics as confirmed.
+Ask for BQ-09 input when branch access is to be designed. Until then, plan M9
+from the roadmap and begin only the hardening work that is independent of that
+decision.
