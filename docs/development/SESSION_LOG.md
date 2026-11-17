@@ -2626,3 +2626,79 @@ verification gates used locally.
 Read `AGENTS.md`, `PROJECT_OVERVIEW.md`, `IMPLEMENTATION_PROGRESS.md`,
 `CURRENT_TASK.md` and the M9 roadmap section. Verify CI, then continue independent
 hardening. Do not implement branch permissions until BQ-09 is answered.
+
+---
+
+## Session 26 — 2026-11-17 — M9 hardening review and drills
+
+### Objective
+
+Continue BQ-09-independent M9 work: review audit evidence, exercise backup/restore,
+record a performance baseline and document release readiness.
+
+### Work performed
+
+- Reviewed the audit implementation across both schema trees, repositories,
+  use cases, tests and decisions. Mapped existing per-entity evidence and recorded
+  gaps rather than inventing a general audit model.
+- Added BQ-22 for the unresolved audit-log scope; reused BQ-03 for correction
+  approval rules.
+- Executed a SQLite backup/restore drill using `better-sqlite3` against the seeded
+  development database.
+- Documented SQLite and PostgreSQL backup/restore procedures; PostgreSQL was not
+  executed locally.
+- Measured representative SQLite report and stock-movement queries and recorded a
+  seeded-data baseline; added BQ-23 for the missing target and dataset size.
+- Added a release readiness checklist that explicitly remains blocked.
+
+### Files changed
+
+- `docs/development/CURRENT_TASK.md`
+- `docs/development/IMPLEMENTATION_PROGRESS.md`
+- `docs/development/KNOWN_ISSUES.md`
+- `docs/development/SESSION_LOG.md`
+- `docs/open-questions.md`
+- `docs/progress/REPORT.md`
+
+### Technical decisions
+
+- No general `audit_log` table was added; the scope is BQ-22.
+- No new actor/reason columns were added to purchases or price history; those are
+  audit gaps pending the scope decision.
+- No performance target was invented; BQ-23 records the missing input.
+- PostgreSQL backup/restore was documented but not claimed as executed.
+
+### Validation
+
+- Audit review: per-entity audit evidence exists and is tested on SQLite for M3-M7;
+  PostgreSQL parity remains skipped locally (SI-06).
+- SQLite drill: 26 tables, clean `integrity_check` and `foreign_key_check`, all row
+  counts and backup/restore SHA-256 hashes matched.
+- SQLite baseline: sales report median 0.0388 ms/p95 0.1152 ms over 13 rows;
+  movement balance median 0.0090 ms/p95 0.0128 ms over 57 movements.
+- No code changed in this session, so the M8/CI verification baseline remains the
+  authority for build, tests, lint and typecheck.
+
+### Problems found
+
+- No `sqlite3`, `pg_dump` or PostgreSQL client is available on this machine; the
+  drill used the API workspace's installed `better-sqlite3`.
+- The sales report query plan scans checkpoint items and sorts in a temporary
+  B-tree on the seeded database; this is not a performance failure without a
+  target or production-size dataset.
+- Purchase cancellation, price changes, draft discards and master-data edits have
+  weaker attribution than the per-entity correction records.
+
+### Pending work
+
+- Verify the CI workflow on GitHub.
+- Run PostgreSQL integration and backup/restore drills on a server.
+- Get BQ-09, BQ-03, BQ-22 and BQ-23 answers before the corresponding design or
+  acceptance work.
+- Continue critical-rule test expansion and finalize release readiness.
+
+### Next session
+
+Read `AGENTS.md`, `PROJECT_OVERVIEW.md`, `IMPLEMENTATION_PROGRESS.md`,
+`CURRENT_TASK.md` and the M9 roadmap section. Verify CI and continue independent
+hardening; do not invent branch, audit or performance decisions.

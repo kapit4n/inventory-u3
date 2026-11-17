@@ -14,7 +14,7 @@
 | In-progress milestones | M9; M6/M7/M8 follow-ups blocked on BR-013/BQ-02/BQ-10/BQ-16/BQ-17 |
 | Blocked milestones     | Final WhatsApp fields on BR-013; branch access on BQ-09           |
 | Pending milestones     | M9 remaining hardening                                            |
-| Last verified commit   | `9099246` (M8); M9 CI workflow pending first GitHub run           |
+| Last verified commit   | `634e58f` (M9 CI); GitHub run pending                             |
 | Last update date       | 2026-11-17                                                        |
 | Next recommended task  | Verify CI on GitHub; continue independent M9 hardening            |
 
@@ -860,25 +860,81 @@ implementing branch access.
       browser tests.
 - [x] CI-style browser setup validated locally with `CI=true` and a manually
       started web preview server.
+- [x] Audit review completed: per-entity evidence mapped for M3-M7; gaps recorded
+      as BQ-22 and existing BQ-03 rather than silently choosing a new audit model.
+- [x] SQLite backup/restore drill executed successfully against the default
+      development database.
+- [x] SQLite report/movement query baseline recorded on seeded data; no pass/fail
+      target claimed because BQ-23 is open.
 
 ### Pending
 
 - [ ] Verify the CI workflow on GitHub.
 - [ ] Business-flow test coverage.
 - [ ] Branch-specific access control; blocked on BQ-09.
-- [ ] Audit log.
-- [ ] Backup and recovery drills.
-- [ ] Performance and reliability.
+- [ ] Audit history scope; blocked on BQ-22 and BQ-03.
+- [ ] PostgreSQL backup/restore drill; blocked locally by SI-06.
+- [ ] Performance acceptance; blocked on BQ-23.
 - [ ] Release documentation.
 
 ### Validation
 
 Foundation gates pass. The CI workflow is formatted and its browser-test path was
 reproduced locally: 48 Chromium tests passed with `CI=true`. The GitHub Actions
-run itself has not executed yet. No backup drill, performance test or release
-checklist exists.
+run itself has not executed yet. A general audit table remains undecided (BQ-22);
+per-entity correction evidence is implemented and tested on SQLite, while
+PostgreSQL parity remains skipped locally (SI-06). A seeded-data performance
+baseline exists, but BQ-23 has no target, and the release checklist below still
+has open blockers.
+
+### Backup and restore procedure
+
+**SQLite:** stop API/migrator writes, use `better-sqlite3`'s online backup API from
+`apps/api` to copy `data/inventory-u3.db` to a durable destination, verify
+`integrity_check` and `foreign_key_check`, then restore by copying the verified
+backup over the target file while the application is stopped and rerunning the
+same checks plus a smoke test. The local drill backed up the seeded development
+database, restored a copy, and confirmed 26 tables with matching row counts and
+SHA-256 hashes; both integrity checks were clean.
+
+**PostgreSQL:** on a host with client tools, create a custom-format dump with
+`pg_dump --format=custom --file=inventory-u3.dump "$DATABASE_URL"`. Restore into
+a scratch database first with
+`pg_restore --clean --if-exists --no-owner --no-privileges --dbname "$RESTORE_DATABASE_URL" inventory-u3.dump`,
+verify row counts and application smoke tests, then cut over only after
+approval. This drill has not been executed locally: no PostgreSQL server or
+`pg_dump` is available (SI-06).
+
+### Performance baseline
+
+Measured with `better-sqlite3` against the seeded development database, 40 runs
+per query, median/p95 in milliseconds:
+
+| Query                           | Rows | Median | p95    | Plan                                                                |
+| ------------------------------- | ---- | ------ | ------ | ------------------------------------------------------------------- |
+| Sales lines for a report period | 13   | 0.0388 | 0.1152 | `sales_checkpoint_items_organization_product_idx`, temp B-tree sort |
+| Stock balance before period end | 57   | 0.0090 | 0.0128 | `stock_movements_organization_product_occurred_idx`                 |
+
+This is a baseline, not a pass/fail result: the dataset is small, PostgreSQL was
+not measured, and no latency target or production-size dataset exists (BQ-23).
+
+### Release readiness checklist
+
+- [x] Formatting, typecheck, lint, boundary guard, unit/component tests and build
+      are green locally.
+- [x] Browser tests are green locally and in a CI-style `CI=true` run.
+- [x] SQLite backup/restore drill passed.
+- [ ] CI workflow has executed on GitHub.
+- [ ] PostgreSQL integration and backup/restore drills have run on a server.
+- [ ] BQ-09 branch access, BQ-03 correction approval, BQ-22 audit scope and
+      BQ-23 performance target are answered where applicable.
+- [ ] Final reporting questions BR-013, BQ-02, BQ-10, BQ-14, BQ-16 and BQ-17 are
+      resolved.
+
+This checklist is documentation of current readiness, not a release approval.
 
 ### Next action
 
 Verify CI on the first push or pull request, then continue independent hardening.
-Ask for BQ-09 input before branch access work.
+Ask for BQ-09, BQ-03, BQ-22 and BQ-23 input before authorization, general audit
+or performance acceptance work.

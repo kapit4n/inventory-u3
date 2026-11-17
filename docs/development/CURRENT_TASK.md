@@ -59,6 +59,7 @@ performance, add CI and prepare release documentation.
   boundaries (BQ-16) or no-sales marker (BQ-17) without product decisions.
 - Guessing names/codes of the three real branches (BQ-19).
 - Inventing supplier details (BQ-21).
+- Designing a general audit table before the audit scope is answered (BQ-22).
 
 ## Acceptance criteria
 
@@ -66,16 +67,18 @@ performance, add CI and prepare release documentation.
 - [ ] A branch user can only access assigned branches.
 - [ ] Significant corrections are auditable end to end.
 - [ ] Backup and restore have been exercised for both engines.
-- [ ] Report and movement queries meet an agreed performance target.
+- [ ] Report and movement queries meet an agreed performance target; blocked on BQ-23.
 - [ ] CI runs typecheck, lint, tests, build and boundary guard.
 - [ ] Release documentation exists and no known critical issue is open.
 
 ## Current blocker
 
-BQ-09 blocks meaningful branch-scoped authorization work. Ask for product input
-before designing `user_branch_assignments` or branch-permission behavior. Work
-that does not depend on BQ-09, such as CI, backup drills, audit review and
-performance measurement, can be planned independently.
+BQ-09 blocks meaningful branch-scoped authorization work. BQ-22 blocks a general
+audit-log design, BQ-03 blocks production/checkpoint correction approval rules,
+and BQ-23 blocks a performance pass/fail claim. Ask for product input before
+designing `user_branch_assignments`, a general audit table, new correction-approval
+fields, or declaring a performance target met. CI, audit review, backup drills,
+baseline measurement and release documentation are independent.
 
 ## Verification baseline from M8
 
@@ -92,6 +95,13 @@ performance measurement, can be planned independently.
 - `pnpm exec prettier --check .github/workflows/ci.yml` — PASS.
 - Manual CI-style browser run with `CI=true` and a separately started preview
   server — PASS, 48 Chromium tests.
+- SQLite backup/restore drill — PASS: 26 tables, `integrity_check` and
+  `foreign_key_check` clean, all table counts and backup/restore hashes matched.
+- PostgreSQL backup/restore commands are documented, but no PostgreSQL server or
+  `pg_dump` exists locally (SI-06), so that drill has not been executed.
+- SQLite seeded-data query baseline — PASS as a baseline only: sales-report query
+  median 0.0388 ms/p95 0.1152 ms over 13 rows; movement-balance query median
+  0.0090 ms/p95 0.0128 ms over 57 movements. No target exists yet (BQ-23).
 - PostgreSQL integration cases were skipped because no server is available
   (SI-06), not passed.
 
