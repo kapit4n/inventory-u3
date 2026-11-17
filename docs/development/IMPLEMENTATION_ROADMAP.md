@@ -663,7 +663,7 @@ business-day boundary or no-sales marker was invented.
 
 ## M9 — Quality, Permissions and Operational Hardening
 
-**Status: NOT_STARTED**
+**Status: IN_PROGRESS**
 
 ### Objective
 
@@ -738,4 +738,4 @@ been executed." A passing unit suite is not a backup/restore drill.
 | M6                      | COMPLETED   | Generic checkpoints, snapshots, ledger integration, UI and tests; committed as `52e39a3`         |
 | M7                      | COMPLETED   | Versioned closings, latest-purchase costing, warnings, UI, tests; committed as `e04bafa`         |
 | M8                      | COMPLETED   | Consolidated reports, filters, estimated profit, CSV export, UI and tests; committed `9099246`   |
-| M9                      | NOT_STARTED | No CI, branch permissions, audit log or backup drill                                             |
+| M9                      | IN_PROGRESS | CI workflow added; branch permissions, audit log and backup drill remain                         |

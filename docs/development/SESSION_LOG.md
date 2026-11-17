@@ -2550,3 +2550,79 @@ then update continuity documentation for the completed milestone.
 Read `AGENTS.md`, `PROJECT_OVERVIEW.md`, `IMPLEMENTATION_PROGRESS.md`,
 `CURRENT_TASK.md` and the M9 roadmap section. Begin M9 quality, permissions and
 operational hardening; ask for BQ-09 input before branch access work.
+
+---
+
+## Session 25 — 2026-11-17 — M9 CI pipeline
+
+### Objective
+
+Begin BQ-09-independent M9 hardening by adding a CI pipeline that runs the same
+verification gates used locally.
+
+### Work performed
+
+- Inspected root scripts, pnpm/Node requirements, environment handling and the
+  Playwright web-server configuration.
+- Added a GitHub Actions workflow for formatting, typecheck, lint/boundary guard,
+  unit/component tests, SQLite integration tests, build, Chromium installation,
+  a manually started web preview and browser tests.
+- Validated workflow formatting and reproduced the CI-style browser path locally
+  with `CI=true` and a separate preview server.
+- Updated M9 status and continuity documentation.
+
+### Files changed
+
+- `.github/workflows/ci.yml`
+- `AGENTS.md`
+- `docs/development/CURRENT_TASK.md`
+- `docs/development/IMPLEMENTATION_PROGRESS.md`
+- `docs/development/IMPLEMENTATION_ROADMAP.md`
+- `docs/development/KNOWN_ISSUES.md`
+- `docs/development/SESSION_LOG.md`
+- `docs/progress/REPORT.md`
+- `docs/progress/STATE.md`
+- `docs/project/PROJECT_OVERVIEW.md`
+
+### Technical decisions
+
+- One Ubuntu Actions job runs all gates with Node 22 and pnpm 10.34.6.
+- CI creates `.env` from `.env.example` and clears `TEST_DATABASE_URL` for the
+  SQLite integration step.
+- Playwright disables its own web server under `CI`, so the workflow starts the
+  built web preview explicitly and polls it with Node's `fetch`.
+- Branch-permission work remains blocked on BQ-09; this session did not add
+  user-branch assignment or change authorization rules.
+
+### Validation
+
+- `pnpm exec prettier --check .github/workflows/ci.yml` — PASS.
+- `CI=true pnpm run test:e2e` with a separately started preview server — PASS,
+  48 Chromium tests.
+- M8 baseline gates remained green: formatting, typecheck, lint, boundary guard,
+  437 default tests, 109 SQLite integration tests and build.
+- The GitHub Actions workflow itself has not executed yet; that is the next
+  verification step.
+
+### Problems found
+
+- `curl` is not installed on this machine, so the readiness probe in the workflow
+  uses Node 22's built-in `fetch`, which is available in both CI and local
+  validation.
+- Playwright intentionally skips its managed web server when `CI` is set; the
+  workflow therefore starts `pnpm --filter @inventory-u3/web preview` before the
+  browser-test step.
+
+### Pending work
+
+- Verify the CI workflow on the first push or pull request.
+- Continue BQ-09-independent hardening: audit review, backup/restore drills,
+  performance measurement and release documentation.
+- Ask for BQ-09 input before designing branch access.
+- Run PostgreSQL integration cases on a machine with a server (SI-06).
+
+### Next session
+
+Read `AGENTS.md`, `PROJECT_OVERVIEW.md`, `IMPLEMENTATION_PROGRESS.md`,
+`CURRENT_TASK.md` and the M9 roadmap section. Verify CI, then continue independent
+hardening. Do not implement branch permissions until BQ-09 is answered.

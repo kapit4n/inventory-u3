@@ -113,12 +113,13 @@ microservices, third database or hidden abstraction over the two engines.
 How branch-scoped access should work (BQ-09) is the main M9 input. Reporting
 semantics remain provisional while BR-013 and BQ-02/BQ-10/BQ-14/BQ-16/BQ-17 are
 open. Report-query performance targets and whether indexes or materialization are
-needed remain to be measured. CI, backup/restore and release procedures still need
-operational execution, not just documentation.
+needed remain to be measured. The CI workflow now exists but has not yet run on GitHub; backup/restore and
+release procedures still need operational execution, not just documentation.
 
 ## 13. Recommended next milestone
 
-Start M9 — Quality, Permissions and Operational Hardening. Ask for BQ-09 input
-before branch access work; independently plan critical-rule test expansion, audit
-review, backup/restore drills, performance measurement, CI and release
-documentation. Do not mark M9 complete until those checks have actually run.
+Continue M9 — Quality, Permissions and Operational Hardening. Verify the new CI
+workflow on GitHub and ask for BQ-09 input before branch access work. Independently
+continue critical-rule test expansion, audit review, backup/restore drills,
+performance measurement and release documentation. Do not mark M9 complete until
+those checks have actually run.

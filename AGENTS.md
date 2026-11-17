@@ -42,7 +42,7 @@ reporting fields remain blocked on BR-013. M7 daily closing is complete and
 committed as `e04bafa` (versioned snapshots, latest-purchase costing, audited
 reopening). M8 dashboard and reporting is complete and committed as `9099246`
 (on-demand consolidated reports, day/week/month periods, estimated profit, CSV
-export); M9 hardening is next.
+export); M9 hardening is in progress with a CI workflow added.
 
 - Canonical roadmap: `docs/development/IMPLEMENTATION_ROADMAP.md`.
 - Current task and status: `docs/development/CURRENT_TASK.md` and

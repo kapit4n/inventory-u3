@@ -4,7 +4,8 @@
 > M2-T2 at `6b50606`, M2-T3 at `5c96eeb`, M2-T4 at `992d6ea`, M2-T5 at
 > `c8526d0`, M2-T6/T7 with the sample seed at `cc70bfc`, M3 at `13b8fcd` and its
 > documentation closeout at `c86c6c5`, M4 at `8f5f326`, M5 at `7441653`, M6 at
-> `52e39a3`, M7 at `e04bafa`, and M8 at `9099246`.
+> `52e39a3`, M7 at `e04bafa`, and M8 at `9099246`. M9 hardening is in progress
+> with a CI workflow added.
 > See [IMPLEMENTATION_PROGRESS](../development/IMPLEMENTATION_PROGRESS.md).
 
 ## Purpose

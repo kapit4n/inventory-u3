@@ -1,0 +1,78 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.34.6
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Create local environment file
+        run: cp .env.example .env
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Check formatting
+        run: pnpm run format:check
+
+      - name: Typecheck
+        run: pnpm run typecheck
+
+      - name: Lint and boundary guard
+        run: pnpm run lint
+
+      - name: Unit and component tests
+        run: pnpm run test
+
+      - name: SQLite integration tests
+        env:
+          TEST_DATABASE_URL: ''
+        run: pnpm --filter @inventory-u3/api run test:integration
+
+      - name: Build
+        run: pnpm run build
+
+      - name: Install Chromium
+        run: pnpm --filter @inventory-u3/e2e exec playwright install --with-deps chromium
+
+      - name: Start web preview
+        run: |
+          pnpm --filter @inventory-u3/web preview > web-preview.log 2>&1 &
+          for attempt in $(seq 1 60); do
+            if node -e "fetch('http://localhost:5173').then((r) => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"; then
+              exit 0
+            fi
+            sleep 1
+          done
+          cat web-preview.log
+          exit 1
+
+      - name: Browser tests
+        run: pnpm run test:e2e
+
+      - name: Show web preview log on failure
+        if: failure()
+        run: cat web-preview.log || true

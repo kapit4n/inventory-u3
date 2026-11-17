@@ -2,22 +2,21 @@
 
 > Last updated: 2026-11-17.
 >
-> **M8 dashboard and reports is COMPLETE and committed as `9099246`.** The next
-> milestone is **M9 — Quality, Permissions and Operational Hardening**, which is
-> NOT_STARTED. M7 is committed as `e04bafa`, M6 as `52e39a3`, M5 as `7441653`, M4
-> as `8f5f326` and M1–M3 are complete. BR-013, BQ-02, BQ-09, BQ-10, BQ-14,
-> BQ-16 and BQ-17 still limit final business semantics.
+> **M9 — Quality, Permissions and Operational Hardening is IN_PROGRESS with
+> BQ-09-independent work.** M8 is committed as `9099246`, M7 as `e04bafa`, M6 as
+> `52e39a3`, M5 as `7441653`, M4 as `8f5f326` and M1–M3 are complete. BR-013,
+> BQ-02, BQ-09, BQ-10, BQ-14, BQ-16 and BQ-17 still limit final business semantics.
 
 ## Task identity
 
-| Field        | Value                                                |
-| ------------ | ---------------------------------------------------- |
-| Milestone    | M9 — Quality, Permissions and Operational Hardening  |
-| Task ID      | M9 (planning)                                        |
-| Task         | Confirm scope, decide open access rules, then harden |
-| Status       | NOT_STARTED                                          |
-| Dependencies | M1 through M8                                        |
-| Blocks       | Release readiness                                    |
+| Field        | Value                                               |
+| ------------ | --------------------------------------------------- |
+| Milestone    | M9 — Quality, Permissions and Operational Hardening |
+| Task ID      | M9-CI                                               |
+| Task         | Add CI and continue independent hardening           |
+| Status       | IN_PROGRESS                                         |
+| Dependencies | M1 through M8                                       |
+| Blocks       | Release readiness                                   |
 
 ## Objective
 
@@ -90,11 +89,15 @@ performance measurement, can be planned independently.
   PASS, 16 files, 109 passed and 13 skipped.
 - `pnpm run build` — PASS, 5/5 tasks; Vite chunk-size warnings only.
 - `pnpm run test:e2e` — PASS, 48 Chromium tests, including two dashboard specs.
+- `pnpm exec prettier --check .github/workflows/ci.yml` — PASS.
+- Manual CI-style browser run with `CI=true` and a separately started preview
+  server — PASS, 48 Chromium tests.
 - PostgreSQL integration cases were skipped because no server is available
   (SI-06), not passed.
 
 ## Next action
 
-Ask for BQ-09 input when branch access is to be designed. Until then, plan M9
-from the roadmap and begin only the hardening work that is independent of that
-decision.
+Verify the new CI workflow on the first push or pull request, then continue M9
+hardening that is independent of BQ-09: audit review, backup/restore drills,
+performance measurement and release documentation. Ask for BQ-09 input before
+branch access work.

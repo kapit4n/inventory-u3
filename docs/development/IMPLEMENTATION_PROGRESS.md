@@ -7,16 +7,16 @@
 
 | Field                  | Value                                                             |
 | ---------------------- | ----------------------------------------------------------------- |
-| Current milestone      | M9 — Quality, Permissions and Operational Hardening (not started) |
-| Current task           | Plan M9; confirm branch-access rules before implementation        |
-| Overall project status | M8 committed end-to-end; reporting contract still open            |
+| Current milestone      | M9 — Quality, Permissions and Operational Hardening (in progress) |
+| Current task           | BQ-09-independent hardening; CI workflow added                    |
+| Overall project status | M8 committed; M9 CI workflow added, GitHub run not yet verified   |
 | Completed milestones   | A prerequisite and M1 through M8                                  |
-| In-progress milestones | M6/M7/M8 follow-ups blocked on BR-013/BQ-02/BQ-10/BQ-16/BQ-17     |
-| Blocked milestones     | Final WhatsApp fields on BR-013; period and unit work open        |
-| Pending milestones     | M9                                                                |
-| Last verified commit   | `9099246` (M8)                                                    |
+| In-progress milestones | M9; M6/M7/M8 follow-ups blocked on BR-013/BQ-02/BQ-10/BQ-16/BQ-17 |
+| Blocked milestones     | Final WhatsApp fields on BR-013; branch access on BQ-09           |
+| Pending milestones     | M9 remaining hardening                                            |
+| Last verified commit   | `9099246` (M8); M9 CI workflow pending first GitHub run           |
 | Last update date       | 2026-11-17                                                        |
-| Next recommended task  | Start M9 planning; resolve BQ-09 before branch access work        |
+| Next recommended task  | Verify CI on GitHub; continue independent M9 hardening            |
 
 ### State at the time of this update
 
@@ -850,26 +850,35 @@ implementing branch access.
 
 ## M9 — Quality, Permissions and Operational Hardening
 
-**Status: NOT_STARTED**
+**Status: IN_PROGRESS**
 
 ### Completed
 
 - [x] Foundation quality gates exist: typecheck, lint, boundary guard, unit tests.
+- [x] CI workflow added for formatting, typecheck, lint/boundary guard, unit and
+      component tests, SQLite integration tests, build, Chromium install and
+      browser tests.
+- [x] CI-style browser setup validated locally with `CI=true` and a manually
+      started web preview server.
 
 ### Pending
 
+- [ ] Verify the CI workflow on GitHub.
 - [ ] Business-flow test coverage.
-- [ ] Branch-specific access control.
+- [ ] Branch-specific access control; blocked on BQ-09.
 - [ ] Audit log.
 - [ ] Backup and recovery drills.
 - [ ] Performance and reliability.
-- [ ] CI pipeline.
 - [ ] Release documentation.
 
 ### Validation
 
-Foundation gates pass. No backup drill, performance test or CI pipeline exists.
+Foundation gates pass. The CI workflow is formatted and its browser-test path was
+reproduced locally: 48 Chromium tests passed with `CI=true`. The GitHub Actions
+run itself has not executed yet. No backup drill, performance test or release
+checklist exists.
 
 ### Next action
 
-Continuous hardening; final milestone before release.
+Verify CI on the first push or pull request, then continue independent hardening.
+Ask for BQ-09 input before branch access work.
